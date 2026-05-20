@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Network for backend calls (Supabase, Ktor, FCM) -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- Android 13+ runtime notification permission (FCM display) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!--
+        NOTE on QUERY_ALL_PACKAGES (install detection):
+        Defer to APT-V1-R-040. When that lands, add <queries> + targeted permission with
+        rationale per https://developer.android.com/training/package-visibility.
+    -->
+
+    <application
+        android:name=".AppTestApplication"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:allowBackup="false"
+        android:theme="@style/Theme.AppTest.Starting">
+
+        <!--
+            Disable WorkManager's default auto-init so we can provide HiltWorkerFactory
+            via Configuration.Provider in AppTestApplication. Without this, WorkManager
+            would init first with its own factory and Hilt injection would fail.
+        -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup.InitializationProvider"
+                tools:node="remove" />
+        </provider>
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:configChanges="orientation|screenSize|keyboardHidden|locale|layoutDirection|fontScale|uiMode|smallestScreenSize|screenLayout|density">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!-- Custom scheme deep links: apptest://app/{id}, apptest://test/{id}, apptest://invite -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="apptest" />
+            </intent-filter>
+
+            <!--
+                App Links — Firebase Hosting subdomain (active, $0 plan).
+                autoVerify=true once assetlinks.json is deployed to
+                apptest-prod.web.app/.well-known/assetlinks.json (APT-OPS-001).
+            -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="apptest-prod.web.app" />
+            </intent-filter>
+
+            <!--
+                App Links — custom domain placeholder (APT-OPS-001, post-launch V2).
+                autoVerify=false until apptest.dev DNS + assetlinks.json deployed.
+            -->
+            <intent-filter android:autoVerify="false">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="apptest.dev" />
+            </intent-filter>
+
+        </activity>
+
+        <!--
+            R-040: Package uninstall detection (APT-A-003 default: PackageManager V1).
+            android:exported="true" is required for ACTION_PACKAGE_REMOVED delivery.
+            The data scheme filter ("package") is mandatory — without it the broadcast
+            carries no package name in Intent.data.
+        -->
+        <!--
+            R-042: Firebase Cloud Messaging — receives push when app is background/killed.
+            MESSAGING_EVENT intent-filter is required for FCM to route messages here.
+        -->
+        <service
+            android:name=".fcm.AppTestMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <receiver
+            android:name=".receiver.UninstallReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_REMOVED" />
+                <data android:scheme="package" />
+            </intent-filter>
+        </receiver>
+
+    </application>
+
+</manifest>

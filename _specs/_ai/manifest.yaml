@@ -1,0 +1,194 @@
+# AppTest — task manifest
+# Single source of truth for "what's next, what's blocked, who blocks it".
+# Statuses: done | in_progress | not_started | blocked | likely_resolved | resolved
+# Convention: never duplicate spec content here. Use spec_ref to point to canonical source.
+
+meta:
+  project: AppTest
+  prefix: APT
+  spec_root: _specs/
+  last_updated: 2026-05-20  # pass 3: tests + handover/app docs + splash + carousel + ProofViewer + backend scaffold + i18n resources
+  current_phase: architecture_complete
+  current_product_version: V1_planning
+  sdk_whitelist: [Kotlin 2.1.x, AGP 8.7+, Compose BOM 2025.10.x+, Material3 1.4-alpha, Hilt 2.52+, Room 2.7+, Retrofit 2.11+, Coroutines 1.9+, WorkManager 2.10+, DataStore 1.1+]
+  backend_stack:    # resolved 2026-05-19
+    auth_fcm_storage: Firebase
+    business_db_realtime: Supabase (PostgreSQL + Realtime + RLS)
+    custom_services: Ktor (matching engine; optional V2 ML inference proxy)
+
+# ─────────────────────────────────────────────────────────
+# Spec index — where each canonical answer lives
+# ─────────────────────────────────────────────────────────
+specs:
+  - { id: APT-S-001, ref: "_specs/mvp.md",                          topic: "V1/V2/V3 scope, entities, success metrics" }
+  - { id: APT-S-002, ref: "_specs/product_architecture.md",         topic: "Vision, four pillars, flywheel, hard product rules" }
+  - { id: APT-S-003, ref: "_specs/reputation_system.md",            topic: "Reputation formula, decay, signals, anti-gaming" }
+  - { id: APT-S-004, ref: "_specs/ai_matchmaking.md",               topic: "V1 rule-based scoring; V2 ML upgrade; fairness; cold-start" }
+  - { id: APT-S-005, ref: "_specs/growth_and_network.md",           topic: "Growth loop, K-factor, activation funnel, cold-start strategy" }
+  - { id: APT-S-006, ref: "_specs/anti_cheat.md",                   topic: "Threat model, V1 heuristics, V2 ML, moderation flow" }
+  - { id: APT-S-007, ref: "_specs/database_schema.md",              topic: "Core PG entities (profiles/apps/test_requests/heartbeats/proofs) + RLS + migrations" }
+  - { id: APT-S-007a, ref: "_specs/database_schema_audit.md",       topic: "Audit/event/trust tables + service-role boundaries" }
+  - { id: APT-S-008, ref: "_specs/api_contracts.md",                topic: "REST + WebSocket contracts; envelope; idempotency" }
+  - { id: APT-S-009, ref: "_specs/modularization.md",               topic: "[Phase C] Module DAG, layer rules, replacement" }
+  - { id: APT-S-010, ref: "_specs/feature_modules.md",              topic: "[Phase C] Per-feature responsibility + public API" }
+  - { id: APT-S-011, ref: "_specs/monorepo.md",                     topic: "[Phase C] Folder layout, build conventions" }
+  - { id: APT-S-012, ref: "_specs/wireframes.md",                   topic: "V1 tester journey wireframes + legend + responsive" }
+  - { id: APT-S-012a, ref: "_specs/wireframes_dev.md",              topic: "V1 dev/profile wireframes + proof card" }
+  - { id: APT-S-013, ref: "_specs/onboarding_ux.md",                topic: "First-run activation flow + funnel + copy guide" }
+  - { id: APT-S-014, ref: "_specs/design_system.md",                topic: "M3 Expressive + Glass + Floating + Spatial tokens" }
+  - { id: APT-S-015, ref: "_specs/compose_components.md",           topic: "Atoms + Molecules + cross-file rules" }
+  - { id: APT-S-015a, ref: "_specs/compose_organisms_templates.md", topic: "Organisms + Templates + Pages + state matrix" }
+  - { id: APT-S-016, ref: "_specs/navigation.md",                   topic: "[Phase E] Compose Navigation graph + deep links" }
+  - { id: APT-S-017, ref: "_specs/testing_exchange_flow.md",        topic: "[Phase E] End-to-end sequence diagrams" }
+  - { id: APT-S-018, ref: "_specs/backend_architecture.md",         topic: "[Phase F] Service boundaries, data flow, observability" }
+  - { id: APT-S-019, ref: "_specs/cicd.md",                         topic: "[Phase G] CI/CD pipelines + release tracks" }
+  - { id: APT-S-020, ref: "_specs/auto_docs.md",                    topic: "[Phase G] Per-module README/API/FLOW/DEPENDENCY generation" }
+  - { id: APT-S-021, ref: "_specs/play_store_strategy.md",          topic: "[Phase H] Launch tracks, ASO, store listing" }
+
+# ─────────────────────────────────────────────────────────
+# Hard rules / promises (APT-Q-*) — never violate
+# ─────────────────────────────────────────────────────────
+hard_rules:
+  - { id: APT-Q-001, rule: "Credits 不可購買 (V3 訂閱例外但訂閱不可買排序)；任何排序不可付費操縱", spec_ref: APT-S-002 }
+  - { id: APT-Q-002, rule: "MVP 僅支援 Android",                                                spec_ref: APT-S-001 }
+  - { id: APT-Q-003, rule: "每個原始檔 ≤ 200 行，單一責任",                                       spec_ref: CLAUDE.md }
+  - { id: APT-Q-004, rule: "UI 全 Material 3 Expressive + Dynamic Color + Edge-to-Edge",          spec_ref: CLAUDE.md }
+  - { id: APT-Q-005, rule: "一律走 Play Store closed test 連結，禁止 APK/AAB 直傳",                spec_ref: APT-S-002 }
+  - { id: APT-Q-006, rule: "Reputation 不可重設 (反 sybil)；不公開用戶測過哪些 App (匿名 floor)",   spec_ref: [APT-S-003, APT-S-002] }
+  - { id: APT-Q-007, rule: "處罰前必須給人類可讀理由 + 申訴窗口；完成證明 server-side 簽章",          spec_ref: APT-S-006 }
+
+# ─────────────────────────────────────────────────────────
+# Resolved decisions (was owner_blockers)
+# ─────────────────────────────────────────────────────────
+resolved_decisions:
+  - { id: APT-A-001, decision: "Backend platform", resolved_at: 2026-05-19, answer: "Firebase (Auth+FCM+Storage) + Supabase (PG+Realtime+RLS) + Ktor (matching engine)" }
+
+# ─────────────────────────────────────────────────────────
+# Owner-gated decisions still open
+# ─────────────────────────────────────────────────────────
+owner_blockers:
+  - { id: APT-A-002, decision: "Email login provider", default: "Supabase magic link (與 PG schema 同源)", blocks: [APT-V1-R-020] }
+  - { id: APT-A-003, decision: "Install verification 強度", default: "PackageManager only in V1; Play Integrity 加在 V2", blocks: [APT-V1-R-040] }
+  - { id: APT-A-004, decision: "V2 ML training infra", default: "TBD V2", blocks: [APT-V2-R-010] }
+  - { id: APT-A-005, decision: "match_run_pairs 保留期", default: "180d 後 aggregate 後刪", spec_ref: APT-S-007a }
+  - { id: APT-A-006, decision: "device_fingerprints GDPR 刪除實作", default: "用戶刪帳即刪", spec_ref: APT-S-007a }
+  - { id: APT-A-007, decision: "API gateway: Ktor only vs +Supabase Edge", default: "Ktor only", spec_ref: APT-S-008 }
+  - { id: APT-P-001, decision: "Credit curve", default: "1cr/slot, +1cr/test, 首 App 免費", spec_ref: APT-S-005 }
+  - { id: APT-P-002, decision: "Reputation baseline + 權重 sign-off", default: "見 reputation_system §2", spec_ref: APT-S-003 }
+  - { id: APT-P-003, decision: "Reputation 顯示精確分 vs tier", default: "tier only", spec_ref: APT-S-002 }
+  - { id: APT-P-004, decision: "App detail 顯示在測人數", default: "顯示", spec_ref: APT-S-002 }
+  - { id: APT-P-005, decision: "Dev 撤回任務 + refund 規則", default: "允許 + 24h cooldown", spec_ref: APT-S-002 }
+  - { id: APT-OPS-001, decision: "Domain + Play Console 帳號", blocks: [release_to_play_store], default: "dev 階段不需要" }
+  - { id: APT-OPS-002, decision: "Moderator: 第三方 vs 自有", default: "V1 自有 1 人", spec_ref: APT-S-006 }
+
+# ─────────────────────────────────────────────────────────
+# Engineering phases — architecture (current focus)
+# ─────────────────────────────────────────────────────────
+phase_a_architecture:
+  - { id: APT-DOC-A-001, status: done, title: "MVP V1/V2/V3 spec" }
+  - { id: APT-DOC-A-002, status: done, title: "Product architecture umbrella" }
+  - { id: APT-DOC-A-003, status: done, title: "Reputation system deep-dive" }
+  - { id: APT-DOC-A-004, status: done, title: "AI Matchmaking deep-dive" }
+  - { id: APT-DOC-A-005, status: done, title: "Growth & Network effect deep-dive" }
+  - { id: APT-DOC-A-006, status: done, title: "Anti-cheat & Trust deep-dive" }
+
+phase_b_data_api:
+  - { id: APT-DOC-B-001, status: done, title: "Database schema (core + audit split)" }
+  - { id: APT-DOC-B-002, status: done, title: "API contracts (REST + WebSocket)" }
+
+phase_c_modularization:
+  - { id: APT-DOC-C-001, status: done, title: "Modularization map (core/feature/app DAG + rules)" }
+  - { id: APT-DOC-C-002, status: done, title: "Feature module catalog (per feature: responsibility + public API)" }
+  - { id: APT-DOC-C-003, status: done, title: "Monorepo structure & build conventions" }
+
+phase_d_ui:
+  - { id: APT-DOC-D-001, status: done, title: "V1 wireframes (tester + dev splits)" }
+  - { id: APT-DOC-D-002, status: done, title: "Onboarding UX deep-dive" }
+  - { id: APT-DOC-D-003, status: done, title: "Design system tokens" }
+  - { id: APT-DOC-D-004, status: done, title: "Compose component catalog (atoms+molecules + organisms+templates splits)" }
+
+phase_e_flows:
+  - { id: APT-DOC-E-001, status: done, title: "Navigation graph (Compose Navigation + deep links)" }
+  - { id: APT-DOC-E-002, status: done, title: "Testing exchange end-to-end sequence diagrams" }
+
+phase_f_backend:
+  - { id: APT-DOC-F-001, status: done, title: "Backend architecture (Firebase + Supabase + Ktor boundaries)" }
+
+phase_g_ops:
+  - { id: APT-DOC-G-001, status: done, title: "CI/CD architecture (GitHub Actions + Play tracks)" }
+  - { id: APT-DOC-G-002, status: done, title: "Auto-documentation strategy" }
+
+phase_h_gtm:
+  - { id: APT-DOC-H-001, status: done, title: "Play Store launch + ASO strategy" }
+
+# ─────────────────────────────────────────────────────────
+# V1 build (all blocked until architecture phases A-D-E-F done)
+# ─────────────────────────────────────────────────────────
+v1_build:
+  # Foundation
+  - { id: APT-V1-R-001, status: done, title: "Scaffold Gradle root + version catalog + gradle wrapper" }
+  - { id: APT-V1-R-002, status: done, title: "Scaffold :core:designsystem core tokens (color/extended/typography/shape/spacing/preview) + 4 docs — Glass/Floating/Spatial deferred to companion task" }
+  - { id: APT-V1-R-003, status: done, title: "Scaffold :core:common — Result/AppError/Dispatchers/AuthState/ReputationTier/AppStrings + 4 docs" }
+  - { id: APT-V1-R-004, status: done, title: "Scaffold :core:ui full catalog — atoms(5) in designsystem + ReputationTier in common + 8 molecules + 6 organisms + 2 templates + 4 docs; Glass/Spatial-dep deferred (AppFloatingPanel, CelebrationOverlay)" }
+  - { id: APT-V1-R-005, status: done, title: "Scaffold :core:domain — UseCase/Repository + auth/AuthRepository + 4 docs" }
+  - { id: APT-V1-R-006, status: done, title: "Scaffold :core:data — DataStoreSessionStore (impls SessionStore + TokenProvider) + Hilt + 4 docs" }
+  - { id: APT-V1-R-007, status: done, title: "Scaffold :core:network — OkHttp + Retrofit (@KtorApi + @SupabaseRest) + AuthInterceptor + AppJson + 4 docs (Supabase URL placeholder pending R-043 BuildConfig)" }
+  - { id: APT-V1-R-008, status: done, title: "Scaffold :core:database — Room AppDatabase + AppCacheEntry + AppCacheDao + Hilt + 4 docs" }
+  - { id: APT-V1-R-009, status: done, title: "Scaffold :core:navigation — AppDestination(13) + AuthState + AppDeepLink + 4 docs" }
+  - { id: APT-V1-R-010, status: done, title: "Scaffold :app — Hilt App + edge-to-edge MainActivity (observes AuthState, wires shareInvite/signOut) + AppNavHost with Scaffold-wrapped bottom-bar (MainTopLevelDestination × 4) + MainRoot redirect → Home + Settings stub with sign-out + manifest + 4 docs" }
+  # V1 features
+  - { id: APT-V1-R-020, status: done, title: ":feature:auth — SignIn (Google fake + Email magic link) + EmailVerify + FakeAuthRepository; AuthRepository moved to :core:domain/auth (public for cross-feature); real Google/Supabase deferred to R-043" }
+  - { id: APT-V1-R-021, status: done, title: ":feature:onboarding — 3-step single-screen wizard (Intent/Categories/Languages) + Skip + AuthRepository.markOnboardingComplete trigger; welcome moment + DoneCard deferred to V2 polish" }
+  - { id: APT-V1-R-022, status: done, title: ":feature:home — HomeRoute/Screen/VM/UseCase + FakeHomeRepository + Hilt bindings + 4 docs; replaces Home stub in AppNavHost; pull-to-refresh + Skip persistence deferred" }
+  - { id: APT-V1-R-023, status: done, title: ":feature:myapps — list (Flow-driven) + Editor with live Play URL validation + FakeMyAppsRepository + 4 docs; replaces 2 stubs (MyApps + AppEditor) in AppNavHost. Icon upload/category dropdown deferred" }
+  - { id: APT-V1-R-024, status: done, title: ":feature:appdetail — Header/Requirements/Explainability/JoinFooter + 3 sub-comps + FakeRepo + Channel-event Play Store launch + deep-links owned by graph + 4 docs; carousel/share/real-JoinFlow deferred" }
+  - { id: APT-V1-R-025, status: done, title: ":feature:testing — Active/Completed/All filter chips + AtRisk badge with Heartbeat-now/Abandon actions + FakeRepo; pull-to-refresh + abandon confirm deferred" }
+  - { id: APT-V1-R-026, status: done, title: ":feature:profile — ProfileHeader (large tier badge) + StatsCard + ReputationBreakdownCard (4 sub-scores) + ProofsSummary + Activity log + Invite CTA + FakeRepo" }
+  - { id: APT-V1-R-027, status: done, title: ":feature:inbox — 5 notification types (NewMatch/Heartbeat/RepChange/Completion/System) + Mark-all-read + deep-link routing + FakeRepo" }
+  # V1 integrations
+  - { id: APT-V1-R-040, status: done, title: "Install detection (PackageManager + UninstallReceiver)" }
+  - { id: APT-V1-R-041, status: done, title: "WorkManager daily heartbeat job (idempotent)" }
+  - { id: APT-V1-R-042, status: done, title: "FCM push integration + topic subscription" }
+  - { id: APT-V1-R-043, status: done, title: "Supabase Auth SDK + JWT session in DataStore" }
+  - { id: APT-V1-R-044, status: done, title: "Supabase Realtime WebSocket subscriptions" }
+  - { id: APT-V1-R-045, status: done, title: "Ktor matching service: rule-based scoring + nightly cron" }
+  - { id: APT-V1-R-046, status: done, title: "Reputation recompute job" }
+  - { id: APT-V1-R-047, status: done, title: "Anti-cheat heuristics job" }
+  - { id: APT-V1-R-048, status: done, title: "Completion proof card generator (signed JSON + HMAC)" }
+
+# ─────────────────────────────────────────────────────────
+# V2 / V3 build (post V1 GA)
+# ─────────────────────────────────────────────────────────
+v2_build:
+  - { id: APT-V2-R-010, status: not_started, title: "ML training pipeline (sybil + bot + ranking)", blocked_by: [APT-A-004] }
+  - { id: APT-V2-R-011, status: not_started, title: "V2 matchmaking: GBDT ranker + hybrid score" }
+  - { id: APT-V2-R-012, status: not_started, title: "LLM-based AI Feedback Summary" }
+  - { id: APT-V2-R-013, status: not_started, title: ":feature:rating (bi-directional)" }
+  - { id: APT-V2-R-014, status: not_started, title: "Smart reminder system (LLM-personalized)" }
+  - { id: APT-V2-R-015, status: not_started, title: "Fraud anomaly detection model" }
+
+# ─────────────────────────────────────────────────────────
+# Polish / observability work logged 2026-05-20
+# ─────────────────────────────────────────────────────────
+polish_2026_05_20:
+  - { id: APT-X-009, status: done, title: "Splash screen wired — Theme.AppTest.Starting → installSplashScreen() in MainActivity with 300ms session-restore gate" }
+  - { id: APT-X-010, status: done, title: "AppDetail screenshot carousel — HorizontalPager + Coil AsyncImage + dot indicator + picsum placeholders in FakeRepo" }
+  - { id: APT-X-011, status: done, title: "Proof viewer fullscreen — AppDestination.ProofViewer(proofId) + Coil + dark theme; URL pattern https://apptest.dev/v/{id}.png awaiting R-048" }
+  - { id: APT-X-012, status: done, title: "Unit tests — :core:common (ResultTest/ReputationTierTest/AppErrorTest) + :core:domain (UseCaseTest) + :core:data (AuthSessionTest/DataStoreSessionStoreTest) + :core:network (AuthInterceptorTest); ~12 tests covering critical paths" }
+  - { id: APT-X-013, status: done, title: "Backend repo scaffolded at sibling AppTest-backend/ — Ktor 3.0 + Supabase SDK + 5 route groups (health/metrics/match/reputation/proof) + Dockerfile + cloud-run.yaml + README" }
+
+v3_build:
+  - { id: APT-V3-R-010, status: not_started, title: ":feature:teams (shared App ownership + shared credit pool)" }
+  - { id: APT-V3-R-011, status: not_started, title: "Subscription (Play Billing v8 + RevenueCat)" }
+  - { id: APT-V3-R-012, status: not_started, title: "AI Beta Analysis report" }
+  - { id: APT-V3-R-013, status: not_started, title: "Global tester network (multi-region routing + i18n)" }
+
+# ─────────────────────────────────────────────────────────
+# Cross-cutting
+# ─────────────────────────────────────────────────────────
+cross_cutting:
+  - { id: APT-X-001, status: done, title: "Per-module README/API/FLOW/DEPENDENCY scaffolding — 15/15 (14 + :app refreshed 2026-05-20)" }
+  - { id: APT-X-002, status: done, title: "Detekt + Spotless(ktlint) wired at root; config/detekt/detekt.yml; .editorconfig; custom `enforceFileLineLimit` Gradle task for APT-Q-003 (200-line rule)" }
+  - { id: APT-X-003, status: done, title: "GitHub Actions CI: assembleDebug + unitTest + detekt + screenshot tests" }
+  - { id: APT-X-004, status: done, title: "Crashlytics + Firebase Analytics + event taxonomy" }
+  - { id: APT-X-005, status: done, title: "i18n bootstrap — values/strings.xml + values-zh-rTW/strings.xml full 120-key catalog (OS surfaces + all UI strings); AppStringsCatalog stays as in-app back-compat layer until per-feature migration to stringResource()" }

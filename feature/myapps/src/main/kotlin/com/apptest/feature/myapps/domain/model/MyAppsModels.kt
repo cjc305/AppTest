@@ -1,0 +1,40 @@
+package com.apptest.feature.myapps.domain.model
+
+/**
+ * Feature-local types per `_specs/feature_modules.md §3`. Reflect canonical entities from
+ * `_specs/database_schema.md §3 apps` but flatten what dev list + editor actually need.
+ *
+ * If any of these grow shared by ≥ 2 features, lift up to `:core:domain`.
+ */
+
+enum class OwnedAppStatus { Recruiting, Active, Completed, Paused }
+
+/** Row item for My apps list. */
+data class OwnedAppRow(
+    val id: String,
+    val name: String,
+    val packageName: String,
+    val status: OwnedAppStatus,
+    val currentTesters: Int,
+    val requiredTesters: Int,
+    val requiredDays: Int,
+    val daysLeft: Int,                  // 0 when not active yet
+)
+
+/** Editor form draft. Used by both create (id=null) and edit (id=existing). */
+data class AppDraft(
+    val id: String? = null,
+    val packageName: String = "",
+    val name: String = "",
+    val description: String = "",
+    val playOptInUrl: String = "",
+    val requiredTesters: Int = 12,
+    val requiredDays: Int = 14,
+)
+
+/** Validation result for the [AppDraft.playOptInUrl] field. */
+sealed interface PlayUrlValidation {
+    data object Empty : PlayUrlValidation
+    data object Valid : PlayUrlValidation
+    data class Invalid(val reason: String) : PlayUrlValidation
+}

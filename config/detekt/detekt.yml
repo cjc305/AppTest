@@ -1,0 +1,82 @@
+# Detekt config — opinionated, builds upon defaults.
+# Adjust thresholds to match AppTest hard rules (200-line file budget; small methods).
+
+build:
+  maxIssues: 0
+  excludeCorrectable: false
+
+complexity:
+  active: true
+  LongMethod:
+    active: true
+    threshold: 60
+  LongParameterList:
+    active: true
+    functionThreshold: 7
+    constructorThreshold: 8
+  TooManyFunctions:
+    active: true
+    thresholdInFiles: 25
+    thresholdInClasses: 20
+    thresholdInInterfaces: 12
+    thresholdInObjects: 12
+    thresholdInEnums: 8
+  LargeClass:
+    active: true
+    threshold: 200          # mirrors AppTest 200-line hard rule per APT-Q-003
+  ComplexCondition:
+    active: true
+    threshold: 4
+  CyclomaticComplexMethod:
+    active: true
+    threshold: 15
+
+style:
+  active: true
+  MaxLineLength:
+    active: true
+    maxLineLength: 130
+    excludePackageStatements: true
+    excludeImportStatements: true
+  ReturnCount:
+    active: true
+    max: 3
+  WildcardImport:
+    active: true
+  ForbiddenComment:
+    active: false           # we use TODOs liberally with task IDs
+
+naming:
+  active: true
+  FunctionNaming:
+    active: true
+    functionPattern: '[a-z][a-zA-Z0-9]*'
+    excludeClassPattern: '$^'   # composables exempted via @Composable below
+  TopLevelPropertyNaming:
+    active: true
+    constantPattern: '[A-Z][_A-Z0-9]*'
+    propertyPattern: '[A-Z][A-Za-z0-9]*|[a-z][A-Za-z0-9]*'
+  FunctionParameterNaming:
+    parameterPattern: '[a-z][A-Za-z0-9]*'
+
+empty-blocks:
+  active: true
+  EmptyFunctionBlock:
+    active: true
+    ignoreOverridden: true
+
+exceptions:
+  active: true
+  TooGenericExceptionCaught:
+    active: false           # we use Throwable -> AppError mapping
+  SwallowedException:
+    active: true
+  ReturnFromFinally:
+    active: true
+
+potential-bugs:
+  active: true
+  UnsafeCallOnNullableType:
+    active: true
+  UnreachableCode:
+    active: true

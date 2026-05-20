@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        Two Android themes:
+
+        1. `Theme.AppTest.Starting` — applied to MainActivity in the manifest. Inherits the
+           androidx splash-screen compat theme so the system shows a branded splash while the
+           process warms up. After MainActivity calls `installSplashScreen()`, control hands off
+           to `postSplashScreenTheme` which is the regular shell.
+
+        2. `Theme.AppTest` — the regular shell used after the splash. Provides only NoActionBar +
+           transparent system bars so Compose `:core:designsystem/AppTheme` (Dynamic Color + tokens)
+           takes over inside `setContent`.
+    -->
+    <style name="Theme.AppTest.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@android:color/white</item>
+        <item name="windowSplashScreenAnimatedIcon">@android:drawable/sym_def_app_icon</item>
+        <item name="postSplashScreenTheme">@style/Theme.AppTest</item>
+    </style>
+
+    <style name="Theme.AppTest" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+</resources>

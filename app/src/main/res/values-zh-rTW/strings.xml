@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- OS-level surfaces -->
+    <string name="app_name">AppTest</string>
+    <string name="app_tagline">真實測試者、真實信譽，加速 Play 封閉測試門檻。</string>
+    <string name="notif_channel_matches">新的配對</string>
+    <string name="notif_channel_heartbeat">心跳提醒</string>
+    <string name="notif_channel_completion">完成與獎勵</string>
+    <string name="notif_channel_system">系統</string>
+
+    <!-- App-wide -->
+    <string name="cta_back">返回</string>
+    <string name="cta_retry">重試</string>
+    <string name="cta_skip">略過</string>
+    <string name="cta_continue">繼續 →</string>
+    <string name="cta_save">儲存</string>
+    <string name="cta_cancel">取消</string>
+    <string name="cta_saving">儲存中…</string>
+    <string name="state_loading">載入中…</string>
+    <string name="state_loading_default_msg"></string>
+
+    <!-- Sign in -->
+    <string name="signin_social_proof">加入 1,238 位 Android 開發者\n互測彼此的 App</string>
+    <string name="signin_cta_google">用 Google 帳號繼續</string>
+    <string name="signin_cta_email">用 Email 登入</string>
+    <string name="signin_terms">繼續即表示同意 服務條款 · 隱私權</string>
+    <string name="signin_email_title">用 Email 登入</string>
+    <string name="signin_email_label">Email</string>
+    <string name="signin_cta_send_link">寄出登入連結</string>
+    <string name="signin_signing_in">登入中…</string>
+    <string name="signin_link_sent_title">✓ 登入連結已寄出</string>
+    <string name="signin_link_sent_body">請查收 %1$s 的登入連結（≤ 30 秒）。\n從任何裝置點開連結即可繼續。</string>
+    <string name="signin_change_email">改用其他 Email</string>
+    <string name="signin_failed_title">登入失敗</string>
+
+    <!-- Email verify -->
+    <string name="verify_progress">正在驗證 %1$s…</string>
+    <string name="verify_failed_title">驗證失敗</string>
+    <string name="verify_signed_in_loading">登入成功！載入中…</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_step_format">第 %1$d 步（共 %2$d 步）</string>
+    <string name="onboarding_step1_title">你為什麼來這？</string>
+    <string name="onboarding_intent_find">為我的 App 找 tester</string>
+    <string name="onboarding_intent_test">去測別人的 App</string>
+    <string name="onboarding_intent_both">兩者都要</string>
+    <string name="onboarding_step2_title">選你願意測的類別</string>
+    <string name="onboarding_step2_help">至少選 1 個 — 決定首頁配對。</string>
+    <string name="onboarding_step3_title">語言偏好</string>
+    <string name="onboarding_step3_help">只影響配對，不影響介面語言。</string>
+    <string name="onboarding_cta_done">完成</string>
+    <string name="onboarding_submit_error_prefix">無法繼續：</string>
+
+    <!-- Home -->
+    <string name="home_greeting">嗨, %1$s</string>
+    <string name="home_credits_suffix"> · %1$d 點</string>
+    <string name="home_section_today">今日</string>
+    <string name="home_section_active_tests">進行中的測試 (%1$d)</string>
+    <string name="home_section_your_apps">你的 App (%1$d)</string>
+    <string name="home_new_match_label">★ 新配對</string>
+    <string name="home_testers_needed">還需 %1$d 位 tester</string>
+    <string name="home_no_match_today">今日無新配對 — 下次批次配對 02:00 UTC</string>
+    <string name="home_day_progress">第 %1$d / %2$d 天</string>
+    <string name="home_ping_overdue"> · ⚠ 今日尚未回報</string>
+    <string name="home_owned_testers">%1$d / %2$d 位 tester</string>
+    <string name="home_cta_join">加入</string>
+    <string name="home_cta_skip_match">略過</string>
+
+    <!-- App detail -->
+    <string name="appdetail_default_title">App 詳情</string>
+    <string name="appdetail_by_owner">by %1$s</string>
+    <string name="appdetail_screenshots_placeholder">%1$d 張截圖</string>
+    <string name="appdetail_requirements_title">需求</string>
+    <string name="appdetail_req_days_testers">%1$d 天 · 需 %2$d 位 tester</string>
+    <string name="appdetail_req_daily">每日：開啟 1 次 + 約 %1$d 分鐘</string>
+    <string name="appdetail_req_current">目前：%1$d / %2$d 位 tester</string>
+    <string name="appdetail_explainability_title">為什麼配對到你</string>
+    <string name="appdetail_cta_join_credits">加入測試（1 點）</string>
+    <string name="appdetail_cta_join_opening">正在開 Play Store…</string>
+    <string name="appdetail_maybe_later">之後再說 — 返回首頁</string>
+
+    <!-- My apps -->
+    <string name="myapps_title">我的 Apps</string>
+    <string name="myapps_fab_create">新增</string>
+    <string name="myapps_empty_title">還沒有任何 App</string>
+    <string name="myapps_empty_desc">第一個 App 免費 — 建立後即可找 tester。</string>
+    <string name="myapps_empty_cta">建立 App</string>
+    <string name="myapps_row_supporting">%1$s · %2$d / %3$d 位 tester</string>
+    <string name="myapps_days_left"> · 剩 %1$d 天</string>
+
+    <!-- App editor -->
+    <string name="editor_title_create">建立 App</string>
+    <string name="editor_title_edit">編輯 App</string>
+    <string name="editor_field_package">Package name（必填）</string>
+    <string name="editor_field_name">App 名稱（必填，2–50 字）</string>
+    <string name="editor_field_description">描述（0/500）</string>
+    <string name="editor_field_desc_counter">%1$d / %2$d</string>
+    <string name="editor_field_play_url">Play Console 加入測試 URL（必填）</string>
+    <string name="editor_field_play_url_help_empty">必填（https://play.google.com/...）</string>
+    <string name="editor_field_play_url_help_valid">✓ 有效</string>
+    <string name="editor_field_play_url_help_invalid">✗ %1$s</string>
+    <string name="editor_field_required_testers">需要 tester 數（1–100）</string>
+    <string name="editor_field_required_days">需要天數（7–30）</string>
+    <string name="editor_cost_label">費用：1 點（首個 App 免費）</string>
+    <string name="editor_save_error_prefix">儲存失敗：</string>
+
+    <!-- Testing -->
+    <string name="testing_title">我的測試</string>
+    <string name="testing_filter_active">進行中</string>
+    <string name="testing_filter_done">已完成</string>
+    <string name="testing_filter_all">全部</string>
+    <string name="testing_section_active">進行中 (%1$d)</string>
+    <string name="testing_section_completed">已完成 (%1$d)</string>
+    <string name="testing_empty_title">目前沒有進行中的測試</string>
+    <string name="testing_empty_desc">下次配對批次：%1$s 後。</string>
+    <string name="testing_active_supporting">第 %1$d / %2$d 天</string>
+    <string name="testing_active_supporting_atrisk">第 %1$d / %2$d 天 · ⚠ 今日尚未回報</string>
+    <string name="testing_cta_heartbeat">立即回報</string>
+    <string name="testing_cta_abandon">放棄</string>
+    <string name="testing_completed_row">%1$s  ✓ %2$d 天 · +%3$d 信用</string>
+    <string name="testing_view_proof">查看完成證明 →</string>
+    <string name="testing_proof_pending">證明處理中</string>
+
+    <!-- Profile -->
+    <string name="profile_title">個人</string>
+    <string name="profile_credits">%1$d 點</string>
+    <string name="profile_stats_title">近 30 天統計</string>
+    <string name="profile_stats_completed">完成</string>
+    <string name="profile_stats_days">天數</string>
+    <string name="profile_stats_rep">信用 Δ</string>
+    <string name="profile_stats_streak">連勝</string>
+    <string name="profile_breakdown_title">信用分數拆解</string>
+    <string name="profile_breakdown_completion">完成率</string>
+    <string name="profile_breakdown_streak">連勝</string>
+    <string name="profile_breakdown_volume">次數</string>
+    <string name="profile_breakdown_publish">發佈</string>
+    <string name="profile_breakdown_penalty">（扣分：-%1$d）</string>
+    <string name="profile_proofs_title">完成證明 (%1$d)</string>
+    <string name="profile_proofs_tap">點選查看最新證明卡</string>
+    <string name="profile_proofs_empty">完成一次測試即可獲得證明卡</string>
+    <string name="profile_activity_title">活動歷史</string>
+    <string name="profile_invite_cta">邀請開發者朋友</string>
+    <string name="profile_action_inbox">通知</string>
+    <string name="profile_action_settings">設定</string>
+
+    <!-- Inbox -->
+    <string name="inbox_title">通知</string>
+    <string name="inbox_mark_all_read">全部標為已讀</string>
+    <string name="inbox_empty_title">通知箱是空的</string>
+    <string name="inbox_empty_desc">配對提醒與每日 heartbeat 提醒會出現在這裡。</string>
+    <string name="time_just_now">剛剛</string>
+    <string name="time_min_ago">%1$d 分鐘前</string>
+    <string name="time_hour_ago">%1$d 小時前</string>
+    <string name="time_day_ago">%1$d 天前</string>
+
+    <!-- Errors -->
+    <string name="err_network">網路有問題</string>
+    <string name="err_http">伺服器錯誤 (%1$d)</string>
+    <string name="err_auth">需要登入</string>
+    <string name="err_validation">輸入有誤</string>
+    <string name="err_not_found">找不到資料</string>
+    <string name="err_forbidden">權限不足</string>
+    <string name="err_conflict">狀態衝突</string>
+    <string name="err_rate_limited">請求太頻繁</string>
+    <string name="err_unknown">出了點問題</string>
+</resources>

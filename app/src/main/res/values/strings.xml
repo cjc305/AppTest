@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+        APT-X-005 i18n bootstrap (full).
+        EN copy mirrors `:core:common/AppStringsCatalog.EN`. Until call sites migrate to
+        stringResource(R.string.x), AppStringsCatalog remains the in-app source; this file
+        is the canonical translation surface (Play Console listing + future translation tool).
+    -->
+
+    <!-- OS-level surfaces -->
+    <string name="app_name">AppTest</string>
+    <string name="app_tagline">Real testers. Real reputation. Faster Play closed-test approval.</string>
+    <string name="notif_channel_matches">New matches</string>
+    <string name="notif_channel_heartbeat">Heartbeat reminders</string>
+    <string name="notif_channel_completion">Completion &amp; rewards</string>
+    <string name="notif_channel_system">System</string>
+
+    <!-- App-wide -->
+    <string name="cta_back">Back</string>
+    <string name="cta_retry">Retry</string>
+    <string name="cta_skip">Skip</string>
+    <string name="cta_continue">Continue →</string>
+    <string name="cta_save">Save</string>
+    <string name="cta_cancel">Cancel</string>
+    <string name="cta_saving">Saving…</string>
+    <string name="state_loading">Loading…</string>
+    <string name="state_loading_default_msg"></string>
+
+    <!-- Sign in -->
+    <string name="signin_social_proof">Join 1,238 Android devs\ntesting each other\'s apps</string>
+    <string name="signin_cta_google">Continue with Google</string>
+    <string name="signin_cta_email">Sign in with email</string>
+    <string name="signin_terms">By continuing, you accept Terms · Privacy</string>
+    <string name="signin_email_title">Sign in with email</string>
+    <string name="signin_email_label">Email</string>
+    <string name="signin_cta_send_link">Send magic link</string>
+    <string name="signin_signing_in">Signing in…</string>
+    <string name="signin_link_sent_title">✓ Magic link sent</string>
+    <string name="signin_link_sent_body">Check %1$s for a sign-in link (≤ 30s).\nTap the link from any device to continue.</string>
+    <string name="signin_change_email">Change email</string>
+    <string name="signin_failed_title">Sign-in failed</string>
+
+    <!-- Email verify -->
+    <string name="verify_progress">Verifying %1$s…</string>
+    <string name="verify_failed_title">Verification failed</string>
+    <string name="verify_signed_in_loading">Signed in! Loading…</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_step_format">Step %1$d of %2$d</string>
+    <string name="onboarding_step1_title">Why are you here?</string>
+    <string name="onboarding_intent_find">Find testers for my app</string>
+    <string name="onboarding_intent_test">Test others\' apps</string>
+    <string name="onboarding_intent_both">Both</string>
+    <string name="onboarding_step2_title">Pick categories you\'ll test</string>
+    <string name="onboarding_step2_help">At least 1 — shapes your home feed.</string>
+    <string name="onboarding_step3_title">Language preferences</string>
+    <string name="onboarding_step3_help">Influences matching only, not UI.</string>
+    <string name="onboarding_cta_done">Done</string>
+    <string name="onboarding_submit_error_prefix">Couldn\'t continue: </string>
+
+    <!-- Home -->
+    <string name="home_greeting">Hi, %1$s</string>
+    <string name="home_credits_suffix"> · %1$d cr</string>
+    <string name="home_section_today">Today</string>
+    <string name="home_section_active_tests">Active tests (%1$d)</string>
+    <string name="home_section_your_apps">Your apps (%1$d)</string>
+    <string name="home_new_match_label">★ New match</string>
+    <string name="home_testers_needed">%1$d testers needed</string>
+    <string name="home_no_match_today">No new match today — next batch at 02:00 UTC</string>
+    <string name="home_day_progress">Day %1$d/%2$d</string>
+    <string name="home_ping_overdue"> · ⚠ ping overdue</string>
+    <string name="home_owned_testers">%1$d/%2$d testers</string>
+    <string name="home_cta_join">Join</string>
+    <string name="home_cta_skip_match">Skip</string>
+
+    <!-- App detail -->
+    <string name="appdetail_default_title">App detail</string>
+    <string name="appdetail_by_owner">by %1$s</string>
+    <string name="appdetail_screenshots_placeholder">%1$d screenshots</string>
+    <string name="appdetail_requirements_title">Requirements</string>
+    <string name="appdetail_req_days_testers">%1$d days · %2$d testers needed</string>
+    <string name="appdetail_req_daily">Daily: 1 launch + ~%1$d min</string>
+    <string name="appdetail_req_current">Currently: %1$d/%2$d testers</string>
+    <string name="appdetail_explainability_title">Why you got this match</string>
+    <string name="appdetail_cta_join_credits">Join test (1 credit)</string>
+    <string name="appdetail_cta_join_opening">Opening Play Store…</string>
+    <string name="appdetail_maybe_later">Maybe later — back to feed</string>
+
+    <!-- My apps -->
+    <string name="myapps_title">My apps</string>
+    <string name="myapps_fab_create">Create</string>
+    <string name="myapps_empty_title">No apps yet</string>
+    <string name="myapps_empty_desc">First one is free — create it to start finding testers.</string>
+    <string name="myapps_empty_cta">Create app</string>
+    <string name="myapps_row_supporting">%1$s · %2$d/%3$d testers</string>
+    <string name="myapps_days_left"> · %1$dd left</string>
+
+    <!-- App editor -->
+    <string name="editor_title_create">Create app</string>
+    <string name="editor_title_edit">Edit app</string>
+    <string name="editor_field_package">Package name *</string>
+    <string name="editor_field_name">App name * (2–50)</string>
+    <string name="editor_field_description">Description (0/500)</string>
+    <string name="editor_field_desc_counter">%1$d/%2$d</string>
+    <string name="editor_field_play_url">Play Console opt-in URL *</string>
+    <string name="editor_field_play_url_help_empty">Required (https://play.google.com/...)</string>
+    <string name="editor_field_play_url_help_valid">✓ Valid</string>
+    <string name="editor_field_play_url_help_invalid">✗ %1$s</string>
+    <string name="editor_field_required_testers">Required testers (1–100)</string>
+    <string name="editor_field_required_days">Required days (7–30)</string>
+    <string name="editor_cost_label">Cost: 1 credit (your first app is free)</string>
+    <string name="editor_save_error_prefix">Save failed: </string>
+
+    <!-- Testing -->
+    <string name="testing_title">My tests</string>
+    <string name="testing_filter_active">Active</string>
+    <string name="testing_filter_done">Done</string>
+    <string name="testing_filter_all">All</string>
+    <string name="testing_section_active">Active (%1$d)</string>
+    <string name="testing_section_completed">Completed (%1$d)</string>
+    <string name="testing_empty_title">No active tests yet</string>
+    <string name="testing_empty_desc">Next batch run: in %1$s.</string>
+    <string name="testing_active_supporting">Day %1$d/%2$d</string>
+    <string name="testing_active_supporting_atrisk">Day %1$d/%2$d · ⚠ ping overdue</string>
+    <string name="testing_cta_heartbeat">Heartbeat now</string>
+    <string name="testing_cta_abandon">Abandon</string>
+    <string name="testing_completed_row">%1$s  ✓ %2$d days · +%3$d rep</string>
+    <string name="testing_view_proof">View proof card →</string>
+    <string name="testing_proof_pending">Proof pending</string>
+
+    <!-- Profile -->
+    <string name="profile_title">Profile</string>
+    <string name="profile_credits">%1$d credits</string>
+    <string name="profile_stats_title">Stats (last 30 days)</string>
+    <string name="profile_stats_completed">Completed</string>
+    <string name="profile_stats_days">Days</string>
+    <string name="profile_stats_rep">Rep Δ</string>
+    <string name="profile_stats_streak">Streak</string>
+    <string name="profile_breakdown_title">Reputation breakdown</string>
+    <string name="profile_breakdown_completion">Completion rate</string>
+    <string name="profile_breakdown_streak">Streak</string>
+    <string name="profile_breakdown_volume">Volume</string>
+    <string name="profile_breakdown_publish">Publish</string>
+    <string name="profile_breakdown_penalty">(penalties: -%1$d)</string>
+    <string name="profile_proofs_title">Proof cards (%1$d)</string>
+    <string name="profile_proofs_tap">Tap to view the latest proof card</string>
+    <string name="profile_proofs_empty">Complete a test to earn a proof card</string>
+    <string name="profile_activity_title">Activity history</string>
+    <string name="profile_invite_cta">Invite a developer friend</string>
+    <string name="profile_action_inbox">Inbox</string>
+    <string name="profile_action_settings">Settings</string>
+
+    <!-- Inbox -->
+    <string name="inbox_title">Inbox</string>
+    <string name="inbox_mark_all_read">Mark all read</string>
+    <string name="inbox_empty_title">Inbox is empty</string>
+    <string name="inbox_empty_desc">Match alerts + heartbeat reminders show up here.</string>
+    <string name="time_just_now">just now</string>
+    <string name="time_min_ago">%1$dm ago</string>
+    <string name="time_hour_ago">%1$dh ago</string>
+    <string name="time_day_ago">%1$dd ago</string>
+
+    <!-- Errors -->
+    <string name="err_network">Connection problem</string>
+    <string name="err_http">Server error (%1$d)</string>
+    <string name="err_auth">Sign-in needed</string>
+    <string name="err_validation">Invalid input</string>
+    <string name="err_not_found">Not found</string>
+    <string name="err_forbidden">Not allowed</string>
+    <string name="err_conflict">Conflict</string>
+    <string name="err_rate_limited">Too many requests</string>
+    <string name="err_unknown">Something went wrong</string>
+</resources>
