@@ -8,6 +8,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.apptest.core.designsystem.components.AppText
@@ -17,6 +18,8 @@ import com.apptest.core.designsystem.components.AppText
  * Always determinate; if you need indeterminate use M3 `LinearProgressIndicator()` directly.
  *
  * `progress` is clamped to [0f, 1f] so callers can pass derived values safely.
+ * `color` defaults to [MaterialTheme.colorScheme.primary]; pass an explicit value for
+ * semantic color coding (e.g. amber for mid-range, red for low scores).
  */
 @Composable
 fun AppProgressBar(
@@ -24,7 +27,9 @@ fun AppProgressBar(
     modifier: Modifier = Modifier,
     label: String? = null,
     height: Dp = 8.dp,
+    color: Color = Color.Unspecified,
 ) {
+    val resolvedColor = if (color == Color.Unspecified) MaterialTheme.colorScheme.primary else color
     Column(modifier = modifier) {
         if (label != null) {
             AppText(
@@ -38,6 +43,7 @@ fun AppProgressBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(height),
+            color = resolvedColor,
             trackColor = MaterialTheme.colorScheme.surfaceContainerHigh,
         )
     }

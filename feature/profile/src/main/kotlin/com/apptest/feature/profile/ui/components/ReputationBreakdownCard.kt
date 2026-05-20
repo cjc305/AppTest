@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.apptest.core.designsystem.components.AppText
 import com.apptest.core.designsystem.spacing.AppSpacing
@@ -15,11 +16,22 @@ import com.apptest.core.ui.components.AppCard
 import com.apptest.core.ui.components.AppProgressBar
 import com.apptest.feature.profile.domain.model.ReputationBreakdown
 
+/**
+ * Credit score breakdown card on the Profile screen.
+ *
+ * Visual improvements:
+ * - Score label now shows "value / max" to communicate absolute headroom
+ * - Progress bar color shifts: >=80% primary, 50-79% tertiary (amber), <50% error
+ *   giving instant at-a-glance health signal per category
+ */
 @Composable
 internal fun ReputationBreakdownCard(breakdown: ReputationBreakdown, modifier: Modifier = Modifier) {
     val l = AppL10n.current
     AppCard(modifier = modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(AppSpacing.Md), verticalArrangement = Arrangement.spacedBy(AppSpacing.Sm)) {
+        Column(
+            modifier = Modifier.padding(AppSpacing.Md),
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.Sm),
+        ) {
             AppText(l.profile_breakdown_title, style = MaterialTheme.typography.titleMedium)
             ScoreRow(l.profile_breakdown_completion, breakdown.completionRate, max = 40)
             ScoreRow(l.profile_breakdown_streak, breakdown.streak, max = 20)
@@ -38,16 +50,34 @@ internal fun ReputationBreakdownCard(breakdown: ReputationBreakdown, modifier: M
 
 @Composable
 private fun ScoreRow(label: String, value: Int, max: Int) {
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
-        AppText(text = label, modifier = Modifier.weight(0.4f), style = MaterialTheme.typography.bodyMedium)
+    // Color encodes health: green (>=80%) / amber (50-79%) / red (<50%)
+    val pct = value.toFloat() / max.toFloat()
+    val barColor = when {
+        pct >= 0.8f -> MaterialTheme.colorScheme.primary
+        pct >= 0.5f -> MaterialTheme.colorScheme.tertiary
+        else        -> MaterialTheme.colorScheme.error
+    }
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        AppText(
+            text = label,
+            modifier = Modifier.weight(0.38f),
+            style = MaterialTheme.typography.bodyMedium,
+        )
         AppProgressBar(
-            progress = value.toFloat() / max.toFloat(),
-            modifier = Modifier.weight(0.5f).padding(horizontal = AppSpacing.Sm),
+            progress = pct,
+            color = barColor,
+            modifier = Modifier
+                .weight(0.48f)
+                .padding(horizontal = AppSpacing.Sm),
         )
         AppText(
-            text = "$value",
-            style = MaterialTheme.typography.labelLarge,
-            modifier = Modifier.weight(0.1f),
+            text = "$value / $max",
+            style = MaterialTheme.typography.labelMedium,
+            color = barColor,
+            modifier = Modifier.weight(0.14f),
         )
     }
 }
