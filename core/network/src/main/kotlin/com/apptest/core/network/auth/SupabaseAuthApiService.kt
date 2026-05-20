@@ -1,5 +1,7 @@
 package com.apptest.core.network.auth
 
+import kotlinx.serialization.EncodeDefault
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import okhttp3.ResponseBody
@@ -56,24 +58,28 @@ interface SupabaseAuthApiService {
 
 // ─── Request DTOs ──────────────────────────────────────────────────────────
 
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
 data class OtpRequest(
     val email: String,
     /** Creates account if not already registered (V1: always true). */
-    @SerialName("create_user") val createUser: Boolean = true,
+    @EncodeDefault @SerialName("create_user") val createUser: Boolean = true,
 )
 
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
 data class VerifyOtpRequest(
     /** Must be `"email"` for 6-digit code flow. Use `"magiclink"` for URL-click flow. */
-    val type: String = "email",
+    @EncodeDefault val type: String = "email",
     val token: String,
     val email: String,
 )
 
+@OptIn(ExperimentalSerializationApi::class)
 @Serializable
 data class GoogleIdTokenRequest(
-    val provider: String = "google",
+    /** Force-encoded even though it has a default; AppJson uses encodeDefaults=false. */
+    @EncodeDefault val provider: String = "google",
     @SerialName("id_token") val idToken: String,
 )
 
