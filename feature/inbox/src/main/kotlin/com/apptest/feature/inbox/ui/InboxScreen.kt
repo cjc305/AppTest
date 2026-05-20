@@ -30,8 +30,8 @@ import com.apptest.core.ui.components.AppListItem
 import com.apptest.core.ui.components.AppLoadingState
 import com.apptest.core.ui.components.AppTopBar
 import com.apptest.core.ui.templates.ScreenScaffold
-import com.apptest.feature.inbox.domain.model.InboxNotification
-import com.apptest.feature.inbox.domain.model.InboxNotificationType
+import com.apptest.core.domain.inbox.InboxNotification
+import com.apptest.core.domain.inbox.InboxNotificationType
 import java.time.Duration
 import java.time.Instant
 

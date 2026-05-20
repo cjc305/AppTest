@@ -65,8 +65,11 @@ fun AppNavHost(
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentTopLevel = MainTopLevelDestination.fromDestination(backStackEntry?.destination)
-    val l = com.apptest.core.designsystem.theme.AppL10n.current
-    val isZh = l.cta_back == "返回"
+    // Resolve tab labels at composable scope (tabLabelFor is @Composable)
+    val tabHome    = tabLabelFor(TopLevelLabelKey.Home)
+    val tabMyApps  = tabLabelFor(TopLevelLabelKey.MyApps)
+    val tabTesting = tabLabelFor(TopLevelLabelKey.Testing)
+    val tabProfile = tabLabelFor(TopLevelLabelKey.Profile)
 
     // Outer Scaffold owns only the conditional bottom bar; leave system-bar insets to the
     // feature ScreenScaffolds inside (avoids double-padding on edge-to-edge layouts).
@@ -76,10 +79,16 @@ fun AppNavHost(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
             if (currentTopLevel != null) {
+                val tabLabelMap = mapOf(
+                    TopLevelLabelKey.Home to tabHome,
+                    TopLevelLabelKey.MyApps to tabMyApps,
+                    TopLevelLabelKey.Testing to tabTesting,
+                    TopLevelLabelKey.Profile to tabProfile,
+                )
                 val destinations = MainTopLevelDestination.entries.map { tab ->
                     AppBottomDest(
                         id = tab.id,
-                        label = tabLabelFor(tab.labelKey, isZh),
+                        label = tabLabelMap[tab.labelKey] ?: tab.labelKey.name,
                         icon = tab.icon,
                     )
                 }
@@ -146,7 +155,6 @@ fun AppNavHost(
 
             composable<AppDestination.Settings> {
                 SettingsStub(
-                    isZh = isZh,
                     onSignOut = onSignOut,
                     onBack = { navController.popBackStack() },
                 )
@@ -182,7 +190,8 @@ private fun MainRootRedirect(nav: NavHostController) {
 }
 
 @Composable
-private fun SettingsStub(isZh: Boolean, onSignOut: () -> Unit, onBack: () -> Unit) {
+private fun SettingsStub(onSignOut: () -> Unit, onBack: () -> Unit) {
+    val l = com.apptest.core.designsystem.theme.AppL10n.current
     ScreenScaffold { padding ->
         Box(
             modifier = Modifier.fillMaxSize().padding(padding).padding(AppSpacing.Lg),
@@ -193,18 +202,18 @@ private fun SettingsStub(isZh: Boolean, onSignOut: () -> Unit, onBack: () -> Uni
                 verticalArrangement = Arrangement.spacedBy(AppSpacing.Md),
             ) {
                 AppText(
-                    text = if (isZh) "設定" else "Settings",
+                    text = l.settings_title,
                     style = MaterialTheme.typography.headlineMedium,
                 )
                 AppText(
-                    text = if (isZh) "語系切換 V2 開放，目前跟隨系統。" else "Locale follows system (toggle ships in V2).",
+                    text = l.settings_locale_note,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 AppVSpacer(AppSpacing.Md)
-                AppButton(if (isZh) "登出" else "Sign out", onSignOut)
+                AppButton(l.cta_sign_out, onSignOut)
                 AppVSpacer(AppSpacing.Sm)
-                AppButton(if (isZh) "返回" else "Back", onBack)
+                AppButton(l.cta_back, onBack)
             }
         }
     }

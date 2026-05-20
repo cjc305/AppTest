@@ -1,5 +1,6 @@
 package com.apptest.core.ui.components
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -46,5 +47,15 @@ fun AppProgressBar(
             color = resolvedColor,
             trackColor = MaterialTheme.colorScheme.surfaceContainerHigh,
         )
+    }
+}
+
+@com.apptest.core.designsystem.preview.AppPreviewLightDark
+@Composable
+private fun AppProgressBarPreview() = com.apptest.core.designsystem.preview.AppPreviewTheme {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        AppProgressBar(progress = 0.75f, label = "Completion Rate")
+        AppProgressBar(progress = 0.45f)
+        AppProgressBar(progress = 0.2f, color = MaterialTheme.colorScheme.error)
     }
 }

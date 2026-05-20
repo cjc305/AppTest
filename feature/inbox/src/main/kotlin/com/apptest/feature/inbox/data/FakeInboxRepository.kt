@@ -1,8 +1,9 @@
 package com.apptest.feature.inbox.data
 
 import com.apptest.core.common.AppResult
-import com.apptest.feature.inbox.domain.model.InboxNotification
-import com.apptest.feature.inbox.domain.model.InboxNotificationType
+import com.apptest.core.domain.inbox.InboxNotification
+import com.apptest.core.domain.inbox.InboxNotificationType
+import com.apptest.core.domain.inbox.InboxRepository
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 import javax.inject.Inject
@@ -51,7 +52,7 @@ class FakeInboxRepository @Inject constructor() : InboxRepository {
                 ),
                 InboxNotification(
                     id = "n3", type = InboxNotificationType.ReputationChange,
-                    title = "🎉 +6 reputation",
+                    title = "+6 reputation",
                     body = "Completed test for App X",
                     timestamp = now.minus(1, ChronoUnit.DAYS),
                     isRead = true,

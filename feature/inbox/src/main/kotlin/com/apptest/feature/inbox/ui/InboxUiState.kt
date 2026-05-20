@@ -2,7 +2,7 @@ package com.apptest.feature.inbox.ui
 
 import androidx.compose.runtime.Immutable
 import com.apptest.core.common.AppError
-import com.apptest.feature.inbox.domain.model.InboxNotification
+import com.apptest.core.domain.inbox.InboxNotification
 
 @Immutable
 sealed interface InboxUiState {

@@ -82,6 +82,12 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun signOut() {
-        lifecycleScope.launch { authRepo.signOut() }
+        lifecycleScope.launch {
+            val result = authRepo.signOut()
+            if (result is com.apptest.core.common.AppResult.Failure) {
+                android.util.Log.w("MainActivity", "signOut error: ${result.error}")
+            }
+            // AuthState → SignedOut is driven reactively regardless of API result
+        }
     }
 }

@@ -1,7 +1,7 @@
 package com.apptest.feature.inbox.domain.usecase
 
-import com.apptest.feature.inbox.data.InboxRepository
-import com.apptest.feature.inbox.domain.model.InboxNotification
+import com.apptest.core.domain.inbox.InboxNotification
+import com.apptest.core.domain.inbox.InboxRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 

@@ -169,6 +169,23 @@ data class AppStrings(
     val time_hour_ago: String,                 // %1$d
     val time_day_ago: String,                  // %1$d
 
+    // ── Settings ──────────────────────────────────────────────────────
+    val settings_title: String,
+    val settings_locale_note: String,
+    val cta_sign_out: String,
+
+    // ── Nav tabs ──────────────────────────────────────────────────────
+    val nav_tab_home: String,
+    val nav_tab_my_apps: String,
+    val nav_tab_testing: String,
+    val nav_tab_profile: String,
+
+    // ── App detail screenshots ─────────────────────────────────────────
+    val appdetail_screenshots_count: String,  // {0} screenshots
+
+    // ── Profile streak value ──────────────────────────────────────────
+    val profile_stats_streak_value: String,   // {0} 🔥
+
     // ── Errors (per AppError sealed) ───────────────────────────────────
     val err_network: String,
     val err_http: String,                     // %1$d
@@ -319,6 +336,16 @@ object AppStringsCatalog {
         time_hour_ago = "%1\$dh ago",
         time_day_ago = "%1\$dd ago",
 
+        settings_title = "Settings",
+        settings_locale_note = "Locale follows system (toggle ships in V2).",
+        cta_sign_out = "Sign out",
+        nav_tab_home = "Home",
+        nav_tab_my_apps = "My Apps",
+        nav_tab_testing = "Testing",
+        nav_tab_profile = "Profile",
+        appdetail_screenshots_count = "%1\$d screenshots",
+        profile_stats_streak_value = "%1\$d 🔥",
+
         err_network = "Connection problem",
         err_http = "Server error (%1\$d)",
         err_auth = "Sign-in needed",
@@ -465,6 +492,16 @@ object AppStringsCatalog {
         time_min_ago = "%1\$d 分鐘前",
         time_hour_ago = "%1\$d 小時前",
         time_day_ago = "%1\$d 天前",
+
+        settings_title = "設定",
+        settings_locale_note = "語系切換 V2 開放，目前跟隨系統。",
+        cta_sign_out = "登出",
+        nav_tab_home = "首頁",
+        nav_tab_my_apps = "我的 Apps",
+        nav_tab_testing = "測試",
+        nav_tab_profile = "個人",
+        appdetail_screenshots_count = "%1\$d 張截圖",
+        profile_stats_streak_value = "%1\$d 🔥",
 
         err_network = "網路有問題",
         err_http = "伺服器錯誤 (%1\$d)",

@@ -16,6 +16,10 @@ import com.apptest.core.ui.components.AppCard
 import com.apptest.core.ui.components.AppProgressBar
 import com.apptest.feature.profile.domain.model.ReputationBreakdown
 
+private const val SCORE_LABEL_WEIGHT = 0.38f
+private const val SCORE_BAR_WEIGHT   = 0.48f
+private const val SCORE_VALUE_WEIGHT = 0.14f
+
 /**
  * Credit score breakdown card on the Profile screen.
  *
@@ -48,6 +52,20 @@ internal fun ReputationBreakdownCard(breakdown: ReputationBreakdown, modifier: M
     }
 }
 
+@com.apptest.core.designsystem.preview.AppPreviewLightDark
+@Composable
+private fun ReputationBreakdownCardPreview() = com.apptest.core.designsystem.preview.AppPreviewTheme {
+    ReputationBreakdownCard(
+        breakdown = com.apptest.feature.profile.domain.model.ReputationBreakdown(
+            completionRate = 34,
+            streak = 12,
+            volume = 10,
+            publish = 20,
+            penalty = 0,
+        ),
+    )
+}
+
 @Composable
 private fun ScoreRow(label: String, value: Int, max: Int) {
     // Color encodes health: green (>=80%) / amber (50-79%) / red (<50%)
@@ -63,21 +81,21 @@ private fun ScoreRow(label: String, value: Int, max: Int) {
     ) {
         AppText(
             text = label,
-            modifier = Modifier.weight(0.38f),
+            modifier = Modifier.weight(SCORE_LABEL_WEIGHT),
             style = MaterialTheme.typography.bodyMedium,
         )
         AppProgressBar(
             progress = pct,
             color = barColor,
             modifier = Modifier
-                .weight(0.48f)
+                .weight(SCORE_BAR_WEIGHT)
                 .padding(horizontal = AppSpacing.Sm),
         )
         AppText(
             text = "$value / $max",
             style = MaterialTheme.typography.labelMedium,
             color = barColor,
-            modifier = Modifier.weight(0.14f),
+            modifier = Modifier.weight(SCORE_VALUE_WEIGHT),
         )
     }
 }

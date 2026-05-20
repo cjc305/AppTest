@@ -2,7 +2,7 @@ package com.apptest.feature.inbox.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.apptest.feature.inbox.data.InboxRepository
+import com.apptest.core.domain.inbox.InboxRepository
 import com.apptest.feature.inbox.domain.usecase.ObserveInboxUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject

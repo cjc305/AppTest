@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.apptest.core.designsystem.components.AppText
 import com.apptest.core.designsystem.spacing.AppSpacing
+import com.apptest.core.designsystem.theme.AppL10n
 
 /**
  * Horizontal pager carousel for AppDetail screenshots. V1: shows fake picsum images so the UI
@@ -92,6 +93,7 @@ private fun DotIndicator(count: Int, current: Int, modifier: Modifier = Modifier
 
 @Composable
 fun ScreenshotsPlaceholderRow(count: Int, modifier: Modifier = Modifier) {
+    val l = AppL10n.current
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -101,7 +103,7 @@ fun ScreenshotsPlaceholderRow(count: Int, modifier: Modifier = Modifier) {
         contentAlignment = Alignment.Center,
     ) {
         AppText(
-            text = "$count screenshots",
+            text = l.appdetail_screenshots_count.format(count),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

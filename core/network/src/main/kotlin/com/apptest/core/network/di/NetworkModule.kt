@@ -87,9 +87,12 @@ object NetworkModule {
     @Provides
     @Singleton
     @SupabaseRest
-    fun provideSupabaseRetrofit(@SupabaseRest supabaseClient: OkHttpClient): Retrofit =
+    fun provideSupabaseRetrofit(
+        @SupabaseRest supabaseClient: OkHttpClient,
+        @SupabaseBaseUrl baseUrl: String,
+    ): Retrofit =
         Retrofit.Builder()
-            .baseUrl(ApiConfig.SUPABASE_REST_BASE_URL)
+            .baseUrl("$baseUrl/rest/v1/")
             .client(supabaseClient)
             .addConverterFactory(AppJson.asConverterFactory(MEDIA_TYPE_JSON.toMediaType()))
             .build()
@@ -98,9 +101,12 @@ object NetworkModule {
     @Provides
     @Singleton
     @SupabaseAuth
-    fun provideSupabaseAuthRetrofit(@SupabaseRest supabaseClient: OkHttpClient): Retrofit =
+    fun provideSupabaseAuthRetrofit(
+        @SupabaseRest supabaseClient: OkHttpClient,
+        @SupabaseBaseUrl baseUrl: String,
+    ): Retrofit =
         Retrofit.Builder()
-            .baseUrl(ApiConfig.SUPABASE_AUTH_URL)
+            .baseUrl("$baseUrl/auth/v1/")
             .client(supabaseClient)
             .addConverterFactory(AppJson.asConverterFactory(MEDIA_TYPE_JSON.toMediaType()))
             .build()
@@ -144,3 +150,8 @@ annotation class SupabaseAnonKey
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class SupabaseAuth
+
+/** Marks the Supabase project base URL. Provided by [com.apptest.app.di.SupabaseModule]. */
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class SupabaseBaseUrl

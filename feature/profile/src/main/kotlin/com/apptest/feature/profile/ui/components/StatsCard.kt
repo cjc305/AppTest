@@ -42,10 +42,23 @@ internal fun StatsCard(stats: ProfileStats30d, modifier: Modifier = Modifier) {
                     label = l.profile_stats_rep,
                     value = (if (stats.reputationDelta >= 0) "+" else "") + stats.reputationDelta,
                 )
-                Stat(label = l.profile_stats_streak, value = "${stats.streakDays} 🔥")
+                Stat(label = l.profile_stats_streak, value = l.profile_stats_streak_value.format(stats.streakDays))
             }
         }
     }
+}
+
+@com.apptest.core.designsystem.preview.AppPreviewLightDark
+@Composable
+private fun StatsCardPreview() = com.apptest.core.designsystem.preview.AppPreviewTheme {
+    StatsCard(
+        stats = com.apptest.feature.profile.domain.model.ProfileStats30d(
+            completedTests = 14,
+            daysContributed = 22,
+            reputationDelta = 18,
+            streakDays = 7,
+        ),
+    )
 }
 
 @Composable

@@ -24,8 +24,6 @@ dependencies {
     implementation(project(":core:designsystem"))
     implementation(project(":core:ui"))
     implementation(project(":core:domain"))
-    implementation(project(":core:data"))     // RealtimeManager + SupabaseInboxRepository
-    implementation(project(":core:network"))  // SupabaseNotificationsApiService
     implementation(project(":core:navigation"))
 
     implementation(platform(libs.androidx.compose.bom))
@@ -39,7 +37,5 @@ dependencies {
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 
-    testImplementation(libs.junit)
-    testImplementation(libs.turbine)
-    testImplementation(libs.truth)
+    testImplementation(libs.bundles.test.unit)
 }

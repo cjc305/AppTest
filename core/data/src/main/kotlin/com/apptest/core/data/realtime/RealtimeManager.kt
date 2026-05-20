@@ -1,15 +1,14 @@
 package com.apptest.core.data.realtime
 
 import android.util.Log
+import com.apptest.core.data.di.ApplicationScope
 import com.apptest.core.data.session.SessionStore
-import com.apptest.core.network.ApiConfig
 import com.apptest.core.network.di.SupabaseAnonKey
+import com.apptest.core.network.di.SupabaseBaseUrl
 import com.apptest.core.network.di.SupabaseRest
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -37,10 +36,10 @@ import okhttp3.WebSocketListener
 class RealtimeManager @Inject constructor(
     @SupabaseRest private val okHttpClient: OkHttpClient,
     @SupabaseAnonKey private val anonKey: String,
+    @SupabaseBaseUrl private val supabaseBaseUrl: String,
     private val sessionStore: SessionStore,
+    @ApplicationScope private val scope: CoroutineScope,
 ) {
-
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private val _events = MutableSharedFlow<RealtimeEvent>(extraBufferCapacity = 64)
     val events: SharedFlow<RealtimeEvent> = _events.asSharedFlow()
@@ -64,7 +63,8 @@ class RealtimeManager @Inject constructor(
     }
 
     private fun connect(jwt: String) {
-        val url = "${ApiConfig.SUPABASE_REALTIME_URL}/websocket?apikey=$anonKey&vsn=1.0.0"
+        val realtimeBase = supabaseBaseUrl.replace("https://", "wss://").replace("http://", "ws://")
+        val url = "$realtimeBase/realtime/v1/websocket?apikey=$anonKey&vsn=1.0.0"
         val req = Request.Builder().url(url).build()
         ws = okHttpClient.newWebSocket(req, PhoenixListener(jwt))
         Log.d(TAG, "WebSocket connecting")

@@ -95,3 +95,19 @@ internal fun HeroMatchCard(
         }
     }
 }
+
+@com.apptest.core.designsystem.preview.AppPreviewLightDark
+@Composable
+private fun HeroMatchCardPreview() = com.apptest.core.designsystem.preview.AppPreviewTheme {
+    HeroMatchCard(
+        match = com.apptest.feature.home.domain.model.MatchedApp(
+            id = "1",
+            name = "DiceX 3D",
+            category = "Games",
+            description = "A 3D dice rolling app for tabletop gaming enthusiasts.",
+            testersNeeded = 3,
+        ),
+        onJoin = {},
+        onSkip = {},
+    )
+}

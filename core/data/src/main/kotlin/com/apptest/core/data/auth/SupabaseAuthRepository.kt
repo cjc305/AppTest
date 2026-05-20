@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.edit
 import com.apptest.core.common.AppError
 import com.apptest.core.common.AppResult
 import com.apptest.core.common.AuthState
+import com.apptest.core.data.di.ApplicationScope
 import com.apptest.core.data.session.AuthSession
 import com.apptest.core.data.session.SessionStore
 import com.apptest.core.domain.auth.AuthRepository
@@ -16,9 +17,8 @@ import com.apptest.core.network.auth.VerifyOtpRequest
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
+
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
@@ -44,9 +44,8 @@ class SupabaseAuthRepository @Inject constructor(
     private val authApiService: SupabaseAuthApiService,
     private val sessionStore: SessionStore,
     private val dataStore: DataStore<Preferences>,
+    @ApplicationScope private val scope: CoroutineScope,
 ) : AuthRepository {
-
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     private val _state = MutableStateFlow<AuthState>(AuthState.SignedOut)
     override val state: StateFlow<AuthState> = _state.asStateFlow()
@@ -69,7 +68,7 @@ class SupabaseAuthRepository @Inject constructor(
     }
 
     override suspend fun requestMagicLink(email: String): AppResult<Unit> {
-        if (!email.contains("@") || !email.contains(".")) {
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             return AppResult.Failure(AppError.Validation("email", "Invalid email format"))
         }
         pendingEmail = email
