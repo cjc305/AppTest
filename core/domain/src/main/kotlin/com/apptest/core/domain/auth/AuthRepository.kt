@@ -23,8 +23,11 @@ interface AuthRepository : Repository {
     /** Observable for `:app/MainActivity` to drive NavHost startDestination. */
     val state: StateFlow<AuthState>
 
-    /** Mock or real Google Sign-In. V1 fake emits NeedsOnboarding for first-time users. */
-    suspend fun signInWithGoogle(): AppResult<Unit>
+    /**
+     * Exchange a Google ID token (from Credential Manager) for a Supabase session.
+     * The caller (SignInRoute) owns the Credential Manager UX; this method only calls the network.
+     */
+    suspend fun signInWithGoogle(idToken: String): AppResult<Unit>
 
     /** Triggers email magic link send. */
     suspend fun requestMagicLink(email: String): AppResult<Unit>

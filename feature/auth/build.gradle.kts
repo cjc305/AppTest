@@ -34,6 +34,11 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     debugImplementation(libs.bundles.compose.debug)
 
+    // Google Credential Manager (Google Sign-In)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
+
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
 

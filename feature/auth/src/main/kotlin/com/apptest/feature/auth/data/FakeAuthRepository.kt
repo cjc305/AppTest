@@ -27,7 +27,7 @@ class FakeAuthRepository @Inject constructor() : AuthRepository {
     private val _state = MutableStateFlow(AuthState.SignedOut)
     override val state: StateFlow<AuthState> = _state.asStateFlow()
 
-    override suspend fun signInWithGoogle(): AppResult<Unit> {
+    override suspend fun signInWithGoogle(idToken: String): AppResult<Unit> {
         delay(600)
         _state.value = AuthState.NeedsOnboarding
         return AppResult.Success(Unit)

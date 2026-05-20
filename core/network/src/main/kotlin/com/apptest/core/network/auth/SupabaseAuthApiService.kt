@@ -27,6 +27,16 @@ interface SupabaseAuthApiService {
     suspend fun verifyOtp(@Body request: VerifyOtpRequest): AuthTokenResponse
 
     /**
+     * Exchange a Google ID token for a Supabase session.
+     * Supabase verifies the token against its configured Google OAuth credentials.
+     */
+    @POST("token")
+    suspend fun signInWithIdToken(
+        @Query("grant_type") grantType: String = "id_token",
+        @Body request: GoogleIdTokenRequest,
+    ): AuthTokenResponse
+
+    /**
      * Exchange refresh token for a new access token.
      * `Authorization: Bearer <current_access_token>` added by AuthInterceptor.
      */
@@ -59,6 +69,12 @@ data class VerifyOtpRequest(
     val type: String = "email",
     val token: String,
     val email: String,
+)
+
+@Serializable
+data class GoogleIdTokenRequest(
+    val provider: String = "google",
+    @SerialName("id_token") val idToken: String,
 )
 
 @Serializable

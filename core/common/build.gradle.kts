@@ -12,6 +12,9 @@ kotlin {
 }
 
 dependencies {
+    // JSR-330 @Qualifier — used for Hilt qualifier annotations defined in this module.
+    // Pure Java, no Android dependency, ~2 KB.
+    api("javax.inject:javax.inject:1")
     api(libs.kotlinx.coroutines.core)
 
     testImplementation(libs.junit)

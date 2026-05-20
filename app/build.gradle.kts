@@ -34,8 +34,10 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // Supabase credentials from local.properties — never hardcoded
-        buildConfigField("String", "SUPABASE_URL",      "\"${localProps.getProperty("SUPABASE_URL",      "")}\"")
-        buildConfigField("String", "SUPABASE_ANON_KEY", "\"${localProps.getProperty("SUPABASE_ANON_KEY", "")}\"")
+        buildConfigField("String", "SUPABASE_URL",           "\"${localProps.getProperty("SUPABASE_URL",           "")}\"")
+        buildConfigField("String", "SUPABASE_ANON_KEY",      "\"${localProps.getProperty("SUPABASE_ANON_KEY",      "")}\"")
+        // Google OAuth Web Client ID — from Google Cloud Console → OAuth 2.0 Client (Web application type)
+        buildConfigField("String", "GOOGLE_WEB_CLIENT_ID",   "\"${localProps.getProperty("GOOGLE_WEB_CLIENT_ID",   "")}\"")
     }
 
     signingConfigs {

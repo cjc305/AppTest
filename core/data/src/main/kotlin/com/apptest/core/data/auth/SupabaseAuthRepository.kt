@@ -112,9 +112,21 @@ class SupabaseAuthRepository @Inject constructor(
         return AppResult.Success(Unit) // AuthState → SignedOut via reactive Flow
     }
 
-    /** Google Sign-In deferred to V2. */
-    override suspend fun signInWithGoogle(): AppResult<Unit> =
-        AppResult.Failure(AppError.Auth(AppError.AuthReason.SignInCancelled, "Google Sign-In arrives in V2"))
+    override suspend fun signInWithGoogle(idToken: String): AppResult<Unit> {
+        return runCatching {
+            val response = authApiService.signInWithIdToken(
+                request = com.apptest.core.network.auth.GoogleIdTokenRequest(idToken = idToken),
+            )
+            sessionStore.save(
+                AuthSession(
+                    jwt = response.accessToken,
+                    refreshToken = response.refreshToken,
+                    expiresAtEpochMs = System.currentTimeMillis() + response.expiresIn * 1000L,
+                ),
+            )
+            AppResult.Success(Unit)
+        }.getOrElse { AppResult.Failure(mapError(it)) }
+    }
 
     // ─── helpers ─────────────────────────────────────────────────────────────
 

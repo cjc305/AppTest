@@ -2,6 +2,7 @@ package com.apptest.feature.auth.ui.signin
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.apptest.core.common.GoogleWebClientId
 import com.apptest.core.common.onFailure
 import com.apptest.core.common.onSuccess
 import com.apptest.core.domain.auth.AuthRepository
@@ -15,18 +16,26 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class SignInViewModel @Inject constructor(
     private val authRepo: AuthRepository,
+    /** Exposed to SignInRoute so it can build the GetGoogleIdOption without depending on :app. */
+    @GoogleWebClientId val googleWebClientId: String,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<SignInUiState>(SignInUiState.Idle)
     val state: StateFlow<SignInUiState> = _state.asStateFlow()
 
-    fun onGoogleClick() {
+    /** Called by SignInRoute after Credential Manager returns a Google ID token. */
+    fun onGoogleIdToken(idToken: String) {
         _state.value = SignInUiState.Working
         viewModelScope.launch {
-            authRepo.signInWithGoogle().onFailure { _state.value = SignInUiState.Error(it.message ?: "Sign-in failed") }
-            // on success, MainActivity-level AuthState observer drives navigation;
-            // our local state can stay Working (we won't be visible)
+            authRepo.signInWithGoogle(idToken)
+                .onFailure { _state.value = SignInUiState.Error(it.message ?: "Sign-in failed") }
+            // on success, MainActivity-level AuthState observer drives navigation
         }
+    }
+
+    /** Called by SignInRoute when Credential Manager fails or user cancels. */
+    fun onGoogleSignInFailed(message: String) {
+        _state.value = SignInUiState.Error(message)
     }
 
     fun onEmailModeClick() {
