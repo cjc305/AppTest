@@ -12,10 +12,10 @@ import retrofit2.http.Query
 /**
  * Retrofit interface for Supabase PostgREST `/rest/v1/matches`.
  *
- * Richer queries for feature repositories (Home, Testing screens). The heartbeat worker
- * uses [com.apptest.core.network.testing.SupabaseTestingApiService] for its own queries.
+ * Actual DB columns (audited 2026-05-21):
+ *   id, app_id, tester_id, status, assigned_at, completed_at.
  *
- * RLS policies scope all queries to the authenticated tester's own rows.
+ * V2 columns not yet in DB: match_score, days_active, last_heartbeat_at, matched_at.
  */
 interface SupabaseMatchesApiService {
 
@@ -24,7 +24,7 @@ interface SupabaseMatchesApiService {
     suspend fun getNewMatch(
         @Query("select") select: String = SELECT_NEW_MATCH,
         @Query("status") status: String = "eq.matched",
-        @Query("order") order: String = "matched_at.desc",
+        @Query("order") order: String = "assigned_at.desc",
         @Query("limit") limit: Int = 1,
     ): List<MatchWithAppDto>
 
@@ -40,10 +40,13 @@ interface SupabaseMatchesApiService {
     suspend fun getCompletedTests(
         @Query("select") select: String = SELECT_COMPLETED,
         @Query("status") status: String = "eq.completed",
-        @Query("order") order: String = "matched_at.desc",
+        @Query("order") order: String = "completed_at.desc",
     ): List<CompletedMatchWithAppDto>
 
-    /** Stamp last_heartbeat_at = now(). [idFilter] format: "eq.<uuid>". */
+    /**
+     * Heartbeat keep-alive: touch the match status to signal tester is still active.
+     * V1: no last_heartbeat_at column — sets status=active as keep-alive.
+     */
     @PATCH("matches")
     suspend fun submitHeartbeat(
         @Query("id") idFilter: String,
@@ -61,11 +64,11 @@ interface SupabaseMatchesApiService {
 
     private companion object {
         const val SELECT_NEW_MATCH =
-            "id,app_id,match_score,apps(name,category,description,required_testers,required_days)"
+            "id,app_id,apps(name,category,description)"
         const val SELECT_ACTIVE =
-            "id,app_id,days_active,last_heartbeat_at,apps(name,required_days)"
+            "id,app_id,status,apps(name)"
         const val SELECT_COMPLETED =
-            "id,app_id,days_active,apps(name)"
+            "id,app_id,completed_at,apps(name)"
     }
 }
 
@@ -75,7 +78,6 @@ interface SupabaseMatchesApiService {
 data class MatchWithAppDto(
     val id: String,
     @SerialName("app_id") val appId: String,
-    @SerialName("match_score") val matchScore: Int = 0,
     val apps: MatchedAppInfoDto? = null,
 )
 
@@ -84,30 +86,26 @@ data class MatchedAppInfoDto(
     val name: String = "",
     val category: String = "",
     val description: String = "",
-    @SerialName("required_testers") val requiredTesters: Int = 12,
-    @SerialName("required_days") val requiredDays: Int = 14,
 )
 
 @Serializable
 data class ActiveMatchWithAppDto(
     val id: String,
     @SerialName("app_id") val appId: String,
-    @SerialName("days_active") val daysActive: Int = 0,
-    @SerialName("last_heartbeat_at") val lastHeartbeatAt: String? = null,
+    val status: String = "active",
     val apps: ActiveMatchAppInfoDto? = null,
 )
 
 @Serializable
 data class ActiveMatchAppInfoDto(
     val name: String = "",
-    @SerialName("required_days") val requiredDays: Int = 14,
 )
 
 @Serializable
 data class CompletedMatchWithAppDto(
     val id: String,
     @SerialName("app_id") val appId: String,
-    @SerialName("days_active") val daysActive: Int = 14,
+    @SerialName("completed_at") val completedAt: String? = null,
     val apps: CompletedMatchAppInfoDto? = null,
 )
 
@@ -116,9 +114,10 @@ data class CompletedMatchAppInfoDto(
     val name: String = "",
 )
 
+/** V1: no last_heartbeat_at column — touch status to signal activity. */
 @Serializable
 data class HeartbeatBody(
-    @SerialName("last_heartbeat_at") val lastHeartbeatAt: String = "now()",
+    val status: String = "active",
 )
 
 @Serializable

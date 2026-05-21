@@ -6,7 +6,6 @@ import com.apptest.core.common.DispatcherProvider
 import com.apptest.core.common.ReputationTier
 import com.apptest.core.network.matches.SupabaseMatchesApiService
 import com.apptest.core.network.profiles.ProfileDto
-import com.apptest.core.network.profiles.ProofDto
 import com.apptest.core.network.profiles.SupabaseProfilesApiService
 import com.apptest.feature.profile.domain.model.ActivityEvent
 import com.apptest.feature.profile.domain.model.ProfileData
@@ -23,8 +22,8 @@ import kotlinx.coroutines.withContext
 /**
  * Real Supabase-backed [ProfileRepository]. Replaces [FakeProfileRepository].
  *
- * Makes 3 parallel calls: profile row, completed tests (for stats), proofs list.
- * V1 simplifications: reputationDelta=0, activity=[].
+ * Makes 2 parallel calls: profile row + completed tests count.
+ * V1 simplifications: proofs=[] (no proofs table yet), reputationDelta=0, activity=[].
  */
 @Singleton
 class SupabaseProfileRepository @Inject constructor(
@@ -37,23 +36,21 @@ class SupabaseProfileRepository @Inject constructor(
         try {
             val profileDeferred = async { profilesApi.getMyProfile() }
             val completedDeferred = async { matchesApi.getCompletedTests() }
-            val proofsDeferred = async { profilesApi.getMyProofs() }
 
             val profileDto = profileDeferred.await().firstOrNull()
                 ?: return@withContext AppResult.Failure(AppError.NotFound("profile"))
             val completedTests = completedDeferred.await()
-            val proofs = proofsDeferred.await()
 
             val profileData = ProfileData(
                 user = profileDto.toUser(),
                 stats = ProfileStats30d(
                     completedTests = completedTests.size,
-                    daysContributed = completedTests.sumOf { it.daysActive },
-                    reputationDelta = 0, // V1: not stored server-side
-                    streakDays = profileDto.streakDays,
+                    daysContributed = completedTests.size * 14, // V1: estimate 14d per test
+                    reputationDelta = 0,
+                    streakDays = 0, // V1: streak_days not in DB
                 ),
                 breakdown = profileDto.reputationScore.toBreakdown(),
-                proofs = proofs.map { it.toSummary() },
+                proofs = emptyList<ProofCardSummary>(), // V1: proofs table not yet created
                 activity = emptyList<ActivityEvent>(),
             )
             AppResult.Success(profileData)
@@ -68,11 +65,12 @@ class SupabaseProfileRepository @Inject constructor(
 // ─── Mapping helpers ──────────────────────────────────────────────────────────
 
 private fun ProfileDto.toUser() = ProfileUser(
-    id = userId,
+    id = id,
     displayName = displayName,
-    photoUrl = photoUrl,
-    tier = ReputationTier.entries.firstOrNull { it.name == reputationTier } ?: ReputationTier.Newcomer,
-    credits = credits,
+    photoUrl = avatarUrl,
+    tier = ReputationTier.entries.firstOrNull { it.name == tier.uppercase() }
+        ?: ReputationTier.Newcomer,
+    credits = 0, // V1: credits column not in DB
 )
 
 private fun Int.toBreakdown(): ReputationBreakdown {
@@ -85,9 +83,3 @@ private fun Int.toBreakdown(): ReputationBreakdown {
         penalty = 0,
     )
 }
-
-private fun ProofDto.toSummary() = ProofCardSummary(
-    proofId = id,
-    appName = matches?.apps?.name ?: "Unknown App",
-    completedAt = createdAt.take(10), // "yyyy-MM-dd"
-)

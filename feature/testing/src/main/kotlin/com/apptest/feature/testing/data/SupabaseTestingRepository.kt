@@ -10,8 +10,6 @@ import com.apptest.feature.testing.domain.model.ActiveTestEntry
 import com.apptest.feature.testing.domain.model.CompletedTestEntry
 import com.apptest.feature.testing.domain.model.TestStatus
 import com.apptest.feature.testing.domain.model.TestingSnapshot
-import java.time.Duration
-import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CancellationException
@@ -28,8 +26,8 @@ import kotlinx.coroutines.withContext
 /**
  * Real Supabase-backed [TestingRepository]. Replaces [FakeTestingRepository].
  *
- * [observe] loads fresh data from the network on each new collection; subsequent mutations
- * update the local [_state] optimistically without a full reload.
+ * V1: days_active, last_heartbeat_at, required_days not in DB — defaulted.
+ * Heartbeat touches status=active as a keep-alive signal.
  */
 @Singleton
 class SupabaseTestingRepository @Inject constructor(
@@ -59,7 +57,8 @@ class SupabaseTestingRepository @Inject constructor(
                 matchesApi.submitHeartbeat("eq.$testId").close()
                 _state.update { snap ->
                     snap.copy(active = snap.active.map {
-                        if (it.testId == testId) it.copy(pingStatusOk = true, status = TestStatus.Active) else it
+                        if (it.testId == testId) it.copy(pingStatusOk = true, status = TestStatus.Active)
+                        else it
                     })
                 }
                 AppResult.Success(Unit)
@@ -82,31 +81,21 @@ class SupabaseTestingRepository @Inject constructor(
 
 // ─── Mapping helpers ──────────────────────────────────────────────────────────
 
-private fun ActiveMatchWithAppDto.toEntry(): ActiveTestEntry {
-    val pingOk = lastHeartbeatAt.isPingOk()
-    return ActiveTestEntry(
-        testId = id,
-        appId = appId,
-        appName = apps?.name ?: "",
-        day = daysActive,
-        totalDays = apps?.requiredDays ?: 14,
-        pingStatusOk = pingOk,
-        status = if (pingOk) TestStatus.Active else TestStatus.AtRisk,
-    )
-}
+private fun ActiveMatchWithAppDto.toEntry() = ActiveTestEntry(
+    testId = id,
+    appId = appId,
+    appName = apps?.name ?: "",
+    day = 0, // V1: days_active not in DB
+    totalDays = 14, // V1: required_days not in DB
+    pingStatusOk = true, // V1: last_heartbeat_at not in DB — default ok
+    status = TestStatus.Active,
+)
 
 private fun CompletedMatchWithAppDto.toCompleted() = CompletedTestEntry(
     testId = id,
     appId = appId,
     appName = apps?.name ?: "",
-    daysCompleted = daysActive,
-    reputationGained = 0, // V1: not stored per-match
+    daysCompleted = 14, // V1: days_active not in DB
+    reputationGained = 0,
     proofId = null,
 )
-
-private fun String?.isPingOk(): Boolean {
-    if (this == null) return false
-    return try {
-        Duration.between(Instant.parse(this), Instant.now()).toHours() < 25
-    } catch (_: Exception) { false }
-}

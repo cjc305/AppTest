@@ -7,7 +7,6 @@ import com.apptest.core.data.realtime.RealtimeManager
 import com.apptest.core.domain.inbox.InboxNotification
 import com.apptest.core.domain.inbox.InboxNotificationType
 import com.apptest.core.domain.inbox.InboxRepository
-import com.apptest.core.network.notifications.MarkReadBody
 import com.apptest.core.network.notifications.NotificationDto
 import com.apptest.core.network.notifications.SupabaseNotificationsApiService
 import java.time.Instant
@@ -24,11 +23,7 @@ import retrofit2.HttpException
 /**
  * Production [InboxRepository] backed by Supabase PostgREST + Realtime (R-044).
  *
- * Strategy:
- * 1. On first [observe] collector, fetch historical notifications via REST.
- * 2. Subscribe to [RealtimeManager.events] for live INSERT/UPDATE events on the
- *    `notifications` table (RLS scopes delivery to the current user automatically).
- * 3. All writes (markRead / markAllRead) go through PostgREST PATCH.
+ * V1: is_read and deep_link not in DB — markRead/markAllRead update local state only.
  */
 @Singleton
 class SupabaseInboxRepository @Inject constructor(
@@ -41,7 +36,6 @@ class SupabaseInboxRepository @Inject constructor(
     private var initialized = false
 
     init {
-        // Subscribe to Realtime events — live INSERT / UPDATE
         scope.launch {
             realtimeManager.events.collect { event ->
                 if (event.table != TABLE_NOTIFICATIONS) return@collect
@@ -72,17 +66,17 @@ class SupabaseInboxRepository @Inject constructor(
         return _notifications.asStateFlow()
     }
 
+    /** V1: no is_read column in DB — updates local state only. */
     override suspend fun markRead(id: String): AppResult<Unit> = runCatching {
-        apiService.markRead(idFilter = "eq.$id", body = MarkReadBody()).close()
         _notifications.update { list -> list.map { if (it.id == id) it.copy(isRead = true) else it } }
         AppResult.Success(Unit)
-    }.getOrElse { AppResult.Failure(mapError(it)) }
+    }.getOrElse { AppResult.Failure(AppError.fromThrowable(it)) }
 
+    /** V1: no is_read column in DB — updates local state only. */
     override suspend fun markAllRead(): AppResult<Unit> = runCatching {
-        apiService.markAllRead(body = MarkReadBody()).close()
         _notifications.update { list -> list.map { it.copy(isRead = true) } }
         AppResult.Success(Unit)
-    }.getOrElse { AppResult.Failure(mapError(it)) }
+    }.getOrElse { AppResult.Failure(AppError.fromThrowable(it)) }
 
     // ─── helpers ─────────────────────────────────────────────────────────────
 
@@ -91,11 +85,6 @@ class SupabaseInboxRepository @Inject constructor(
             val dtos = apiService.getNotifications()
             _notifications.value = dtos.mapNotNull { it.toDomain() }
         }
-    }
-
-    private fun mapError(t: Throwable): AppError = when (t) {
-        is HttpException -> AppError.Http(t.code(), t.message())
-        else -> AppError.fromThrowable(t)
     }
 
     private companion object {
@@ -112,8 +101,8 @@ private fun NotificationDto.toDomain(): InboxNotification? = runCatching {
         title = title,
         body = body,
         timestamp = Instant.parse(createdAt),
-        isRead = isRead,
-        deepLink = deepLink,
+        isRead = false, // V1: is_read not in DB
+        deepLink = null, // V1: deep_link not in DB
     )
 }.getOrNull()
 
@@ -124,8 +113,8 @@ private fun Map<String, String>.toDomain(): InboxNotification? = runCatching {
         title = get("title").orEmpty(),
         body = get("body").orEmpty(),
         timestamp = Instant.parse(get("created_at") ?: return null),
-        isRead = get("is_read") == "true",
-        deepLink = get("deep_link")?.takeIf { it != "null" },
+        isRead = false, // V1: is_read not in DB
+        deepLink = null, // V1: deep_link not in DB
     )
 }.getOrNull()
 

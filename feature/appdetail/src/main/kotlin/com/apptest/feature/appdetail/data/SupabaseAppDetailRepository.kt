@@ -16,8 +16,7 @@ import kotlinx.coroutines.withContext
 /**
  * Real Supabase-backed [AppDetailRepository]. Replaces [FakeAppDetailRepository].
  *
- * Calls `GET /rest/v1/apps?id=eq.<id>` with embedded owner profile.
- * V1 simplifications: currentTesters=0, screenshotUrls=[], matchReasons=[].
+ * V1: package_name, play_opt_in_url, required_testers, required_days not in DB — defaulted.
  */
 @Singleton
 class SupabaseAppDetailRepository @Inject constructor(
@@ -34,7 +33,7 @@ class SupabaseAppDetailRepository @Inject constructor(
 
                 val detail = AppDetailData(
                     id = app.id,
-                    packageName = app.packageName,
+                    packageName = "", // V1: not in DB
                     name = app.name,
                     category = app.category,
                     description = app.description,
@@ -44,17 +43,17 @@ class SupabaseAppDetailRepository @Inject constructor(
                     owner = OwnerInfo(
                         displayName = app.profiles?.displayName ?: "Developer",
                         tier = ReputationTier.entries
-                            .firstOrNull { it.name == app.profiles?.reputationTier }
+                            .firstOrNull { it.name == app.profiles?.tier?.uppercase() }
                             ?: ReputationTier.Newcomer,
                     ),
                     requirements = Requirements(
-                        requiredDays = app.requiredDays,
-                        requiredTesters = app.requiredTesters,
-                        currentTesters = 0, // V1: no real-time count
+                        requiredDays = 14, // V1: not in DB
+                        requiredTesters = 12, // V1: not in DB
+                        currentTesters = 0,
                         dailyMinutesEstimated = 15,
                     ),
                     matchReasons = emptyList(),
-                    playOptInUrl = app.playOptInUrl,
+                    playOptInUrl = "", // V1: not in DB
                 )
                 AppResult.Success(detail)
             } catch (c: CancellationException) {

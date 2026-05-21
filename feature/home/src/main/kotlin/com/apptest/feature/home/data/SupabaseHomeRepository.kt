@@ -5,8 +5,8 @@ import com.apptest.core.common.AppResult
 import com.apptest.core.common.DispatcherProvider
 import com.apptest.core.common.ReputationTier
 import com.apptest.core.network.apps.SupabaseAppsApiService
-import com.apptest.core.network.matches.MatchWithAppDto
 import com.apptest.core.network.matches.ActiveMatchWithAppDto
+import com.apptest.core.network.matches.MatchWithAppDto
 import com.apptest.core.network.matches.SupabaseMatchesApiService
 import com.apptest.core.network.profiles.ProfileDto
 import com.apptest.core.network.profiles.SupabaseProfilesApiService
@@ -15,8 +15,6 @@ import com.apptest.feature.home.domain.model.HomeData
 import com.apptest.feature.home.domain.model.HomeUser
 import com.apptest.feature.home.domain.model.MatchedApp
 import com.apptest.feature.home.domain.model.OwnedApp
-import java.time.Duration
-import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CancellationException
@@ -27,7 +25,7 @@ import kotlinx.coroutines.withContext
  * Real Supabase-backed [HomeRepository]. Replaces [FakeHomeRepository] via [HomeDataModule].
  *
  * Makes 4 parallel calls: profile, new match, active tests, owned apps.
- * RLS scopes each query to the authenticated user — no explicit user-id filter needed.
+ * V1 simplifications: matchScore=0, day=0, totalDays=14, pingStatusOk=true (no heartbeat col).
  */
 @Singleton
 class SupabaseHomeRepository @Inject constructor(
@@ -53,8 +51,8 @@ class SupabaseHomeRepository @Inject constructor(
                     OwnedApp(
                         id = it.id,
                         name = it.name,
-                        currentTesters = 0, // V1: no real-time count
-                        requiredTesters = it.requiredTesters,
+                        currentTesters = 0,
+                        requiredTesters = 12, // V1: required_testers not in DB
                     )
                 },
             )
@@ -71,8 +69,9 @@ class SupabaseHomeRepository @Inject constructor(
 
 private fun ProfileDto.toHomeUser() = HomeUser(
     displayName = displayName,
-    tier = ReputationTier.entries.firstOrNull { it.name == reputationTier } ?: ReputationTier.Newcomer,
-    credits = credits,
+    tier = ReputationTier.entries.firstOrNull { it.name == tier.uppercase() }
+        ?: ReputationTier.Newcomer,
+    credits = 0, // V1: credits column not in DB
 )
 
 private fun MatchWithAppDto.toMatchedApp() = MatchedApp(
@@ -80,21 +79,14 @@ private fun MatchWithAppDto.toMatchedApp() = MatchedApp(
     name = apps?.name ?: "",
     category = apps?.category ?: "",
     description = apps?.description ?: "",
-    testersNeeded = apps?.requiredTesters ?: 0,
-    matchScore = matchScore,
+    testersNeeded = 12, // V1: required_testers not in DB
+    matchScore = 0, // V1: match_score not in DB
 )
 
 private fun ActiveMatchWithAppDto.toActiveTest() = ActiveTest(
     appId = appId,
     appName = apps?.name ?: "",
-    day = daysActive,
-    totalDays = apps?.requiredDays ?: 14,
-    pingStatusOk = lastHeartbeatAt.isPingOk(),
+    day = 0, // V1: days_active not in DB
+    totalDays = 14, // V1: required_days not in DB
+    pingStatusOk = true, // V1: last_heartbeat_at not in DB — default to ok
 )
-
-private fun String?.isPingOk(): Boolean {
-    if (this == null) return false
-    return try {
-        Duration.between(Instant.parse(this), Instant.now()).toHours() < 25
-    } catch (_: Exception) { false }
-}

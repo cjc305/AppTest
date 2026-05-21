@@ -3,7 +3,6 @@ package com.apptest.feature.myapps.data
 import com.apptest.core.common.AppError
 import com.apptest.core.common.AppResult
 import com.apptest.core.common.DispatcherProvider
-import com.apptest.core.network.apps.AppDeleteBody
 import com.apptest.core.network.apps.AppStatusBody
 import com.apptest.core.network.apps.AppUpsertBody
 import com.apptest.core.network.apps.SupabaseAppsApiService
@@ -26,6 +25,9 @@ import kotlinx.coroutines.withContext
  *
  * Uses a [MutableStateFlow] cache. [observe] triggers an initial network load on first
  * collection; mutations update both Supabase and the local cache.
+ *
+ * V1: package_name, play_opt_in_url, required_testers, required_days not in DB —
+ * defaulted to empty/"" / 12 / 14. Delete uses HTTP DELETE (no deleted_at column).
  */
 @Singleton
 class SupabaseMyAppsRepository @Inject constructor(
@@ -70,7 +72,7 @@ class SupabaseMyAppsRepository @Inject constructor(
 
     override suspend fun delete(id: String): AppResult<Unit> = withContext(dispatchers.io) {
         try {
-            appsApi.softDelete("eq.$id", AppDeleteBody()).close()
+            appsApi.softDelete("eq.$id").close()
             _state.value = _state.value.filterNot { it.id == id }
             AppResult.Success(Unit)
         } catch (c: CancellationException) { throw c }
@@ -102,12 +104,12 @@ class SupabaseMyAppsRepository @Inject constructor(
 private fun com.apptest.core.network.apps.AppDto.toRow() = OwnedAppRow(
     id = id,
     name = name,
-    packageName = packageName,
+    packageName = "", // V1: not in DB
     status = status.toOwnedAppStatus(),
     currentTesters = 0,
-    requiredTesters = requiredTesters,
-    requiredDays = requiredDays,
-    daysLeft = requiredDays,
+    requiredTesters = 12, // V1: not in DB
+    requiredDays = 14, // V1: not in DB
+    daysLeft = 14,
 )
 
 private fun String.toOwnedAppStatus() = when (this) {
@@ -119,9 +121,6 @@ private fun String.toOwnedAppStatus() = when (this) {
 
 private fun AppDraft.toUpsertBody() = AppUpsertBody(
     name = name,
-    packageName = packageName,
     description = description,
-    playOptInUrl = playOptInUrl,
-    requiredTesters = requiredTesters,
-    requiredDays = requiredDays,
+    // V1: packageName, playOptInUrl, requiredTesters, requiredDays not in DB
 )

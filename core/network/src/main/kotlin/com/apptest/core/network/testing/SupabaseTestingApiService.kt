@@ -23,9 +23,10 @@ interface SupabaseTestingApiService {
      * Supabase PostgREST embedded resource syntax: `select=id,app_id,apps(package_name)`.
      * RLS ensures the caller only sees their own matches.
      */
+    // V1: apps.package_name not in DB — returns id,app_id only for install checks
     @GET("matches")
     suspend fun getActiveMatches(
-        @Query("select") select: String = "id,app_id,apps(package_name)",
+        @Query("select") select: String = "id,app_id",
         @Query("status") status: String = "in.(active,matched)",
     ): List<ActiveMatchDto>
 
@@ -50,6 +51,7 @@ data class ActiveMatchDto(
     val apps: AppPackageDto? = null,
 )
 
+// V1: apps.package_name not in DB — packageName always null for now
 @Serializable
 data class AppPackageDto(
     @SerialName("package_name") val packageName: String? = null,
