@@ -1,7 +1,7 @@
 # AppTest — Pre-Launch Blocker Checklist
 
-> **Generated:** 2026-05-20 (autonomous build pass complete)
-> **Status:** All client-side work I can do without your input is done. Below is what _you_ must provide / decide before AppTest can ship to Play Store closed test.
+> **Generated:** 2026-05-20 | **Last updated:** 2026-05-22 (FCM wired, backend deployed, Supabase migration written)
+> **Status:** FCM (Task #24) + real Supabase repos (Task #25) complete. One user action required: run `supabase/migrations/001_add_missing_columns.sql` in Supabase Dashboard SQL Editor, then upload release AAB to Play Store.
 
 ---
 
@@ -44,6 +44,7 @@ Expected friction:
 - [x] Auth magic link enabled; redirect URL `apptest://login-callback` + `https://apptest-prod.web.app/**` configured
 - [x] `SUPABASE_URL` + `SUPABASE_ANON_KEY` in `local.properties` + `BuildConfig` fields wired
 - [x] Real `SupabaseAuthRepository` live (R-043 ✅), Realtime inbox live (R-044 ✅)
+- [ ] **ACTION REQUIRED:** Run `supabase/migrations/001_add_missing_columns.sql` in Supabase Dashboard → SQL Editor (adds streak_days/credits/package_name/proofs table etc.)
 - [ ] (Optional V1) Enable Google OAuth provider if you want Google sign-in
 
 ### 2.2 Firebase project ✅ DONE
@@ -53,7 +54,7 @@ Expected friction:
 - [x] `google-services.json` placed at `app/google-services.json`
 - [x] Firebase BoM 33.7.0 + Crashlytics + FCM + Analytics wired in `libs.versions.toml` + build files
 - [x] `AppTestMessagingService` (@AndroidEntryPoint) registered in Manifest
-- [ ] In Firebase console → Cloud Messaging, note **Server Key** (needed for Ktor backend push delivery)
+- [x] FCM wired via topic-based delivery (`user_<uid>`) — ADC on Cloud Run, no Server Key needed; Android subscribes in `MainActivity` on sign-in
 
 ### 2.3 Google OAuth client (optional V1, if you want Google sign-in)
 
