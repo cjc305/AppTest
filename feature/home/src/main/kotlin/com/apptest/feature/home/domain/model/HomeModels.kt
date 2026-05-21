@@ -24,6 +24,7 @@ data class MatchedApp(
     val category: String,           // human-readable label
     val description: String,        // truncated to 3 lines client-side
     val testersNeeded: Int,         // remaining slots (required - current)
+    val matchScore: Int = 0,        // AI match score 0-100 (0 = not yet computed)
 )
 
 /** Active TestRequest entry. */

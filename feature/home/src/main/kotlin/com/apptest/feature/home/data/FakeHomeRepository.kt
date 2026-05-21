@@ -39,6 +39,7 @@ class FakeHomeRepository @Inject constructor() : HomeRepository {
                 category = "Productivity",
                 description = "A Pomodoro timer that turns focus sessions into flashcards. Need testers for the iOS-style swipe gesture.",
                 testersNeeded = 7,
+                matchScore = 87,
             ),
             activeTests = listOf(
                 ActiveTest(appId = "a1", appName = "QuickHabit", day = 5, totalDays = 14, pingStatusOk = true),
