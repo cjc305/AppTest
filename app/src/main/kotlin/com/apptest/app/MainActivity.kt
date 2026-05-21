@@ -2,6 +2,7 @@ package com.apptest.app
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Base64
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -13,12 +14,18 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.apptest.app.nav.AppNavHost
 import com.apptest.core.common.AuthState
+import com.apptest.core.data.session.SessionStore
 import com.apptest.core.designsystem.theme.AppTheme
 import com.apptest.core.domain.auth.AuthRepository
 import com.apptest.core.navigation.startDestinationFor
+import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import org.json.JSONObject
 
 /**
  * Single Activity host per `_specs/navigation.md` §4.
@@ -34,6 +41,7 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
 
     @Inject lateinit var authRepo: AuthRepository
+    @Inject lateinit var sessionStore: SessionStore
 
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -57,6 +65,21 @@ class MainActivity : ComponentActivity() {
                 }
             }
             sessionRestored = true
+        }
+
+        // Subscribe to FCM topic once the user is signed in.
+        // Each user subscribes to "user_<uid>" so the backend can push without storing tokens.
+        lifecycleScope.launch {
+            sessionStore.session
+                .filterNotNull()
+                .map { session -> session.jwt.jwtSubject() }
+                .filterNotNull()
+                .distinctUntilChanged()
+                .collect { uid ->
+                    FirebaseMessaging.getInstance().subscribeToTopic("user_$uid")
+                        .addOnSuccessListener { android.util.Log.d("FCM", "subscribed to user_$uid") }
+                        .addOnFailureListener { android.util.Log.w("FCM", "subscribe failed: ${it.message}") }
+                }
         }
 
         setContent {
@@ -91,3 +114,13 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+
+/**
+ * Extracts the `sub` (subject / user ID) claim from a JWT without a library.
+ * Returns null on any parse failure — caller treats null as "not yet known".
+ */
+private fun String.jwtSubject(): String? = try {
+    val payload = split(".").getOrNull(1) ?: return null
+    val decoded = Base64.decode(payload, Base64.URL_SAFE or Base64.NO_PADDING)
+    JSONObject(String(decoded, Charsets.UTF_8)).optString("sub").takeIf { it.isNotBlank() }
+} catch (_: Exception) { null }
