@@ -1,7 +1,7 @@
 package com.apptest.feature.appdetail.data.di
 
 import com.apptest.feature.appdetail.data.AppDetailRepository
-import com.apptest.feature.appdetail.data.FakeAppDetailRepository
+import com.apptest.feature.appdetail.data.SupabaseAppDetailRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -14,5 +14,5 @@ abstract class AppDetailDataModule {
 
     @Binds
     @Singleton
-    abstract fun bindAppDetailRepository(impl: FakeAppDetailRepository): AppDetailRepository
+    abstract fun bindAppDetailRepository(impl: SupabaseAppDetailRepository): AppDetailRepository
 }

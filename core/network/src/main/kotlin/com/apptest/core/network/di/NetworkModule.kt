@@ -2,8 +2,11 @@ package com.apptest.core.network.di
 
 import com.apptest.core.network.ApiConfig
 import com.apptest.core.network.AppJson
+import com.apptest.core.network.apps.SupabaseAppsApiService
 import com.apptest.core.network.auth.SupabaseAuthApiService
+import com.apptest.core.network.matches.SupabaseMatchesApiService
 import com.apptest.core.network.notifications.SupabaseNotificationsApiService
+import com.apptest.core.network.profiles.SupabaseProfilesApiService
 import com.apptest.core.network.testing.SupabaseTestingApiService
 import com.apptest.core.network.interceptor.AuthInterceptor
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
@@ -131,6 +134,30 @@ object NetworkModule {
         @SupabaseRest retrofit: Retrofit,
     ): SupabaseTestingApiService =
         retrofit.create(SupabaseTestingApiService::class.java)
+
+    /** Apps CRUD — My Apps editor + Home owned list + App Detail. */
+    @Provides
+    @Singleton
+    fun provideSupabaseAppsApiService(
+        @SupabaseRest retrofit: Retrofit,
+    ): SupabaseAppsApiService =
+        retrofit.create(SupabaseAppsApiService::class.java)
+
+    /** Richer match queries for Home hero card + Testing screen. */
+    @Provides
+    @Singleton
+    fun provideSupabaseMatchesApiService(
+        @SupabaseRest retrofit: Retrofit,
+    ): SupabaseMatchesApiService =
+        retrofit.create(SupabaseMatchesApiService::class.java)
+
+    /** Profile + proofs — Profile screen. */
+    @Provides
+    @Singleton
+    fun provideSupabaseProfilesApiService(
+        @SupabaseRest retrofit: Retrofit,
+    ): SupabaseProfilesApiService =
+        retrofit.create(SupabaseProfilesApiService::class.java)
 }
 
 @Qualifier

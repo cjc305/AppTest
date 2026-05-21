@@ -1,7 +1,7 @@
 package com.apptest.feature.home.data.di
 
-import com.apptest.feature.home.data.FakeHomeRepository
 import com.apptest.feature.home.data.HomeRepository
+import com.apptest.feature.home.data.SupabaseHomeRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -18,5 +18,5 @@ abstract class HomeDataModule {
 
     @Binds
     @Singleton
-    abstract fun bindHomeRepository(impl: FakeHomeRepository): HomeRepository
+    abstract fun bindHomeRepository(impl: SupabaseHomeRepository): HomeRepository
 }

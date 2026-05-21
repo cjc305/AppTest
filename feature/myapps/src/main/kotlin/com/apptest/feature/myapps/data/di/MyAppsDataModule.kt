@@ -1,7 +1,7 @@
 package com.apptest.feature.myapps.data.di
 
-import com.apptest.feature.myapps.data.FakeMyAppsRepository
 import com.apptest.feature.myapps.data.MyAppsRepository
+import com.apptest.feature.myapps.data.SupabaseMyAppsRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -14,5 +14,5 @@ abstract class MyAppsDataModule {
 
     @Binds
     @Singleton
-    abstract fun bindMyAppsRepository(impl: FakeMyAppsRepository): MyAppsRepository
+    abstract fun bindMyAppsRepository(impl: SupabaseMyAppsRepository): MyAppsRepository
 }
