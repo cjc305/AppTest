@@ -3,6 +3,7 @@ package com.apptest.feature.auth.data
 import com.apptest.core.common.AppError
 import com.apptest.core.common.AppResult
 import com.apptest.core.common.AuthState
+import com.apptest.core.common.EmailValidator
 import com.apptest.core.domain.auth.AuthRepository
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -35,7 +36,7 @@ class FakeAuthRepository @Inject constructor() : AuthRepository {
 
     override suspend fun requestMagicLink(email: String): AppResult<Unit> {
         delay(400)
-        if (!email.contains("@") || !email.contains(".")) {
+        if (!EmailValidator.isValid(email)) {
             return AppResult.Failure(AppError.Validation("email", "Invalid email format"))
         }
         // V1: pretend mail was sent

@@ -30,7 +30,7 @@ class DataStoreSessionStoreTest {
         scope = CoroutineScope(SupervisorJob() + UnconfinedTestDispatcher() + Dispatchers.Unconfined)
         val file = File(tempDir.root, "test.preferences_pb")
         ds = PreferenceDataStoreFactory.create(scope = scope) { file }
-        store = DataStoreSessionStore(ds)
+        store = DataStoreSessionStore(ds, scope)
     }
 
     @After fun tearDown() {

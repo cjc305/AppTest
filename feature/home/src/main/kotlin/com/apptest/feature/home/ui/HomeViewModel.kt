@@ -1,5 +1,9 @@
 package com.apptest.feature.home.ui
 
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apptest.core.common.AppResult
@@ -12,6 +16,8 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 /**
@@ -23,6 +29,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val getHomeData: GetHomeDataUseCase,
+    private val dataStore: DataStore<Preferences>,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
@@ -35,18 +42,31 @@ class HomeViewModel @Inject constructor(
     fun load() {
         viewModelScope.launch {
             _state.value = HomeUiState.Loading
+            val skipped = dataStore.data.map { it[KEY_SKIPPED_MATCH_IDS] ?: emptySet() }
+                .firstOrNull().orEmpty()
             getHomeData()
-                .onSuccess { data -> _state.value = toLoadedOrEmpty(data) }
+                .onSuccess { data ->
+                    val filtered = if (data.newMatch?.id in skipped) data.copy(newMatch = null) else data
+                    _state.value = toLoadedOrEmpty(filtered)
+                }
                 .onFailure { _state.value = HomeUiState.Error(it) }
         }
     }
 
     /**
-     * In-memory dismissal of the current new-match hero card. Server-side persistence
-     * (`POST /me/matches/{id}/skip` per `api_contracts.md` §5) lands with backend integration.
+     * Persisted dismissal — skipped match id is written to DataStore so a pull-to-refresh or
+     * cold restart doesn't resurrect the card. Server-side persistence
+     * (`POST /me/matches/{id}/skip`) lands with backend integration; this DataStore key can
+     * be dropped then.
      */
     fun skipCurrentMatch() {
         val current = _state.value as? HomeUiState.Loaded ?: return
+        val matchId = current.data.newMatch?.id ?: return
+        viewModelScope.launch {
+            dataStore.edit { prefs ->
+                prefs[KEY_SKIPPED_MATCH_IDS] = (prefs[KEY_SKIPPED_MATCH_IDS] ?: emptySet()) + matchId
+            }
+        }
         val withoutMatch = current.data.copy(newMatch = null)
         _state.value = toLoadedOrEmpty(withoutMatch)
     }
@@ -76,4 +96,8 @@ class HomeViewModel @Inject constructor(
 
     // Keep AppResult import alive for future when we add specific error handling paths
     @Suppress("unused") private val _appResultRef: AppResult<Unit>? = null
+
+    private companion object {
+        val KEY_SKIPPED_MATCH_IDS = stringSetPreferencesKey("home_skipped_match_ids")
+    }
 }

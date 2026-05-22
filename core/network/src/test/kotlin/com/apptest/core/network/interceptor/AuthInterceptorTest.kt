@@ -2,7 +2,6 @@ package com.apptest.core.network.interceptor
 
 import com.apptest.core.domain.auth.TokenProvider
 import com.google.common.truth.Truth.assertThat
-import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
@@ -19,7 +18,7 @@ class AuthInterceptorTest {
     private val interceptor = AuthInterceptor(tokenProvider)
 
     @Test fun `attaches Bearer header when token is non-null`() {
-        coEvery { tokenProvider.token() } returns "abc.def.ghi"
+        every { tokenProvider.tokenBlocking() } returns "abc.def.ghi"
         val original = Request.Builder().url("https://example.com/v1/x").build()
         val captured = captureProceededRequest(original)
 
@@ -29,7 +28,7 @@ class AuthInterceptorTest {
     }
 
     @Test fun `omits Authorization header when token is null`() {
-        coEvery { tokenProvider.token() } returns null
+        every { tokenProvider.tokenBlocking() } returns null
         val original = Request.Builder().url("https://example.com/v1/x").build()
         val captured = captureProceededRequest(original)
 
@@ -39,7 +38,7 @@ class AuthInterceptorTest {
     }
 
     @Test fun `preserves existing headers when attaching auth`() {
-        coEvery { tokenProvider.token() } returns "t"
+        every { tokenProvider.tokenBlocking() } returns "t"
         val original = Request.Builder()
             .url("https://example.com/v1/x")
             .header("X-Trace", "abc")

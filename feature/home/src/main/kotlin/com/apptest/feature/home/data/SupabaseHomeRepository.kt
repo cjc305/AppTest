@@ -20,6 +20,7 @@ import javax.inject.Singleton
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * Real Supabase-backed [HomeRepository]. Replaces [FakeHomeRepository] via [HomeDataModule].
@@ -35,19 +36,27 @@ class SupabaseHomeRepository @Inject constructor(
     private val dispatchers: DispatcherProvider,
 ) : HomeRepository {
 
+    /**
+     * Partial-success aggregation: each of the 4 calls is independently bounded by [PER_CALL_MS]
+     * and wrapped in runCatching so a single slow or failing endpoint can't blank out the whole
+     * Home screen. Profile failure still falls back to a placeholder user (not Failure).
+     *
+     * Returns [AppResult.Failure] only when the wrapping coroutine itself crashes — individual
+     * endpoint failures degrade gracefully to defaults / empty lists.
+     */
     override suspend fun getHomeData(): AppResult<HomeData> = withContext(dispatchers.io) {
         try {
-            val profileDeferred = async { profilesApi.getMyProfile() }
-            val matchDeferred = async { matchesApi.getNewMatch() }
-            val activeDeferred = async { matchesApi.getActiveTests() }
-            val appsDeferred = async { appsApi.listOwned() }
+            val profileDeferred = async { runCatching { withTimeoutOrNull(PER_CALL_MS) { profilesApi.getMyProfile() } } }
+            val matchDeferred   = async { runCatching { withTimeoutOrNull(PER_CALL_MS) { matchesApi.getNewMatch() } } }
+            val activeDeferred  = async { runCatching { withTimeoutOrNull(PER_CALL_MS) { matchesApi.getActiveTests() } } }
+            val appsDeferred    = async { runCatching { withTimeoutOrNull(PER_CALL_MS) { appsApi.listOwned() } } }
 
             val homeData = HomeData(
-                user = profileDeferred.await().firstOrNull()?.toHomeUser()
+                user = profileDeferred.await().getOrNull()?.firstOrNull()?.toHomeUser()
                     ?: HomeUser("User", ReputationTier.Newcomer, 0),
-                newMatch = matchDeferred.await().firstOrNull()?.toMatchedApp(),
-                activeTests = activeDeferred.await().map { it.toActiveTest() },
-                myApps = appsDeferred.await().map {
+                newMatch = matchDeferred.await().getOrNull()?.firstOrNull()?.toMatchedApp(),
+                activeTests = activeDeferred.await().getOrNull().orEmpty().map { it.toActiveTest() },
+                myApps = appsDeferred.await().getOrNull().orEmpty().map {
                     OwnedApp(
                         id = it.id,
                         name = it.name,
@@ -62,6 +71,10 @@ class SupabaseHomeRepository @Inject constructor(
         } catch (t: Throwable) {
             AppResult.Failure(AppError.fromThrowable(t))
         }
+    }
+
+    private companion object {
+        const val PER_CALL_MS = 5_000L
     }
 }
 

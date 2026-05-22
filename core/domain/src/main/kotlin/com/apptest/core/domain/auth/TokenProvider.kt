@@ -13,4 +13,12 @@ package com.apptest.core.domain.auth
 interface TokenProvider {
     /** Current valid JWT, or `null` when no session / expired. */
     suspend fun token(): String?
+
+    /**
+     * Synchronous fast-path for OkHttp interceptors that cannot suspend. Returns the most
+     * recently observed cached token, or `null` when none / expired / cache not yet warmed.
+     * Default falls back to a runBlocking [token] call so existing test fakes work unchanged.
+     */
+    fun tokenBlocking(): String? =
+        kotlinx.coroutines.runBlocking { token() }
 }

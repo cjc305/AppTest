@@ -38,6 +38,9 @@ dependencies {
     implementation(project(":core:navigation"))
     implementation(project(":core:network"))
 
+    // DataStore — HomeViewModel persists skipped match IDs (survives reload / cold start).
+    implementation(libs.androidx.datastore.preferences)
+
     // ── Compose ─────────────────────────────────────────────────────────
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.compose.ui)

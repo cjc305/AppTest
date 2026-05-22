@@ -23,5 +23,6 @@ fun AppEditorRoute(
         onField = viewModel::onField,
         onSave = viewModel::save,
         onCancel = onCancel,
+        onRetryLoad = viewModel::retryLoad,
     )
 }

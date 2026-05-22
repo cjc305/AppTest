@@ -3,7 +3,6 @@ package com.apptest.core.network.interceptor
 import com.apptest.core.domain.auth.TokenProvider
 import javax.inject.Inject
 import javax.inject.Singleton
-import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.Response
 
@@ -12,9 +11,9 @@ import okhttp3.Response
  * valid token. Skips the header (sends unauthenticated request) when token is `null` —
  * caller-side handlers must accept that some endpoints (sign-in itself) need anonymous access.
  *
- * Uses [runBlocking] because the OkHttp `Interceptor` contract is synchronous. DataStore reads
- * are fast (microseconds when cached) so this does not meaningfully impact request latency.
- * If profiling later shows a problem, swap [TokenProvider] for a cached pre-fetched variant.
+ * Uses [TokenProvider.tokenBlocking] which reads an in-memory cache populated by the
+ * SessionStore Flow collector. Avoids the previous `runBlocking { dataStore.firstOrNull() }`
+ * that serialized concurrent OkHttp requests behind DataStore's internal Mutex.
  */
 @Singleton
 class AuthInterceptor @Inject constructor(
@@ -22,7 +21,7 @@ class AuthInterceptor @Inject constructor(
 ) : Interceptor {
 
     override fun intercept(chain: Interceptor.Chain): Response {
-        val token = runBlocking { tokenProvider.token() }
+        val token = tokenProvider.tokenBlocking()
         val original = chain.request()
         val authed = if (token != null) {
             original.newBuilder()
