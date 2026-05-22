@@ -38,3 +38,14 @@ sealed interface PlayUrlValidation {
     data object Valid : PlayUrlValidation
     data class Invalid(val reason: String) : PlayUrlValidation
 }
+
+/**
+ * Result of [com.apptest.feature.myapps.data.MyAppsRepository]'s initial network load.
+ * Used to distinguish "loaded empty list" (show Empty state) from "load failed" (show Error).
+ */
+sealed interface MyAppsLoadStatus {
+    data object Idle : MyAppsLoadStatus       // never tried (no subscriber yet)
+    data object Loading : MyAppsLoadStatus    // request in flight
+    data object Loaded : MyAppsLoadStatus     // success — observe() emits real data
+    data class Failed(val error: com.apptest.core.common.AppError) : MyAppsLoadStatus
+}

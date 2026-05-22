@@ -1,5 +1,6 @@
 package com.apptest.feature.appdetail.ui
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,8 +24,16 @@ fun AppDetailRoute(
 
     LaunchedEffect(Unit) {
         viewModel.openPlayStoreEvents.collect { url ->
-            val intent = Intent(Intent.ACTION_VIEW, url.toUri()).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            context.startActivity(intent)
+            try {
+                val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                context.startActivity(intent)
+            } catch (_: ActivityNotFoundException) {
+                viewModel.onJoinIntentFailed()
+            } catch (t: Throwable) {
+                android.util.Log.w("AppDetail", "Play Store intent failed: ${t.message}")
+                viewModel.onJoinIntentFailed()
+            }
         }
     }
 

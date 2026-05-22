@@ -3,6 +3,7 @@ package com.apptest.feature.myapps.data
 import com.apptest.core.common.AppResult
 import com.apptest.core.domain.Repository
 import com.apptest.feature.myapps.domain.model.AppDraft
+import com.apptest.feature.myapps.domain.model.MyAppsLoadStatus
 import com.apptest.feature.myapps.domain.model.OwnedAppRow
 import kotlinx.coroutines.flow.Flow
 
@@ -17,6 +18,12 @@ interface MyAppsRepository : Repository {
 
     /** Live list of apps owned by current user. Emits whenever [save]/[delete] mutates state. */
     fun observe(): Flow<List<OwnedAppRow>>
+
+    /**
+     * Initial-load status. Combine with [observe] in UI to tell "loaded empty" apart from
+     * "load failed". Implementations that never fail (e.g. fakes) may emit only [Loaded].
+     */
+    fun loadStatus(): Flow<MyAppsLoadStatus>
 
     /** Look up a single app by id for editing. Returns null if not found. */
     suspend fun get(id: String): OwnedAppRow?

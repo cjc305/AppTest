@@ -69,6 +69,7 @@ fun AppDetailScreen(
             is AppDetailUiState.Loaded -> LoadedBody(
                 data = state.data,
                 joinInProgress = state.joinInProgress,
+                joinError = state.joinError,
                 onJoin = onJoin,
                 contentPadding = padding,
             )
@@ -80,6 +81,7 @@ fun AppDetailScreen(
 private fun LoadedBody(
     data: AppDetailData,
     joinInProgress: Boolean,
+    joinError: String?,
     onJoin: () -> Unit,
     contentPadding: PaddingValues,
 ) {
@@ -102,12 +104,12 @@ private fun LoadedBody(
             ExplainabilityCard(reasons = data.matchReasons)
             AppVSpacer(AppSpacing.Lg)
         }
-        JoinFooter(joinInProgress = joinInProgress, onJoin = onJoin)
+        JoinFooter(joinInProgress = joinInProgress, joinError = joinError, onJoin = onJoin)
     }
 }
 
 @Composable
-private fun JoinFooter(joinInProgress: Boolean, onJoin: () -> Unit) {
+private fun JoinFooter(joinInProgress: Boolean, joinError: String?, onJoin: () -> Unit) {
     val l = AppL10n.current
     Surface(
         tonalElevation = 3.dp,
@@ -122,12 +124,21 @@ private fun JoinFooter(joinInProgress: Boolean, onJoin: () -> Unit) {
                 variant = AppButtonVariant.Primary,
                 modifier = Modifier.fillMaxWidth(),
             )
-            AppText(
-                text = l.appdetail_maybe_later,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = AppSpacing.Xs),
-            )
+            if (joinError != null) {
+                AppText(
+                    text = joinError,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(top = AppSpacing.Xs),
+                )
+            } else {
+                AppText(
+                    text = l.appdetail_maybe_later,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = AppSpacing.Xs),
+                )
+            }
         }
     }
 }

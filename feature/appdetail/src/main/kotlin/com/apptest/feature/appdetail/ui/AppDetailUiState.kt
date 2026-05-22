@@ -11,5 +11,7 @@ sealed interface AppDetailUiState {
     data class Loaded(
         val data: AppDetailData,
         val joinInProgress: Boolean = false,
+        /** Inline error for the Join action (URL invalid / Play Store not installed). */
+        val joinError: String? = null,
     ) : AppDetailUiState
 }

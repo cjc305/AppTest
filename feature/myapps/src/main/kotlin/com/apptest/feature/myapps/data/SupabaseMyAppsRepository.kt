@@ -7,6 +7,7 @@ import com.apptest.core.network.apps.AppStatusBody
 import com.apptest.core.network.apps.AppUpsertBody
 import com.apptest.core.network.apps.SupabaseAppsApiService
 import com.apptest.feature.myapps.domain.model.AppDraft
+import com.apptest.feature.myapps.domain.model.MyAppsLoadStatus
 import com.apptest.feature.myapps.domain.model.OwnedAppRow
 import com.apptest.feature.myapps.domain.model.OwnedAppStatus
 import javax.inject.Inject
@@ -18,6 +19,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 /**
@@ -36,19 +39,58 @@ class SupabaseMyAppsRepository @Inject constructor(
 ) : MyAppsRepository {
 
     private val _state = MutableStateFlow<List<OwnedAppRow>>(emptyList())
-    private var loaded = false
+    private val _loadStatus = MutableStateFlow<MyAppsLoadStatus>(MyAppsLoadStatus.Idle)
+    private val loadMutex = Mutex()
+
+    /**
+     * V1: package_name / play_opt_in_url / required_testers / required_days don't yet exist
+     * server-side, so the user's editor input would be lost on reload. Cache them
+     * process-locally keyed by app id so the editor shows back what the user typed within
+     * the same process. (Cleared on process death — fix properly when schema migration lands.)
+     */
+    private val draftExtras = java.util.concurrent.ConcurrentHashMap<String, DraftExtras>()
+
+    private data class DraftExtras(
+        val packageName: String,
+        val playOptInUrl: String,
+        val requiredTesters: Int,
+        val requiredDays: Int,
+    )
 
     override fun observe(): Flow<List<OwnedAppRow>> = flow {
-        if (!loaded) {
-            runCatching { appsApi.listOwned().map { it.toRow() } }
-                .onSuccess { _state.value = it; loaded = true }
-        }
+        loadOnce()
         emitAll(_state.asStateFlow())
     }.flowOn(dispatchers.io)
 
+    override fun loadStatus(): Flow<MyAppsLoadStatus> = _loadStatus.asStateFlow()
+
+    /**
+     * Idempotent first-load gate. Mutex serializes concurrent collectors so we don't fire
+     * two parallel `listOwned` requests on simultaneous subscription. Re-attempts after
+     * [Failed] so the user can retry by re-entering the screen.
+     */
+    private suspend fun loadOnce() {
+        loadMutex.withLock {
+            val status = _loadStatus.value
+            if (status is MyAppsLoadStatus.Loaded || status is MyAppsLoadStatus.Loading) return
+            _loadStatus.value = MyAppsLoadStatus.Loading
+            try {
+                val rows = appsApi.listOwned().map { it.toRow() }
+                _state.value = rows
+                _loadStatus.value = MyAppsLoadStatus.Loaded
+            } catch (c: CancellationException) {
+                _loadStatus.value = MyAppsLoadStatus.Idle  // allow retry on resubscribe
+                throw c
+            } catch (t: Throwable) {
+                _loadStatus.value = MyAppsLoadStatus.Failed(AppError.fromThrowable(t))
+            }
+        }
+    }
+
     override suspend fun get(id: String): OwnedAppRow? = withContext(dispatchers.io) {
-        _state.value.firstOrNull { it.id == id }
+        val cached = _state.value.firstOrNull { it.id == id }
             ?: runCatching { appsApi.getById("eq.$id").firstOrNull()?.toRow() }.getOrNull()
+        cached?.mergeExtras(draftExtras[id])
     }
 
     override suspend fun save(draft: AppDraft): AppResult<String> = withContext(dispatchers.io) {
@@ -61,6 +103,13 @@ class SupabaseMyAppsRepository @Inject constructor(
                 appsApi.update("eq.${draft.id}", draft.toUpsertBody()).close()
                 draft.id
             }
+            // Stash V1-only fields locally so subsequent edits show the user's input back.
+            draftExtras[id] = DraftExtras(
+                packageName = draft.packageName,
+                playOptInUrl = draft.playOptInUrl,
+                requiredTesters = draft.requiredTesters,
+                requiredDays = draft.requiredDays,
+            )
             refreshCache()
             AppResult.Success(id)
         } catch (c: CancellationException) { throw c }
@@ -94,8 +143,17 @@ class SupabaseMyAppsRepository @Inject constructor(
         }
 
     private suspend fun refreshCache() {
-        runCatching { appsApi.listOwned().map { it.toRow() } }
+        runCatching { appsApi.listOwned().map { it.toRow().mergeExtras(draftExtras[it.id]) } }
             .onSuccess { _state.value = it }
+    }
+
+    private fun OwnedAppRow.mergeExtras(extras: DraftExtras?): OwnedAppRow {
+        if (extras == null) return this
+        return copy(
+            packageName = extras.packageName.ifBlank { packageName },
+            requiredTesters = extras.requiredTesters,
+            requiredDays = extras.requiredDays,
+        )
     }
 }
 

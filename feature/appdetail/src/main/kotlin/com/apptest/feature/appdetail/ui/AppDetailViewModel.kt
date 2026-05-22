@@ -50,13 +50,36 @@ class AppDetailViewModel @Inject constructor(
     /**
      * V1: fires an [openPlayStoreEvents] event with the App's `playOptInUrl`. Real flow
      * (TestRequest creation + heartbeat scheduling) lands with APT-V1-R-040.
+     *
+     * Guards: rejects empty / non-Play-Store URLs to prevent ActivityNotFoundException +
+     * server-controlled intent injection (e.g. `javascript://`, `intent://`).
      */
     fun onJoinClicked() {
         val loaded = _state.value as? AppDetailUiState.Loaded ?: return
-        _state.update { loaded.copy(joinInProgress = true) }
+        if (loaded.joinInProgress) return
+        val url = loaded.data.playOptInUrl
+        if (!isSafePlayStoreUrl(url)) {
+            _state.update { loaded.copy(joinError = "Play Store opt-in URL not yet provided.") }
+            return
+        }
+        _state.update { loaded.copy(joinInProgress = true, joinError = null) }
         viewModelScope.launch {
-            _openPlayStore.send(loaded.data.playOptInUrl)
-            _state.update { loaded.copy(joinInProgress = false) }
+            _openPlayStore.send(url)
+            _state.update {
+                (it as? AppDetailUiState.Loaded)?.copy(joinInProgress = false) ?: it
+            }
         }
     }
+
+    /** Inline failure surface — Route catches Intent ActivityNotFoundException. */
+    fun onJoinIntentFailed() {
+        val loaded = _state.value as? AppDetailUiState.Loaded ?: return
+        _state.update {
+            loaded.copy(joinInProgress = false, joinError = "Play Store app not available on this device.")
+        }
+    }
+
+    private fun isSafePlayStoreUrl(url: String): Boolean =
+        url.startsWith("https://play.google.com/", ignoreCase = true) ||
+            url.startsWith("market://", ignoreCase = true)
 }

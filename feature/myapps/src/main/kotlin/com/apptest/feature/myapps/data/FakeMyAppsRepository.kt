@@ -2,8 +2,10 @@ package com.apptest.feature.myapps.data
 
 import com.apptest.core.common.AppResult
 import com.apptest.feature.myapps.domain.model.AppDraft
+import com.apptest.feature.myapps.domain.model.MyAppsLoadStatus
 import com.apptest.feature.myapps.domain.model.OwnedAppRow
 import com.apptest.feature.myapps.domain.model.OwnedAppStatus
+import kotlinx.coroutines.flow.flowOf
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -25,6 +27,8 @@ class FakeMyAppsRepository @Inject constructor() : MyAppsRepository {
     private val _items = MutableStateFlow(seed())
 
     override fun observe(): Flow<List<OwnedAppRow>> = _items.asStateFlow()
+
+    override fun loadStatus(): Flow<MyAppsLoadStatus> = flowOf(MyAppsLoadStatus.Loaded)
 
     override suspend fun get(id: String): OwnedAppRow? {
         delay(80)
