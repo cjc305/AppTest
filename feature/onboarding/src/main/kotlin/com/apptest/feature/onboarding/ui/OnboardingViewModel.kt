@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.apptest.core.common.onFailure
 import com.apptest.core.common.onSuccess
 import com.apptest.core.domain.auth.AuthRepository
+import com.apptest.feature.onboarding.domain.model.OnboardingCatalog
 import com.apptest.feature.onboarding.domain.model.OnboardingDraft
 import com.apptest.feature.onboarding.domain.model.OnboardingIntent
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -44,7 +45,17 @@ class OnboardingViewModel @Inject constructor(
     }
 
     fun onSkipAll() {
-        // Skip = accept current defaults + submit
+        // Skip = backfill the minimum required defaults for any not-yet-satisfied step, then
+        // submit. Without this, a tap-skip-immediately on step 1 would submit an empty-category
+        // draft and the server would (rightly) reject it as malformed onboarding.
+        _state.update { s ->
+            val draft = s.draft
+            val filled = draft.copy(
+                categories = if (draft.categories.isEmpty()) setOf(OnboardingCatalog.ALL_CATEGORIES.first()) else draft.categories,
+                languages = if (draft.languages.isEmpty()) setOf("en") else draft.languages,
+            )
+            s.copy(draft = filled)
+        }
         submit()
     }
 

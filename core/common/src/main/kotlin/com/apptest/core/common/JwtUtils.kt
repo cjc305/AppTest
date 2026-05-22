@@ -13,6 +13,9 @@ import java.util.Base64
  */
 fun String.jwtSubject(): String? = runCatching {
     val payload = split(".").getOrNull(1) ?: return@runCatching null
-    val json = String(Base64.getUrlDecoder().decode(payload))
+    // Supabase JWTs follow RFC-7515 base64url-without-padding; java.util.Base64.getUrlDecoder()
+    // is strict and throws when length % 4 != 0. Pad to a multiple of 4 first.
+    val padded = payload.padEnd((payload.length + 3) and 3.inv(), '=')
+    val json = String(Base64.getUrlDecoder().decode(padded))
     Regex(""""sub"\s*:\s*"([^"]+)"""").find(json)?.groupValues?.get(1)
 }.getOrNull()
