@@ -1,7 +1,8 @@
 # AppTest — Pre-Launch Blocker Checklist
 
-> **Generated:** 2026-05-20 | **Last updated:** 2026-05-22 (FCM wired, backend deployed, Supabase migration written)
-> **Status:** FCM (Task #24) + real Supabase repos (Task #25) complete. One user action required: run `supabase/migrations/001_add_missing_columns.sql` in Supabase Dashboard SQL Editor, then upload release AAB to Play Store.
+> **Generated:** 2026-05-20 | **Last updated:** 2026-05-22 (22 bugs fixed + tested ✅)
+> **Status:** Backend ✅ | Firebase ✅ | Supabase ✅ | DB migration ✅ | 22 bugs fixed ✅ | Debug build passes ✅
+> **Remaining before Play upload:** §2.5 store listing content + §2.6 signing keystore (see below).
 
 ---
 
@@ -44,7 +45,7 @@ Expected friction:
 - [x] Auth magic link enabled; redirect URL `apptest://login-callback` + `https://apptest-prod.web.app/**` configured
 - [x] `SUPABASE_URL` + `SUPABASE_ANON_KEY` in `local.properties` + `BuildConfig` fields wired
 - [x] Real `SupabaseAuthRepository` live (R-043 ✅), Realtime inbox live (R-044 ✅)
-- [ ] **ACTION REQUIRED:** Run `supabase/migrations/001_add_missing_columns.sql` in Supabase Dashboard → SQL Editor (adds streak_days/credits/package_name/proofs table etc.)
+- [x] ~~**ACTION REQUIRED:**~~ **✅ DONE 2026-05-22** — `supabase/migrations/001_add_missing_columns.sql` executed; all 14 columns + proofs table confirmed live in DB
 - [ ] (Optional V1) Enable Google OAuth provider if you want Google sign-in
 
 ### 2.2 Firebase project ✅ DONE
