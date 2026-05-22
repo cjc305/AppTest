@@ -1,8 +1,8 @@
 # AppTest — Pre-Launch Blocker Checklist
 
-> **Generated:** 2026-05-20 | **Last updated:** 2026-05-22 (22 bugs fixed + tested ✅)
-> **Status:** Backend ✅ | Firebase ✅ | Supabase ✅ | DB migration ✅ | 22 bugs fixed ✅ | Debug build passes ✅
-> **Remaining before Play upload:** §2.5 store listing content + §2.6 signing keystore (see below).
+> **Generated:** 2026-05-20 | **Last updated:** 2026-05-22 (22 bugs fixed + signed release AAB ✅)
+> **Status:** Backend ✅ | Firebase ✅ | Supabase ✅ | DB migration ✅ | 22 bugs fixed ✅ | Signed AAB on Desktop ✅ (10 MB)
+> **Remaining before Play upload (you do these in Play Console):** store listing screenshots/description + content rating + data safety form + closed testing track setup.
 
 ---
 
@@ -82,11 +82,13 @@ Expected friction:
 - [ ] Closed testing track set up + tester list email (or Google Group)
 - [ ] App signing: use Play App Signing (recommended); generate upload keystore + add CI secret
 
-### 2.6 Signing keystore (release builds)
+### 2.6 Signing keystore (release builds) ✅ DONE
 
-- [ ] Generate upload keystore: `keytool -genkey -v -keystore upload.keystore -alias upload ...`
-- [ ] Store keystore + passwords **outside** repo (1Password / GitHub Actions secret)
-- [ ] Wire `signingConfigs { release { ... } }` in `:app/build.gradle.kts` reading from `local.properties` or env
+- [x] `upload.keystore` generated (PKCS12, RSA-2048, 10000-day, alias=`upload`) — in project root (gitignored)
+- [x] `keystore.properties` wired at project root (gitignored); `signingConfigs { upload }` reads it
+- [x] Passwords backed up to Windows Credential Manager targets: `AppTest_KeystoreStorePassword` / `AppTest_KeystoreKeyPassword`
+- [x] Signed release AAB built: `Desktop\app-release.aab` (10 MB) — ready to upload
+- [x] Keystore SHA-256: `22:65:E4:D6:0D:DE:35:5C:59:88:0D:1A:22:D6:14:9A:AB:DF:9A:97:A1:B2:99:E9:C9:DC:70:C2:4E:5B:6D:3C`
 
 ---
 
