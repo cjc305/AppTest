@@ -100,17 +100,40 @@ object NetworkModule {
             .addConverterFactory(AppJson.asConverterFactory(MEDIA_TYPE_JSON.toMediaType()))
             .build()
 
-    /** Auth Retrofit points to `/auth/v1/` — reuses the Supabase OkHttp client (apikey + JWT). */
+    /**
+     * Supabase Auth OkHttp — **only** apikey header. Deliberately omits [AuthInterceptor] so
+     * sign-in calls (`/otp`, `/verify`, `/token?grant_type=id_token`) are never sent with a
+     * residual Bearer from a previous user (cross-account token pollution). Endpoints that
+     * actually need a Bearer (`/logout`, `/token?grant_type=refresh_token`) pass it explicitly
+     * via the `Authorization` header parameter on [SupabaseAuthApiService].
+     */
+    @Provides
+    @Singleton
+    @SupabaseAuth
+    fun provideSupabaseAuthOkHttpClient(
+        loggingInterceptor: HttpLoggingInterceptor,
+        @SupabaseAnonKey anonKey: String,
+    ): OkHttpClient = OkHttpClient.Builder()
+        .connectTimeout(ApiConfig.TIMEOUT_SECONDS, TimeUnit.SECONDS)
+        .readTimeout(ApiConfig.TIMEOUT_SECONDS, TimeUnit.SECONDS)
+        .writeTimeout(ApiConfig.TIMEOUT_SECONDS, TimeUnit.SECONDS)
+        .addInterceptor { chain ->
+            chain.proceed(chain.request().newBuilder().header(HEADER_API_KEY, anonKey).build())
+        }
+        .addInterceptor(loggingInterceptor)
+        .build()
+
+    /** Auth Retrofit points to `/auth/v1/`. Uses the dedicated [@SupabaseAuth] OkHttp (no auto-Bearer). */
     @Provides
     @Singleton
     @SupabaseAuth
     fun provideSupabaseAuthRetrofit(
-        @SupabaseRest supabaseClient: OkHttpClient,
+        @SupabaseAuth authClient: OkHttpClient,
         @SupabaseBaseUrl baseUrl: String,
     ): Retrofit =
         Retrofit.Builder()
             .baseUrl("$baseUrl/auth/v1/")
-            .client(supabaseClient)
+            .client(authClient)
             .addConverterFactory(AppJson.asConverterFactory(MEDIA_TYPE_JSON.toMediaType()))
             .build()
 

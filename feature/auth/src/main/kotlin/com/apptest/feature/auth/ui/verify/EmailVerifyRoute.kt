@@ -3,12 +3,17 @@ package com.apptest.feature.auth.ui.verify
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -31,7 +36,34 @@ fun EmailVerifyRoute(viewModel: EmailVerifyViewModel = hiltViewModel()) {
             verticalArrangement = Arrangement.Center,
         ) {
             when (val s = state) {
-                is EmailVerifyUiState.Verifying -> AppLoadingState(message = l.verify_progress.format(s.email))
+                is EmailVerifyUiState.AwaitingCode -> {
+                    AppText(
+                        text = l.verify_enter_code_title.format(s.email),
+                        style = MaterialTheme.typography.titleMedium,
+                        textAlign = TextAlign.Center,
+                    )
+                    AppVSpacer(AppSpacing.Md)
+                    OutlinedTextField(
+                        value = s.code,
+                        onValueChange = viewModel::onCodeChanged,
+                        label = { Text(l.verify_code_label) },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+                        modifier = Modifier.fillMaxWidth(),
+                        isError = s.error != null,
+                        supportingText = {
+                            Text(s.error?.message ?: l.verify_code_helper)
+                        },
+                    )
+                    AppVSpacer(AppSpacing.Md)
+                    AppButton(
+                        text = l.verify_code_cta,
+                        onClick = viewModel::verify,
+                        enabled = s.code.length == EmailVerifyViewModel.CODE_LENGTH,
+                    )
+                }
+                is EmailVerifyUiState.Verifying ->
+                    AppLoadingState(message = l.verify_progress.format(s.email))
                 is EmailVerifyUiState.Failed -> {
                     AppText(l.verify_failed_title, color = MaterialTheme.colorScheme.error)
                     AppVSpacer(AppSpacing.Sm)
@@ -41,9 +73,9 @@ fun EmailVerifyRoute(viewModel: EmailVerifyViewModel = hiltViewModel()) {
                         textAlign = TextAlign.Center,
                     )
                     AppVSpacer(AppSpacing.Md)
-                    AppButton(l.cta_retry, onClick = viewModel::verify)
+                    AppButton(l.cta_retry, onClick = viewModel::retry)
                 }
-                EmailVerifyUiState.Succeeded -> {
+                is EmailVerifyUiState.Succeeded -> {
                     AppText(l.verify_signed_in_loading, style = MaterialTheme.typography.titleMedium)
                 }
             }

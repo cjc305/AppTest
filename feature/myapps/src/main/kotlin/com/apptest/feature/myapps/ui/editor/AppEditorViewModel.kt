@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
+import com.apptest.core.common.AppError
 import com.apptest.core.common.onFailure
 import com.apptest.core.common.onSuccess
 import com.apptest.core.navigation.AppDestination
@@ -30,27 +31,42 @@ class AppEditorViewModel @Inject constructor(
     private val _state = MutableStateFlow(AppEditorUiState())
     val state: StateFlow<AppEditorUiState> = _state.asStateFlow()
 
+    private val editingAppId: String? =
+        savedStateHandle.toRoute<AppDestination.AppEditor>().appId
+
     init {
-        val route = savedStateHandle.toRoute<AppDestination.AppEditor>()
-        val editId = route.appId
-        if (editId == null) {
+        if (editingAppId == null) {
             _state.update { it.copy(isEdit = false) }
         } else {
             _state.update { it.copy(isEdit = true, isLoading = true) }
-            viewModelScope.launch { loadForEdit(editId) }
+            viewModelScope.launch { loadForEdit(editingAppId) }
         }
     }
 
+    /** Retry hook for the editor screen — re-attempts load after a transient failure. */
+    fun retryLoad() {
+        val id = editingAppId ?: return
+        if (_state.value.isLoading) return
+        _state.update { it.copy(isLoading = true, loadError = null) }
+        viewModelScope.launch { loadForEdit(id) }
+    }
+
     private suspend fun loadForEdit(id: String) {
-        val row = repo.get(id) ?: run {
-            _state.update { it.copy(isLoading = false) }
+        val row = try {
+            repo.get(id)
+        } catch (t: Throwable) {
+            _state.update { it.copy(isLoading = false, loadError = AppError.fromThrowable(t)) }
+            return
+        }
+        if (row == null) {
+            _state.update { it.copy(isLoading = false, loadError = AppError.NotFound("App")) }
             return
         }
         val draft = AppDraft(
             id = row.id, name = row.name, packageName = row.packageName,
             requiredTesters = row.requiredTesters, requiredDays = row.requiredDays,
         )
-        _state.update { it.copy(draft = draft, isLoading = false).recomputed() }
+        _state.update { it.copy(draft = draft, isLoading = false, loadError = null).recomputed() }
     }
 
     fun onField(update: (AppDraft) -> AppDraft) {
@@ -58,12 +74,18 @@ class AppEditorViewModel @Inject constructor(
     }
 
     fun save() {
-        val draft = _state.value.draft
-        _state.update { it.copy(isSaving = true, saveError = null) }
+        val current = _state.value
+        if (current.isSaving || !current.canSave) return
+        val draft = current.draft
+        _state.update { it.copy(isSaving = true, saveError = null).recomputed() }
         viewModelScope.launch {
             saveApp(draft)
-                .onSuccess { id -> _state.update { it.copy(isSaving = false, savedId = id) } }
-                .onFailure { err -> _state.update { it.copy(isSaving = false, saveError = err) } }
+                .onSuccess { id ->
+                    _state.update { it.copy(isSaving = false, savedId = id).recomputed() }
+                }
+                .onFailure { err ->
+                    _state.update { it.copy(isSaving = false, saveError = err).recomputed() }
+                }
         }
     }
 
@@ -74,7 +96,7 @@ class AppEditorViewModel @Inject constructor(
             draft.description.length <= 500 &&
             draft.requiredTesters in 1..100 &&
             draft.requiredDays in 7..30
-        val canSave = basicOk && urlV == PlayUrlValidation.Valid && !isSaving
+        val canSave = basicOk && urlV == PlayUrlValidation.Valid && !isSaving && !isLoading
         return copy(urlValidation = urlV, canSave = canSave)
     }
 }

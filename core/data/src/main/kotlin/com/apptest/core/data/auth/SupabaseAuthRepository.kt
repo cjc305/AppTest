@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.edit
 import com.apptest.core.common.AppError
 import com.apptest.core.common.AppResult
 import com.apptest.core.common.AuthState
+import com.apptest.core.common.EmailValidator
 import com.apptest.core.data.di.ApplicationScope
 import com.apptest.core.data.session.AuthSession
 import com.apptest.core.data.session.SessionStore
@@ -22,6 +23,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import okhttp3.ResponseBody
@@ -68,7 +70,7 @@ class SupabaseAuthRepository @Inject constructor(
     }
 
     override suspend fun requestMagicLink(email: String): AppResult<Unit> {
-        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+        if (!EmailValidator.isValid(email)) {
             return AppResult.Failure(AppError.Validation("email", "Invalid email format"))
         }
         pendingEmail = email
@@ -106,7 +108,11 @@ class SupabaseAuthRepository @Inject constructor(
     }
 
     override suspend fun signOut(): AppResult<Unit> {
-        runCatching { authApiService.signOut().close() } // best-effort, ignore errors
+        val jwt = sessionStore.session.firstOrNull()?.jwt
+        if (jwt != null) {
+            runCatching { authApiService.signOut(bearer = "Bearer $jwt").close() } // best-effort
+        }
+        pendingEmail = null
         sessionStore.clear()
         dataStore.edit { it.remove(KEY_ONBOARDING) }
         return AppResult.Success(Unit) // AuthState → SignedOut via reactive Flow

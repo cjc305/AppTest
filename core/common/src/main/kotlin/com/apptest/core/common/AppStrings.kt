@@ -53,6 +53,10 @@ data class AppStrings(
     val verify_progress: String,              // %1$s = email
     val verify_failed_title: String,
     val verify_signed_in_loading: String,
+    val verify_enter_code_title: String,      // %1$s = email
+    val verify_code_label: String,
+    val verify_code_helper: String,
+    val verify_code_cta: String,
 
     // ── Onboarding ─────────────────────────────────────────────────────
     val onboarding_step_format: String,       // %1$d, %2$d
@@ -228,6 +232,10 @@ object AppStringsCatalog {
         verify_progress = "Verifying %1\$s…",
         verify_failed_title = "Verification failed",
         verify_signed_in_loading = "Signed in! Loading…",
+        verify_enter_code_title = "Enter the 6-digit code sent to %1\$s",
+        verify_code_label = "Verification code",
+        verify_code_helper = "Check your inbox — the code expires in 10 minutes.",
+        verify_code_cta = "Verify",
 
         onboarding_step_format = "Step %1\$d of %2\$d",
         onboarding_step1_title = "Why are you here?",
@@ -385,6 +393,10 @@ object AppStringsCatalog {
         verify_progress = "正在驗證 %1\$s…",
         verify_failed_title = "驗證失敗",
         verify_signed_in_loading = "登入成功！載入中…",
+        verify_enter_code_title = "請輸入寄到 %1\$s 的 6 位數驗證碼",
+        verify_code_label = "驗證碼",
+        verify_code_helper = "請查收信箱 — 驗證碼 10 分鐘內有效。",
+        verify_code_cta = "驗證",
 
         onboarding_step_format = "第 %1\$d 步（共 %2\$d 步）",
         onboarding_step1_title = "你為什麼來這？",

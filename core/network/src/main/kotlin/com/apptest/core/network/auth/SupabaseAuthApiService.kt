@@ -6,6 +6,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import okhttp3.ResponseBody
 import retrofit2.http.Body
+import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.Query
 
@@ -40,20 +41,20 @@ interface SupabaseAuthApiService {
 
     /**
      * Exchange refresh token for a new access token.
-     * `Authorization: Bearer <current_access_token>` added by AuthInterceptor.
+     * Caller must pass current access token as [bearer] (`"Bearer <jwt>"`).
      */
     @POST("token")
     suspend fun refreshToken(
+        @Header("Authorization") bearer: String,
         @Query("grant_type") grantType: String = "refresh_token",
         @Body request: RefreshRequest,
     ): AuthTokenResponse
 
     /**
-     * Revoke the current session server-side.
-     * `Authorization: Bearer <access_token>` added by AuthInterceptor.
+     * Revoke the current session server-side. Caller passes `"Bearer <jwt>"`.
      */
     @POST("logout")
-    suspend fun signOut(): ResponseBody
+    suspend fun signOut(@Header("Authorization") bearer: String): ResponseBody
 }
 
 // ─── Request DTOs ──────────────────────────────────────────────────────────

@@ -146,10 +146,10 @@ fun AppNavHost(
             inboxGraph(
                 onNavigateUp = { navController.popBackStack() },
                 onItemDeepLink = { uriString ->
-                    val parsed = runCatching {
-                        com.apptest.core.navigation.AppDeepLink.parse(android.net.Uri.parse(uriString))
-                    }.getOrNull()
-                    parsed?.let { navController.navigate(it) }
+                    // Inbox is only reachable from authed Main subgraph, so AuthState is Ready
+                    // by construction. parse() rejects untrusted payloads (host/appId whitelist).
+                    com.apptest.core.navigation.AppDeepLink.parse(uriString)
+                        ?.let { navController.navigate(it) }
                 },
             )
 
