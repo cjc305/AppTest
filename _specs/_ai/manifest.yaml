@@ -238,9 +238,9 @@ audit_2026_05_23:
   # LOW
   - { id: APT-AUDIT-LOW-001,  status: done,         severity: low,  title: "HttpLoggingInterceptor gated on BuildConfig.DEBUG" }
   - { id: APT-AUDIT-LOW-002,  status: done,         severity: low,  title: "FCM subscribe moved out of MainActivity — FcmTopicManager (HIGH-003)" }
-  - { id: APT-AUDIT-LOW-003,  status: not_started,  severity: low,  title: "FCM notification small icon: replace android.R placeholder with app monochrome icon" }
-  - { id: APT-AUDIT-LOW-004,  status: not_started,  severity: low,  title: "Inbox Loading vs Empty separation (no flash of Empty during initial load)" }
-  - { id: APT-AUDIT-LOW-005,  status: not_started,  severity: low,  title: "signOut: queue offline revocation retry" }
+  - { id: APT-AUDIT-LOW-003,  status: done,  severity: low,  title: "FCM notification small icon: replace android.R placeholder with app monochrome icon", fixed_in: "4604f0b" }
+  - { id: APT-AUDIT-LOW-004,  status: done,  severity: low,  title: "Inbox Loading vs Empty separation (no flash of Empty during initial load)", fixed_in: "4604f0b" }
+  - { id: APT-AUDIT-LOW-005,  status: done,  severity: low,  title: "signOut: queue offline revocation retry", fixed_in: "4604f0b" }
   - { id: APT-AUDIT-LOW-006,  status: done,         severity: low,  title: "Home/MyApps progress: guard requiredTesters=0 / totalDays=0 (fd25066)" }
   - { id: APT-AUDIT-LOW-007,  status: done,         severity: low,  title: "InboxScreen relative time: coerceAtLeast(0) on future-dated notifications (fd25066)" }
   - { id: APT-AUDIT-LOW-008,  status: done,         severity: low,  title: "SupabaseAuthApiService: Response<Unit> — no .close() needed (fd25066)" }

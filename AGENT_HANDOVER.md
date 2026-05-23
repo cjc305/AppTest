@@ -1,15 +1,16 @@
 # AppTest — Agent Handover
 
-> **Last refresh:** 2026-05-23 (pass 12 — legal pages drafted + committed) · **State:** Play Console 已送審 13 項變更（pending Google review），所有 41 bugs 已修復，法律文件已 committed。
+> **Last refresh:** 2026-05-23 (pass 13 — ALL 44 audit items done ✅) · **State:** Play Console 已送審 13 項變更（pending Google review），所有 bugs + legal 全部完成。
 >
-> **下個 session 首要事項：**
+> **下個 session 首要事項（純 owner action）：**
 > 1. **Host legal pages** — see `PRELAUNCH_CHECKLIST.md §2.3b` (GitHub Pages fastest, zero-cost)
 > 2. Enter Privacy Policy URL in Play Console store listing
-> 3. 剩餘 3 個 LOW (LOW-003/004/005) not_started — LOW-003 需要 monochrome icon asset
+> 3. Store listing: screenshots, feature graphic, short/long description (en + zh-TW)
+> 4. Content rating questionnaire + Data safety form in Play Console
 >
 > 然後讀 `_specs/_ai/README.md` + `PRELAUNCH_CHECKLIST.md`。
 >
-> **Commit 65f19a0 pushed** to `cjc305/AppTest.git` (master). Clean working tree.
+> **All 44 audit items DONE. 3 commits ahead of origin** — awaiting `push` permission.
 
 ---
 
