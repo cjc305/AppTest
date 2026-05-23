@@ -1,16 +1,18 @@
 # AppTest — Agent Handover
 
-> **Last refresh:** 2026-05-23 (pass 13 — ALL 44 audit items done ✅) · **State:** Play Console 已送審 13 項變更（pending Google review），所有 bugs + legal 全部完成。
+> **Last refresh:** 2026-05-23 (pass 14 — Store copy + assetlinks + backend R-046/047 done) · **State:** Play Console 已送審（pending Google review）。所有 client + backend code 完成。
 >
 > **下個 session 首要事項（純 owner action）：**
-> 1. **Host legal pages** — see `PRELAUNCH_CHECKLIST.md §2.3b` (GitHub Pages fastest, zero-cost)
+> 1. **Host legal pages** — GitHub Pages: `cjc305.github.io/AppTest/legal/privacy.html` (3 min, free)
 > 2. Enter Privacy Policy URL in Play Console store listing
-> 3. Store listing: screenshots, feature graphic, short/long description (en + zh-TW)
-> 4. Content rating questionnaire + Data safety form in Play Console
+> 3. Store listing copy ready in `_specs/store_listing.md` — copy-paste to Play Console (en + zh-TW)
+> 4. Screenshots × 8 (see `_specs/store_listing.md §Screenshot descriptions` for brief)
+> 5. Content rating + Data safety form
+> 6. Backend Cloud Scheduler deploy: `AppTest-backend/deploy/cloud-scheduler.yaml` (gcloud CLI, see file header)
 >
 > 然後讀 `_specs/_ai/README.md` + `PRELAUNCH_CHECKLIST.md`。
 >
-> **All 44 audit items DONE. 3 commits ahead of origin** — awaiting `push` permission.
+> **6 commits ahead of origin (AppTest) + 1 ahead (AppTest-backend)** — awaiting `push` permission.
 
 ---
 
