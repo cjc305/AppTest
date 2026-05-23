@@ -1,8 +1,8 @@
 # AppTest — Pre-Launch Blocker Checklist
 
-> **Generated:** 2026-05-20 | **Last updated:** 2026-05-23 (41 bugs fixed + legal pages drafted ✅)
-> **Status:** Backend ✅ | Firebase ✅ | Supabase ✅ | DB migration ✅ | 41 bugs fixed ✅ | Signed AAB on Desktop ✅ (10 MB) | Privacy Policy + ToS drafted ✅ (pending hosting)
-> **Remaining before Play upload (you do these in Play Console):** host legal pages → store listing screenshots/description + content rating + data safety form + closed testing track setup.
+> **Generated:** 2026-05-20 | **Last updated:** 2026-05-23 (41 bugs fixed + legal pages live ✅ + GitHub Pages ✅)
+> **Status:** Backend ✅ | Firebase ✅ | Supabase ✅ | DB migration ✅ | 41 bugs fixed ✅ | Signed AAB on Desktop ✅ (10 MB) | Privacy Policy + ToS **LIVE** ✅ | GitHub Pages ✅
+> **Remaining before Play upload (you do these in Play Console):** enter Privacy Policy URL → store listing screenshots/description + content rating + data safety form + closed testing track setup.
 
 ---
 
@@ -65,20 +65,18 @@ Expected friction:
 - [ ] Add to `local.properties`: `google.webClientId=...`
 - [ ] Configure Supabase Google provider with same Web client ID
 
-### 2.3b Legal pages ✅ DRAFTED — pending hosting
+### 2.3b Legal pages ✅ LIVE
 
 Play Store requires a live Privacy Policy URL (mandatory) and ToS is best practice.
 
 - [x] `legal/privacy.html` — bilingual 繁中/English, 12 sections, effective 2026-06-01
 - [x] `legal/terms.html` — bilingual 繁中/English, 13 sections, ROC governing law
-- [ ] **Host at your domain** — fastest free options (no custom domain needed for initial submission):
-  - **GitHub Pages** (zero cost, instant): push `legal/` → enable Pages on `cjc305/AppTest` →
-    URL becomes `https://cjc305.github.io/AppTest/legal/privacy.html`
-  - **Cloudflare Pages** (zero cost, free subdomain): `npx wrangler pages deploy legal/ --project-name apptest-legal` →
-    URL becomes `https://apptest-legal.pages.dev/privacy.html`
-  - **Custom domain** (after buying `apptest.dev`): host at `https://apptest.dev/privacy` and `https://apptest.dev/terms`
-- [ ] Enter Privacy Policy URL in Play Console → Store listing → Privacy policy field
-- [ ] Reference same URL in Data Safety form
+- [x] **GitHub Pages enabled** — `cjc305/AppTest` master branch → `/ (root)` (enabled 2026-05-23)
+  - **Privacy Policy:** `https://cjc305.github.io/AppTest/legal/privacy.html` ✅ LIVE
+  - **Terms of Service:** `https://cjc305.github.io/AppTest/legal/terms.html` ✅ LIVE
+  - **assetlinks.json:** `https://cjc305.github.io/AppTest/.well-known/assetlinks.json` ✅ LIVE
+- [ ] **YOU DO:** Enter `https://cjc305.github.io/AppTest/legal/privacy.html` in Play Console → Store listing → Privacy policy field
+- [ ] **YOU DO:** Reference same URL in Data Safety form
 
 ### 2.4 Domain & assetlinks (blocks deep-link verification)
 

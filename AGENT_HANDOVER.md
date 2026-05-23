@@ -1,10 +1,10 @@
 # AppTest — Agent Handover
 
-> **Last refresh:** 2026-05-23 (pass 14 — Store copy + assetlinks + backend R-046/047 done) · **State:** Play Console 已送審（pending Google review）。所有 client + backend code 完成。
+> **Last refresh:** 2026-05-23 (pass 15 — GitHub Pages live ✅) · **State:** Play Console 已送審（pending Google review）。所有 client + backend code 完成。Legal pages live。
 >
 > **下個 session 首要事項（純 owner action）：**
-> 1. **Host legal pages** — GitHub Pages: `cjc305.github.io/AppTest/legal/privacy.html` (3 min, free)
-> 2. Enter Privacy Policy URL in Play Console store listing
+> 1. **✅ DONE** Legal pages live at `https://cjc305.github.io/AppTest/legal/privacy.html`
+> 2. **YOU DO:** Enter `https://cjc305.github.io/AppTest/legal/privacy.html` in Play Console → Store listing → Privacy policy field
 > 3. Store listing copy ready in `_specs/store_listing.md` — copy-paste to Play Console (en + zh-TW)
 > 4. Screenshots × 8 (see `_specs/store_listing.md §Screenshot descriptions` for brief)
 > 5. Content rating + Data safety form
@@ -12,7 +12,7 @@
 >
 > 然後讀 `_specs/_ai/README.md` + `PRELAUNCH_CHECKLIST.md`。
 >
-> **6 commits ahead of origin (AppTest) + 1 ahead (AppTest-backend)** — awaiting `push` permission.
+> **All commits pushed. Both repos up to date.**
 
 ---
 
