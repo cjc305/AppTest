@@ -1,18 +1,22 @@
 # AppTest — Agent Handover
 
-> **Last refresh:** 2026-05-23 (pass 15 — GitHub Pages live ✅) · **State:** Play Console 已送審（pending Google review）。所有 client + backend code 完成。Legal pages live。
+> **Last refresh:** 2026-05-23 (pass 16 — screenshots done ✅) · **State:** Play Console 已送審（pending Google review）。所有 client + backend code 完成。Legal pages live。Screenshots ready。
 >
 > **下個 session 首要事項（純 owner action）：**
 > 1. **✅ DONE** Legal pages live at `https://cjc305.github.io/AppTest/legal/privacy.html`
-> 2. **YOU DO:** Enter `https://cjc305.github.io/AppTest/legal/privacy.html` in Play Console → Store listing → Privacy policy field
-> 3. Store listing copy ready in `_specs/store_listing.md` — copy-paste to Play Console (en + zh-TW)
-> 4. Screenshots × 8 (see `_specs/store_listing.md §Screenshot descriptions` for brief)
-> 5. Content rating + Data safety form
-> 6. Backend Cloud Scheduler deploy: `AppTest-backend/deploy/cloud-scheduler.yaml` (gcloud CLI, see file header)
+> 2. **✅ DONE** 6 Play Store screenshots ready at `screenshots/play_01_signin.png` … `play_06_myapps.png`
+> 3. **YOU DO:** Play Console → Store listing:
+>    - Upload `screenshots/play_01_*.png` … `play_06_*.png` (6 phone screenshots)
+>    - Privacy policy URL: `https://cjc305.github.io/AppTest/legal/privacy.html`
+>    - Copy store listing copy from `_specs/store_listing.md` (en + zh-TW)
+>    - Upload `screenshots/icon_512.png` (512×512 app icon)
+>    - Upload `screenshots/feature_graphic.png` (1024×500)
+> 4. **YOU DO:** Content rating questionnaire + Data safety form in Play Console
+> 5. **YOU DO:** Backend Cloud Scheduler deploy: `AppTest-backend/deploy/cloud-scheduler.yaml`
 >
 > 然後讀 `_specs/_ai/README.md` + `PRELAUNCH_CHECKLIST.md`。
 >
-> **All commits pushed. Both repos up to date.**
+> **All commits pushed pending your push permission. Run `git push` in both repos.**
 
 ---
 
