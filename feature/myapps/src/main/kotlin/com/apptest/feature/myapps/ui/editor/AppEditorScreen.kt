@@ -10,8 +10,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TextButton
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -42,9 +45,19 @@ fun AppEditorScreen(
     onSave: () -> Unit,
     onCancel: () -> Unit,
     onRetryLoad: () -> Unit,
+    onRequestDelete: () -> Unit = {},
+    onCancelDelete: () -> Unit = {},
+    onConfirmDelete: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val l = AppL10n.current
+    if (state.showDeleteConfirm) {
+        DeleteConfirmDialog(
+            appName = state.draft.name.ifBlank { l.editor_field_name },
+            onDismiss = onCancelDelete,
+            onConfirm = onConfirmDelete,
+        )
+    }
     ScreenScaffold(
         modifier = modifier,
         topBar = {
@@ -52,8 +65,23 @@ fun AppEditorScreen(
                 title = if (state.isEdit) l.editor_title_edit else l.editor_title_create,
                 navIcon = {
                     // HIGH-011: disable while saving (matches BackHandler + Cancel button).
-                    IconButton(onClick = onCancel, enabled = !state.isSaving) {
+                    IconButton(onClick = onCancel, enabled = !state.isSaving && !state.isDeleting) {
                         AppIcon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = l.cta_back)
+                    }
+                },
+                actions = {
+                    // Delete button shown only in edit mode.
+                    if (state.isEdit) {
+                        IconButton(
+                            onClick = onRequestDelete,
+                            enabled = !state.isSaving && !state.isDeleting,
+                        ) {
+                            AppIcon(
+                                Icons.Filled.Delete,
+                                contentDescription = "Delete",
+                                tint = MaterialTheme.colorScheme.error,
+                            )
+                        }
                     }
                 },
             )
@@ -141,9 +169,16 @@ fun AppEditorScreen(
                     color = MaterialTheme.colorScheme.error,
                 )
             }
+            if (state.deleteError != null) {
+                AppText(
+                    text = "刪除失敗 / Delete failed: " + (state.deleteError.message ?: l.err_unknown),
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
             EditorActions(
                 canSave = state.canSave,
                 isSaving = state.isSaving,
+                isDeleting = state.isDeleting,
                 onSave = onSave,
                 onCancel = onCancel,
             )
@@ -178,13 +213,24 @@ private fun NumberField(value: Int, onChange: (Int) -> Unit, label: String, rang
 }
 
 @Composable
-private fun EditorActions(canSave: Boolean, isSaving: Boolean, onSave: () -> Unit, onCancel: () -> Unit) {
+private fun EditorActions(
+    canSave: Boolean,
+    isSaving: Boolean,
+    isDeleting: Boolean,
+    onSave: () -> Unit,
+    onCancel: () -> Unit,
+) {
     val l = AppL10n.current
     androidx.compose.foundation.layout.Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(AppSpacing.Sm),
     ) {
-        AppButton(text = l.cta_cancel, onClick = onCancel, enabled = !isSaving, variant = AppButtonVariant.Text)
+        AppButton(
+            text = l.cta_cancel,
+            onClick = onCancel,
+            enabled = !isSaving && !isDeleting,
+            variant = AppButtonVariant.Text,
+        )
         AppButton(
             text = if (isSaving) l.cta_saving else l.cta_save,
             onClick = onSave,
@@ -193,4 +239,26 @@ private fun EditorActions(canSave: Boolean, isSaving: Boolean, onSave: () -> Uni
             variant = AppButtonVariant.Primary,
         )
     }
+}
+
+@Composable
+private fun DeleteConfirmDialog(appName: String, onDismiss: () -> Unit, onConfirm: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { AppText("刪除 \"$appName\"?") },
+        text = {
+            AppText(
+                "此操作無法復原。app 從你的列表移除，配對中的測試會被取消。\n" +
+                    "This action can't be undone. Tests already matched will be cancelled.",
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                AppText("刪除 / Delete", color = MaterialTheme.colorScheme.error)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { AppText("取消 / Cancel") }
+        },
+    )
 }

@@ -18,19 +18,25 @@ fun AppEditorRoute(
     LaunchedEffect(state.savedId) {
         if (state.savedId != null) onSaved()
     }
+    LaunchedEffect(state.deletedId) {
+        if (state.deletedId != null) onSaved()      // same exit path: pop back to My Apps
+    }
 
-    // HIGH-011 (audit 2026-05-23): swallow system back-press while a save is in flight.
+    // HIGH-011 (audit 2026-05-23): swallow system back-press while a save/delete is in flight.
     // Prior C-2 fix added the re-entry guard inside save() itself but didn't block the user
     // from leaving mid-save — popBackStack() cancelled viewModelScope, dropping the
     // suspending HTTP call and the local cache update (data loss). The Cancel button is
     // already disabled when isSaving via AppEditorScreen.
-    BackHandler(enabled = state.isSaving) { /* swallow */ }
+    BackHandler(enabled = state.isSaving || state.isDeleting) { /* swallow */ }
 
     AppEditorScreen(
         state = state,
         onField = viewModel::onField,
         onSave = viewModel::save,
-        onCancel = { if (!state.isSaving) onCancel() },
+        onCancel = { if (!state.isSaving && !state.isDeleting) onCancel() },
         onRetryLoad = viewModel::retryLoad,
+        onRequestDelete = viewModel::requestDelete,
+        onCancelDelete = viewModel::cancelDelete,
+        onConfirmDelete = viewModel::confirmDelete,
     )
 }

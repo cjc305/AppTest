@@ -97,6 +97,34 @@ class AppEditorViewModel @Inject constructor(
         }
     }
 
+    /** User tapped the Delete icon — open confirmation dialog. */
+    fun requestDelete() {
+        if (!_state.value.isEdit || _state.value.isSaving || _state.value.isDeleting) return
+        _state.update { it.copy(showDeleteConfirm = true, deleteError = null) }
+    }
+
+    /** User dismissed the confirmation dialog. */
+    fun cancelDelete() {
+        _state.update { it.copy(showDeleteConfirm = false) }
+    }
+
+    /** User confirmed the delete. Hard-deletes via repo, then triggers navigation up. */
+    fun confirmDelete() {
+        val id = editingAppId ?: return
+        val current = _state.value
+        if (current.isDeleting || current.isSaving) return
+        _state.update { it.copy(isDeleting = true, showDeleteConfirm = false, deleteError = null) }
+        viewModelScope.launch {
+            repo.delete(id)
+                .onSuccess {
+                    _state.update { it.copy(isDeleting = false, deletedId = id) }
+                }
+                .onFailure { err ->
+                    _state.update { it.copy(isDeleting = false, deleteError = err) }
+                }
+        }
+    }
+
     private fun AppEditorUiState.recomputed(): AppEditorUiState {
         val urlV = PlayOptInUrlValidator.validate(draft.playOptInUrl)
         val basicOk = draft.name.length in 2..50 &&
@@ -104,7 +132,7 @@ class AppEditorViewModel @Inject constructor(
             draft.description.length <= 500 &&
             draft.requiredTesters in 1..100 &&
             draft.requiredDays in 7..30
-        val canSave = basicOk && urlV == PlayUrlValidation.Valid && !isSaving && !isLoading
+        val canSave = basicOk && urlV == PlayUrlValidation.Valid && !isSaving && !isLoading && !isDeleting
         return copy(urlValidation = urlV, canSave = canSave)
     }
 }

@@ -15,9 +15,13 @@ data class AppEditorUiState(
     val isEdit: Boolean = false,           // false = create
     val isLoading: Boolean = false,        // true while initial load (edit mode only)
     val isSaving: Boolean = false,
+    val isDeleting: Boolean = false,
     val urlValidation: PlayUrlValidation = PlayUrlValidation.Empty,
     val canSave: Boolean = false,
-    val savedId: String? = null,           // non-null = navigate up
+    val savedId: String? = null,           // non-null = navigate up after save
+    val deletedId: String? = null,         // non-null = navigate up after delete
+    val showDeleteConfirm: Boolean = false,
     val loadError: AppError? = null,
     val saveError: AppError? = null,
+    val deleteError: AppError? = null,
 )
