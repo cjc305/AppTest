@@ -13,17 +13,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.apptest.app.nav.AppNavHost
 import com.apptest.core.common.AuthState
-import com.apptest.core.common.jwtSubject
 import com.apptest.core.data.session.SessionStore
 import com.apptest.core.designsystem.theme.AppTheme
 import com.apptest.core.domain.auth.AuthRepository
 import com.apptest.core.navigation.startDestinationFor
-import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 
@@ -65,30 +61,10 @@ class MainActivity : ComponentActivity() {
             sessionRestored = true
         }
 
-        // Subscribe to FCM topic once the user is signed in. Each user subscribes to
-        // "user_<uid>" so the backend can push without storing tokens. On sign-out / account
-        // switch, unsubscribe the previous uid so the device stops receiving the old user's
-        // notifications (prevents cross-account notification leak).
-        lifecycleScope.launch {
-            var lastUid: String? = null
-            sessionStore.session
-                .map { session -> session?.jwt?.let { it.jwtSubject() } }
-                .distinctUntilChanged()
-                .collect { uid ->
-                    val previous = lastUid
-                    if (previous != null && previous != uid) {
-                        FirebaseMessaging.getInstance().unsubscribeFromTopic("user_$previous")
-                            .addOnSuccessListener { android.util.Log.d("FCM", "unsubscribed user_$previous") }
-                            .addOnFailureListener { android.util.Log.w("FCM", "unsubscribe failed: ${it.message}") }
-                    }
-                    lastUid = uid
-                    if (uid != null) {
-                        FirebaseMessaging.getInstance().subscribeToTopic("user_$uid")
-                            .addOnSuccessListener { android.util.Log.d("FCM", "subscribed to user_$uid") }
-                            .addOnFailureListener { android.util.Log.w("FCM", "subscribe failed: ${it.message}") }
-                    }
-                }
-        }
+        // HIGH-003 (audit 2026-05-23): FCM topic subscribe/unsubscribe moved to
+        // [FcmTopicManager], wired in AppTestApplication.onCreate. Lives in ApplicationScope
+        // and persists `last_subscribed_uid` + pending unsubscribes in DataStore so account
+        // switches survive process death.
 
         setContent {
             AppTheme {

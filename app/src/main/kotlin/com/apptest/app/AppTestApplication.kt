@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import androidx.work.WorkManager
+import com.apptest.app.fcm.FcmTopicManager
 import com.apptest.core.data.worker.SupabaseHeartbeatWorker
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
@@ -14,11 +15,16 @@ import javax.inject.Inject
  *
  * WorkManager auto-init is disabled in the Manifest (via the `WorkManagerInitializer` provider
  * removal); [Configuration.Provider] is the replacement per the official Hilt + WorkManager guide.
+ *
+ * HIGH-003 (audit 2026-05-23): [FcmTopicManager] is started here (ApplicationScope) instead of
+ * inside MainActivity's lifecycleScope, so account-switch unsubscribe state survives process
+ * death and Activity recreation.
  */
 @HiltAndroidApp
 class AppTestApplication : Application(), Configuration.Provider {
 
     @Inject lateinit var workerFactory: HiltWorkerFactory
+    @Inject lateinit var fcmTopicManager: FcmTopicManager
 
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
@@ -27,7 +33,9 @@ class AppTestApplication : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
-        // Schedule the 6-day Supabase keep-alive heartbeat (idempotent; uses KEEP policy).
+        // Schedule the Supabase keep-alive heartbeat (idempotent; uses KEEP policy).
         SupabaseHeartbeatWorker.scheduleIfNeeded(WorkManager.getInstance(this))
+        // Start FCM topic management (drains pending unsubscribes + watches session for switches).
+        fcmTopicManager.observe()
     }
 }

@@ -129,6 +129,11 @@ dependencies {
     implementation(libs.androidx.work.runtime)
     implementation(libs.androidx.hilt.work)
 
+    // ── DataStore — needed by FcmTopicManager (HIGH-003 fix) to persist last subscribed
+    //    uid + pending unsubscribes across process death. :core:data already declares the
+    //    same dep as `implementation` (not exposed); we add it here for :app's own users.
+    implementation(libs.androidx.datastore.preferences)
+
     // ── Hilt ────────────────────────────────────────────────────────────
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
