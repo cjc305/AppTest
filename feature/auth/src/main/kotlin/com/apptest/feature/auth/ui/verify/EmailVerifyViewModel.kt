@@ -72,7 +72,7 @@ class EmailVerifyViewModel @Inject constructor(
         val awaiting = captured ?: return  // not AwaitingCode or code too short — bail
         if (after !is EmailVerifyUiState.Verifying) return // lost the CAS race
         viewModelScope.launch {
-            authRepo.verifyMagicLink(token = awaiting.code)
+            authRepo.verifyMagicLink(email = awaiting.email, token = awaiting.code)
                 .onSuccess { _state.value = EmailVerifyUiState.Succeeded(awaiting.email) }
                 .onFailure { _state.value = EmailVerifyUiState.Failed(awaiting.email, it) }
         }

@@ -51,21 +51,29 @@ class SupabaseHomeRepository @Inject constructor(
             val activeDeferred  = async { runCatching { withTimeoutOrNull(PER_CALL_MS) { matchesApi.getActiveTests() } } }
             val appsDeferred    = async { runCatching { withTimeoutOrNull(PER_CALL_MS) { appsApi.listOwned() } } }
 
-            val homeData = HomeData(
-                user = profileDeferred.await().getOrNull()?.firstOrNull()?.toHomeUser()
+            val profileResult = profileDeferred.await()
+            val matchResult   = matchDeferred.await()
+            val activeResult  = activeDeferred.await()
+            val appsResult    = appsDeferred.await()
+
+            // MED-014: if ALL 4 calls failed (network down, auth expired, etc.) surface as Failure
+            // so the HomeScreen shows a retry button instead of silently showing placeholder data.
+            val allFailed = profileResult.isFailure && matchResult.isFailure &&
+                activeResult.isFailure && appsResult.isFailure
+            if (allFailed) {
+                val first = profileResult.exceptionOrNull() ?: Exception("All home calls failed")
+                return@withContext AppResult.Failure(AppError.fromThrowable(first))
+            }
+
+            AppResult.Success(HomeData(
+                user = profileResult.getOrNull()?.firstOrNull()?.toHomeUser()
                     ?: HomeUser("User", ReputationTier.Newcomer, 0),
-                newMatch = matchDeferred.await().getOrNull()?.firstOrNull()?.toMatchedApp(),
-                activeTests = activeDeferred.await().getOrNull().orEmpty().map { it.toActiveTest() },
-                myApps = appsDeferred.await().getOrNull().orEmpty().map {
-                    OwnedApp(
-                        id = it.id,
-                        name = it.name,
-                        currentTesters = 0,
-                        requiredTesters = 12, // V1: required_testers not in DB
-                    )
+                newMatch = matchResult.getOrNull()?.firstOrNull()?.toMatchedApp(),
+                activeTests = activeResult.getOrNull().orEmpty().map { it.toActiveTest() },
+                myApps = appsResult.getOrNull().orEmpty().map {
+                    OwnedApp(id = it.id, name = it.name, currentTesters = 0, requiredTesters = 12)
                 },
-            )
-            AppResult.Success(homeData)
+            ))
         } catch (c: CancellationException) {
             throw c
         } catch (t: Throwable) {

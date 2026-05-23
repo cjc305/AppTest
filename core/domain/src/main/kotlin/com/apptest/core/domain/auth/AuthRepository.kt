@@ -32,8 +32,14 @@ interface AuthRepository : Repository {
     /** Triggers email magic link send. */
     suspend fun requestMagicLink(email: String): AppResult<Unit>
 
-    /** Verifies magic link token from deep-link arrival → emits NeedsOnboarding / Ready. */
-    suspend fun verifyMagicLink(token: String): AppResult<Unit>
+    /**
+     * Verifies magic link token → emits NeedsOnboarding / Ready.
+     *
+     * MED-011: [email] is passed explicitly so the repository does not rely on [pendingEmail]
+     * surviving a process death. The ViewModel has the email from [SavedStateHandle], which
+     * persists across process death + Activity recreation.
+     */
+    suspend fun verifyMagicLink(email: String, token: String): AppResult<Unit>
 
     /** Called by `:feature:onboarding` when 3-step wizard completes. */
     suspend fun markOnboardingComplete(): AppResult<Unit>

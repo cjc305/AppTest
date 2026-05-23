@@ -43,7 +43,7 @@ class FakeAuthRepository @Inject constructor() : AuthRepository {
         return AppResult.Success(Unit)
     }
 
-    override suspend fun verifyMagicLink(token: String): AppResult<Unit> {
+    override suspend fun verifyMagicLink(email: String, token: String): AppResult<Unit> {
         delay(400)
         if (token.isBlank()) {
             return AppResult.Failure(AppError.Validation("token", "Empty token"))

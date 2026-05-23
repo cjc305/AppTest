@@ -82,9 +82,13 @@ class SupabaseAuthRepository @Inject constructor(
         }.getOrElse { AppResult.Failure(mapError(it)) }
     }
 
-    override suspend fun verifyMagicLink(token: String): AppResult<Unit> {
-        val email = pendingEmail
-            ?: return AppResult.Failure(AppError.Validation("email", "No pending sign-in — call requestMagicLink first"))
+    // MED-011: email is now passed by the caller (ViewModel has it from SavedStateHandle, which
+    // survives process death). pendingEmail is still updated for non-process-death paths but is
+    // no longer the source of truth for verifyMagicLink.
+    override suspend fun verifyMagicLink(email: String, token: String): AppResult<Unit> {
+        if (email.isBlank()) {
+            return AppResult.Failure(AppError.Validation("email", "Email must not be blank"))
+        }
         if (token.isBlank()) {
             return AppResult.Failure(AppError.Validation("token", "Token must not be blank"))
         }
