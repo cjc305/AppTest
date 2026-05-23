@@ -15,7 +15,9 @@ import org.junit.Test
 class AuthInterceptorTest {
 
     private val tokenProvider = mockk<TokenProvider>()
-    private val interceptor = AuthInterceptor(tokenProvider)
+    // HIGH-2 fix: AuthInterceptor now requires host allowlist. Tests host "example.com" is allowed
+    // unless a specific test scopes a narrower set.
+    private val interceptor = AuthInterceptor(tokenProvider, allowedHosts = setOf("example.com"))
 
     @Test fun `attaches Bearer header when token is non-null`() {
         every { tokenProvider.tokenBlocking() } returns "abc.def.ghi"
@@ -49,6 +51,17 @@ class AuthInterceptorTest {
 
         assertThat(captured.captured.header("X-Trace")).isEqualTo("abc")
         assertThat(captured.captured.header("Authorization")).isEqualTo("Bearer t")
+    }
+
+    @Test fun `does NOT attach Bearer for hosts outside allowlist (HIGH-2)`() {
+        every { tokenProvider.tokenBlocking() } returns "supabase.jwt"
+        val outside = Request.Builder().url("https://apptest-backend.run.app/v1/match").build()
+        val captured = captureProceededRequest(outside)
+
+        interceptor.intercept(chainFor(outside, captured))
+
+        // The Ktor backend host is NOT in allowedHosts → request must not carry Authorization.
+        assertThat(captured.captured.header("Authorization")).isNull()
     }
 
     // ── helpers ───────────────────────────────────────────────────────────────────────────

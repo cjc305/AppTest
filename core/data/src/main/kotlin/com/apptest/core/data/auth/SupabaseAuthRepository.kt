@@ -4,6 +4,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import com.apptest.core.common.AppError
 import com.apptest.core.common.AppResult
 import com.apptest.core.common.AuthState
@@ -114,7 +115,14 @@ class SupabaseAuthRepository @Inject constructor(
         }
         pendingEmail = null
         sessionStore.clear()
-        dataStore.edit { it.remove(KEY_ONBOARDING) }
+        // HIGH-9 fix: previously only KEY_ONBOARDING was cleared, leaving user-scoped UI state
+        // (Home skipped matches + Inbox read notifications) on the device → cross-account leak
+        // when the next user signs in on the same device.
+        dataStore.edit { prefs ->
+            prefs.remove(KEY_ONBOARDING)
+            prefs.remove(KEY_HOME_SKIPPED_MATCH_IDS)
+            prefs.remove(KEY_INBOX_READ_NOTIFICATION_IDS)
+        }
         return AppResult.Success(Unit) // AuthState → SignedOut via reactive Flow
     }
 
@@ -130,6 +138,9 @@ class SupabaseAuthRepository @Inject constructor(
                     expiresAtEpochMs = System.currentTimeMillis() + response.expiresIn * 1000L,
                 ),
             )
+            // MED-1 fix: M-4 added pendingEmail clear in signOut(), but not here — stale email
+            // could re-bind to a magic-link verify call after Google sign-in.
+            pendingEmail = null
             AppResult.Success(Unit)
         }.getOrElse { AppResult.Failure(mapError(it)) }
     }
@@ -143,5 +154,9 @@ class SupabaseAuthRepository @Inject constructor(
 
     private companion object {
         val KEY_ONBOARDING = booleanPreferencesKey("onboarding_complete")
+        // Keys also written by other repositories; cleared here on sign-out so the next user
+        // on this device doesn't inherit cross-account UI state (HIGH-9).
+        val KEY_HOME_SKIPPED_MATCH_IDS = stringSetPreferencesKey("home_skipped_match_ids")
+        val KEY_INBOX_READ_NOTIFICATION_IDS = stringSetPreferencesKey("inbox_read_notification_ids")
     }
 }

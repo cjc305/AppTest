@@ -16,15 +16,15 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 /**
- * Preferences-DataStore-backed implementation. File name `auth_session.preferences_pb`
- * is created by `SessionModule` via `preferencesDataStoreFile()`.
+ * Preferences-DataStore-backed implementation. File name `auth_session.preferences_pb`.
  *
- * Implements both [SessionStore] (for writers) and [TokenProvider] (for `:core:network`
- * interceptor) — same singleton instance is double-bound in Hilt.
+ * Implements both [SessionStore] (writers) and [TokenProvider] (reader for AuthInterceptor) —
+ * same singleton instance is double-bound in Hilt.
  *
- * Token freshness: [token] returns `null` when the persisted session is expired so the
- * interceptor doesn't attach a stale JWT. Refresh-flow (mint new JWT from refresh token)
- * lives in `:feature:auth/RealAuthRepository` which writes the new session back here.
+ * Token freshness: the in-memory mirror caches the **session snapshot**, NOT a derived
+ * pre-validated JWT. `tokenBlocking()` re-checks expiry on every read so a JWT that just
+ * crossed its TTL is treated as null immediately, without waiting for a DataStore flow
+ * re-emit (which only fires on value change — wall-clock expiry is silent to Flow).
  */
 @Singleton
 class DataStoreSessionStore @Inject constructor(
@@ -40,18 +40,19 @@ class DataStoreSessionStore @Inject constructor(
     }
 
     /**
-     * In-memory token mirror updated reactively from [session]. Lets the OkHttp
-     * [com.apptest.core.network.interceptor.AuthInterceptor] read the current token
-     * synchronously without serializing every request through a `runBlocking` DataStore read
-     * (which otherwise queues requests behind DataStore's internal Mutex).
+     * In-memory mirror of the **persisted snapshot** (not a pre-validated JWT). Updated
+     * reactively from [session]. The interceptor re-evaluates [AuthSession.isExpired] on each
+     * read so a JWT that just expired silently (no DataStore write occurred) won't be sent.
+     *
+     * HIGH-1 fix: previous code cached the JWT String directly, validated only at collect time.
+     * Once a valid JWT was cached, expiry was never re-checked → stale token sent for hours
+     * until the user explicitly signed out.
      */
-    @Volatile private var cachedToken: String? = null
+    @Volatile private var snapshot: AuthSession? = null
 
     init {
         scope.launch {
-            session.collect { s ->
-                cachedToken = s?.takeIf { !it.isExpired() }?.jwt
-            }
+            session.collect { s -> snapshot = s }
         }
     }
 
@@ -67,11 +68,12 @@ class DataStoreSessionStore @Inject constructor(
         dataStore.edit { it.clear() }
     }
 
-    override suspend fun token(): String? = cachedToken
-        ?: session.firstOrNull()?.takeIf { !it.isExpired() }?.jwt
+    override suspend fun token(): String? =
+        (snapshot ?: session.firstOrNull())?.takeIf { !it.isExpired() }?.jwt
 
     /** Synchronous accessor used by OkHttp interceptors (no coroutine context available). */
-    override fun tokenBlocking(): String? = cachedToken
+    override fun tokenBlocking(): String? =
+        snapshot?.takeIf { !it.isExpired() }?.jwt
 
     private companion object {
         val KEY_JWT = stringPreferencesKey("auth_jwt")

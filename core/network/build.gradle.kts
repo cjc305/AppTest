@@ -14,6 +14,12 @@ android {
         minSdk = 28
     }
 
+    // HIGH-2 / LOW-1 fix: AuthInterceptor allowlist + BuildConfig.DEBUG-gated logging both
+    // need a generated BuildConfig for this module.
+    buildFeatures {
+        buildConfig = true
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21
         targetCompatibility = JavaVersion.VERSION_21

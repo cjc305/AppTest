@@ -42,7 +42,33 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideLoggingInterceptor(): HttpLoggingInterceptor =
-        HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BASIC }
+        HttpLoggingInterceptor().apply {
+            // LOW-1 fix: BASIC logs URL + status to logcat — unsafe to ship in release where
+            // device manufacturers may collect logs. Gate on BuildConfig.DEBUG (consumer module
+            // must enable `buildFeatures { buildConfig = true }`).
+            level = if (com.apptest.core.network.BuildConfig.DEBUG)
+                HttpLoggingInterceptor.Level.BASIC
+            else
+                HttpLoggingInterceptor.Level.NONE
+        }
+
+    /**
+     * Host allowlist for [AuthInterceptor]. The Supabase JWT carries row-level-security claims —
+     * sending it to any other host (Ktor backend, third-party APIs) is a cross-domain token
+     * leak (HIGH-2). Derived at runtime from the configured Supabase URL.
+     */
+    @Provides
+    @Singleton
+    @javax.inject.Named("auth_interceptor_allowed_hosts")
+    fun provideAuthInterceptorAllowedHosts(
+        @SupabaseBaseUrl baseUrl: String,
+    ): Set<String> {
+        val host = baseUrl
+            .removePrefix("https://").removePrefix("http://")
+            .substringBefore("/")
+            .substringBefore(":")
+        return setOf(host)
+    }
 
     /** Shared OkHttp for Ktor — auth JWT only. */
     @Provides
