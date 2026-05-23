@@ -2,7 +2,7 @@ package com.apptest.core.network.apps
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import okhttp3.ResponseBody
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -47,13 +47,17 @@ interface SupabaseAppsApiService {
         @Header("Prefer") prefer: String = "return=representation",
     ): List<AppDto>
 
-    /** Update mutable fields (name, description, etc.) for an owned app. */
+    /**
+     * Update mutable fields (name, description, etc.) for an owned app.
+     * Returns Response<Unit> so PostgREST's 204 No Content (from return=minimal) doesn't
+     * trigger the "null body but non-null type" Retrofit error.
+     */
     @PATCH("apps")
     suspend fun update(
         @Query("id") idFilter: String,
         @Body body: AppUpsertBody,
         @Header("Prefer") prefer: String = "return=minimal",
-    ): ResponseBody
+    ): Response<Unit>
 
     /** Change recruitment status (DRAFT ↔ ACTIVE ↔ PAUSED). */
     @PATCH("apps")
@@ -61,7 +65,7 @@ interface SupabaseAppsApiService {
         @Query("id") idFilter: String,
         @Body body: AppStatusBody,
         @Header("Prefer") prefer: String = "return=minimal",
-    ): ResponseBody
+    ): Response<Unit>
 
     /**
      * Activate a DRAFT app via the `activate_app` Postgres RPC. Server-side ownership
@@ -75,7 +79,7 @@ interface SupabaseAppsApiService {
     suspend fun hardDelete(
         @Query("id") idFilter: String,
         @Header("Prefer") prefer: String = "return=minimal",
-    ): ResponseBody
+    ): Response<Unit>
 
     private companion object {
         // SELECT_LIST is the source of truth for the My Apps list cache.

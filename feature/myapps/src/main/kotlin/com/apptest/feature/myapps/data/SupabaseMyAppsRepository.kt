@@ -98,7 +98,10 @@ class SupabaseMyAppsRepository @Inject constructor(
                     ?: throw IllegalStateException("No row returned after create")
                 created.id
             } else {
-                appsApi.update("eq.${draft.id}", draft.toUpsertBody()).close()
+                val resp = appsApi.update("eq.${draft.id}", draft.toUpsertBody())
+                if (!resp.isSuccessful) {
+                    throw IllegalStateException("update failed HTTP ${resp.code()}")
+                }
                 draft.id!!
             }
             // Auto-activate so the app enters the matching pool.
@@ -139,7 +142,10 @@ class SupabaseMyAppsRepository @Inject constructor(
 
     override suspend fun delete(id: String): AppResult<Unit> = withContext(dispatchers.io) {
         try {
-            appsApi.hardDelete("eq.$id").close()
+            val resp = appsApi.hardDelete("eq.$id")
+            if (!resp.isSuccessful) {
+                throw IllegalStateException("delete failed HTTP ${resp.code()}")
+            }
             _state.value = _state.value.filterNot { it.id == id }
             AppResult.Success(Unit)
         } catch (c: CancellationException) {
@@ -154,7 +160,10 @@ class SupabaseMyAppsRepository @Inject constructor(
     private suspend fun patchStatus(id: String, status: AppStatus): AppResult<Unit> =
         withContext(dispatchers.io) {
             try {
-                appsApi.updateStatus("eq.$id", AppStatusBody.of(status)).close()
+                val resp = appsApi.updateStatus("eq.$id", AppStatusBody.of(status))
+                if (!resp.isSuccessful) {
+                    throw IllegalStateException("updateStatus failed HTTP ${resp.code()}")
+                }
                 _state.value = _state.value.map { row ->
                     if (row.id == id) row.copy(status = status.name.toOwnedAppStatus()) else row
                 }
