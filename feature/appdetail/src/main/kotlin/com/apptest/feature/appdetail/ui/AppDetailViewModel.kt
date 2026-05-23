@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 
 /**
@@ -55,14 +56,30 @@ class AppDetailViewModel @Inject constructor(
      * server-controlled intent injection (e.g. `javascript://`, `intent://`).
      */
     fun onJoinClicked() {
-        val loaded = _state.value as? AppDetailUiState.Loaded ?: return
-        if (loaded.joinInProgress) return
+        // HIGH-12 fix: previous code did `check + update` in two separate statements → fast
+        // double-tap (or async event source) could pass the guard twice and dispatch two Play
+        // Store Intents. Use updateAndGet so the check + transition is atomic.
+        var didWin = false
+        val newState = _state.updateAndGet { current ->
+            val loaded = current as? AppDetailUiState.Loaded ?: return@updateAndGet current
+            if (loaded.joinInProgress) {
+                loaded
+            } else {
+                didWin = true
+                loaded.copy(joinInProgress = true, joinError = null)
+            }
+        }
+        if (!didWin) return
+        val loaded = newState as? AppDetailUiState.Loaded ?: return
         val url = loaded.data.playOptInUrl
         if (!isSafePlayStoreUrl(url)) {
-            _state.update { loaded.copy(joinError = "Play Store opt-in URL not yet provided.") }
+            _state.update {
+                (it as? AppDetailUiState.Loaded)
+                    ?.copy(joinInProgress = false, joinError = "Play Store opt-in URL not yet provided.")
+                    ?: it
+            }
             return
         }
-        _state.update { loaded.copy(joinInProgress = true, joinError = null) }
         viewModelScope.launch {
             _openPlayStore.send(url)
             _state.update {
