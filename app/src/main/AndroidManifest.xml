@@ -72,19 +72,21 @@
             </intent-filter>
 
             <!--
-                App Links — Firebase Hosting subdomain (active, $0 plan).
-                autoVerify=true once assetlinks.json is deployed to
-                apptest-prod.web.app/.well-known/assetlinks.json (APT-OPS-001).
+                App Links — GitHub Pages user domain (free, no custom domain needed).
+                assetlinks.json live at:
+                https://cjc305.github.io/.well-known/assetlinks.json
+                Repo: https://github.com/cjc305/cjc305.github.io
             -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="apptest-prod.web.app" />
+                <data android:scheme="https" android:host="cjc305.github.io"
+                    android:pathPrefix="/AppTest" />
             </intent-filter>
 
             <!--
-                App Links — custom domain placeholder (APT-OPS-001, post-launch V2).
+                App Links — custom domain placeholder (V2, post-launch).
                 autoVerify=false until apptest.dev DNS + assetlinks.json deployed.
             -->
             <intent-filter android:autoVerify="false">
