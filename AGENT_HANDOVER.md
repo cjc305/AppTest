@@ -1,7 +1,10 @@
 # AppTest — Agent Handover
 
-> **Last refresh:** 2026-05-20 (pass 9 — OPS-001 Play Console + package 修正) · **State:** V1 client 完整 + Supabase live + backend 全部 5 服務實作完成 + CI 工作流 + Firebase (FCM + Crashlytics) + Play Console app 建立完成 (com.cjc305.apptest)
-> 下一個 session 從這裡接手。先讀 `_specs/_ai/README.md` + `manifest.yaml` + `PRELAUNCH_CHECKLIST.md`。
+> **Last refresh:** 2026-05-23 (pass 10 — 客戶端 audit + 14 個 CRIT/HIGH patch landed) · **State:** Play Console 已送審 13 項變更（pending Google review 7d 內），客戶端剛經歷 41-bug 深度 audit，12 個 prior "completed" 修復被找到 incomplete/regression
+>
+> **⚠️ 下個 session 首要事項：先讀 `_specs/_ai/audit-2026-05-23.md`** — 22 個 prior bug-fix 任務（C-1 ~ L-3）其中 12 個其實沒完全修好。Audit doc 列出全部 41 bugs，14 個 patch 已套用，6 個 CRIT 未處理項 (CRIT-005/006) + 4 個 HIGH 未處理項 (HIGH-003/005/011) 需要 next-release。
+>
+> 然後讀 `_specs/_ai/README.md` + `manifest.yaml` (§audit_2026_05_23) + `PRELAUNCH_CHECKLIST.md`。
 
 ---
 

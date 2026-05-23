@@ -7,7 +7,7 @@ meta:
   project: AppTest
   prefix: APT
   spec_root: _specs/
-  last_updated: 2026-05-20  # pass 3: tests + handover/app docs + splash + carousel + ProofViewer + backend scaffold + i18n resources
+  last_updated: 2026-05-23  # audit-2026-05-23 — 41 bugs catalogued, 14 patches applied; 22 prior "completed" fixes re-validated, 12 found incomplete/regressed
   current_phase: architecture_complete
   current_product_version: V1_planning
   sdk_whitelist: [Kotlin 2.1.x, AGP 8.7+, Compose BOM 2025.10.x+, Material3 1.4-alpha, Hilt 2.52+, Room 2.7+, Retrofit 2.11+, Coroutines 1.9+, WorkManager 2.10+, DataStore 1.1+]
@@ -192,3 +192,56 @@ cross_cutting:
   - { id: APT-X-003, status: done, title: "GitHub Actions CI: assembleDebug + unitTest + detekt + screenshot tests" }
   - { id: APT-X-004, status: done, title: "Crashlytics + Firebase Analytics + event taxonomy" }
   - { id: APT-X-005, status: done, title: "i18n bootstrap — values/strings.xml + values-zh-rTW/strings.xml full 120-key catalog (OS surfaces + all UI strings); AppStringsCatalog stays as in-app back-compat layer until per-feature migration to stringResource()" }
+
+# ─────────────────────────────────────────────────────────
+# Audit 2026-05-23 — bug catalogue (see _specs/_ai/audit-2026-05-23.md for full evidence/fixes)
+# Re-validation of 22 prior "completed" bug-fix tasks (C-1..L-3, not tracked in this manifest)
+# revealed 12 are incomplete or have regressions. Plus new bugs found in CRIT/HIGH layers.
+# ─────────────────────────────────────────────────────────
+audit_2026_05_23:
+  # CRIT — patches applied this session unless noted
+  - { id: APT-AUDIT-CRIT-001, status: done,        severity: crit, title: "AppDeepLink whitelist exposed via safeId() + ProofViewer URL injection guard" }
+  - { id: APT-AUDIT-CRIT-002, status: done,        severity: crit, title: "MainActivity NavHost re-keyed on AuthState (fixes stuck-on-SignIn after sign-in)" }
+  - { id: APT-AUDIT-CRIT-003, status: done,        severity: crit, title: "(folded into CRIT-001) ProofViewer proofId validated before URL interpolation" }
+  - { id: APT-AUDIT-CRIT-004, status: done,        severity: crit, title: "AndroidManifest <queries> for Android 11+ package visibility (R-040 install detection)" }
+  - { id: APT-AUDIT-CRIT-005, status: not_started, severity: crit, title: "SupabaseHeartbeatWorker: gate on signed-in; UninstallEventStore peek+ack instead of drainAll", blocks: [next_release] }
+  - { id: APT-AUDIT-CRIT-006, status: not_started, severity: crit, title: "UninstallEventStore user-scoped key (prevents cross-account contamination)",                 blocks: [next_release] }
+  # HIGH — patches applied this session unless noted
+  - { id: APT-AUDIT-HIGH-001, status: done,        severity: high, title: "DataStoreSessionStore: snapshot cache + per-read expiry recheck (M-1 was incomplete)" }
+  - { id: APT-AUDIT-HIGH-002, status: done,        severity: high, title: "AuthInterceptor host allowlist (Supabase JWT not leaked to Ktor; C-3 was scope-limited)" }
+  - { id: APT-AUDIT-HIGH-003, status: not_started, severity: high, title: "FcmTopicManager singleton (replaces Activity-scoped FCM subscribe/unsubscribe; H-2 was incomplete)" }
+  - { id: APT-AUDIT-HIGH-004, status: done,        severity: high, title: "RealtimeManager: cancel reconnect on sign-out (H-6 was missing this)" }
+  - { id: APT-AUDIT-HIGH-005, status: not_started, severity: high, title: "OwnedAppRow gains description + playOptInUrl (H-4 regression: edit dropped them)" }
+  - { id: APT-AUDIT-HIGH-006, status: done,        severity: high, title: "Inbox UPDATE handler ORs existing isRead (H-7 was clobbered by realtime UPDATE)" }
+  - { id: APT-AUDIT-HIGH-007, status: done,        severity: high, title: "InboxRepository time-throttled reload (M-8 AtomicBoolean prevented re-fetch)" }
+  - { id: APT-AUDIT-HIGH-008, status: done,        severity: high, title: "Realtime reconnect jitter (H-6 had no jitter — thundering herd risk)" }
+  - { id: APT-AUDIT-HIGH-009, status: done,        severity: high, title: "signOut clears home_skipped + inbox_read keys (M-2 was cross-account leak)" }
+  - { id: APT-AUDIT-HIGH-010, status: done,        severity: high, title: "(folded into CRIT-004) Android 11+ package visibility" }
+  - { id: APT-AUDIT-HIGH-011, status: not_started, severity: high, title: "AppEditor back-during-save guard + NonCancellable cache write (C-2 was incomplete)" }
+  - { id: APT-AUDIT-HIGH-012, status: done,        severity: high, title: "AppDetail Join updateAndGet atomic (H-5 had TOCTOU race)" }
+  # MED — see audit doc; not applied this session
+  - { id: APT-AUDIT-MED-001, status: done,         severity: med,  title: "signInWithGoogle clears pendingEmail (M-4 only covered signOut)" }
+  - { id: APT-AUDIT-MED-002, status: not_started,  severity: med,  title: "JwtUtils: kotlinx JSON parse + UUID regex on sub (L-2 fixed only padding)" }
+  - { id: APT-AUDIT-MED-003, status: not_started,  severity: med,  title: "AuthSession.expiresAtEpochMs from JWT exp claim (not client clock)" }
+  - { id: APT-AUDIT-MED-004, status: not_started,  severity: med,  title: "EmailVerifyViewModel: in-flight guard + attempt counter" }
+  - { id: APT-AUDIT-MED-005, status: done,         severity: med,  title: "RealtimeManager: forward JWT refresh to existing channel (no drop-reconnect)" }
+  - { id: APT-AUDIT-MED-006, status: not_started,  severity: med,  title: "Realtime join payload via kotlinx buildJsonObject (no string interpolation)" }
+  - { id: APT-AUDIT-MED-007, status: not_started,  severity: med,  title: "FCM notification id + PendingIntent requestCode unique (drop FLAG_ONE_SHOT)" }
+  - { id: APT-AUDIT-MED-008, status: not_started,  severity: med,  title: "FCM channel created once in Application.onCreate (not per-push)" }
+  - { id: APT-AUDIT-MED-009, status: not_started,  severity: med,  title: "Heartbeat REPEAT_DAYS=3 + flexInterval (avoid Supabase 7d auto-pause)" }
+  - { id: APT-AUDIT-MED-010, status: not_started,  severity: med,  title: "OnboardingViewModel.onSkipAll in-flight guard (L-1 regression)" }
+  - { id: APT-AUDIT-MED-011, status: not_started,  severity: med,  title: "EmailVerifyViewModel: route email arg → verifyMagicLink(email, token) (C-1 was decoupled)" }
+  - { id: APT-AUDIT-MED-012, status: done,         severity: med,  title: "RealtimeManager heartbeat send wrapped in runCatching" }
+  - { id: APT-AUDIT-MED-013, status: not_started,  severity: med,  title: "NumberField: VM-level validity flag blocks save when on-screen value out of range (L-3 regression)" }
+  - { id: APT-AUDIT-MED-014, status: not_started,  severity: med,  title: "SupabaseHomeRepository: surface 4-of-4-failure as Error+Retry (M-6 silent Empty)" }
+  - { id: APT-AUDIT-MED-015, status: not_started,  severity: med,  title: "EmailValidator: trim before check (M-3 over-strict)" }
+  # LOW
+  - { id: APT-AUDIT-LOW-001,  status: done,         severity: low,  title: "HttpLoggingInterceptor gated on BuildConfig.DEBUG" }
+  - { id: APT-AUDIT-LOW-002,  status: not_started,  severity: low,  title: "FCM subscribe moved out of MainActivity.lifecycleScope (depends on HIGH-003)" }
+  - { id: APT-AUDIT-LOW-003,  status: not_started,  severity: low,  title: "FCM notification small icon: replace android.R placeholder with app monochrome icon" }
+  - { id: APT-AUDIT-LOW-004,  status: not_started,  severity: low,  title: "Inbox Loading vs Empty separation (no flash of Empty during initial load)" }
+  - { id: APT-AUDIT-LOW-005,  status: not_started,  severity: low,  title: "signOut: queue offline revocation retry" }
+  - { id: APT-AUDIT-LOW-006,  status: not_started,  severity: low,  title: "Home/MyApps progress: guard requiredTesters=0 / totalDays=0" }
+  - { id: APT-AUDIT-LOW-007,  status: not_started,  severity: low,  title: "InboxScreen relative time: coerceAtLeast(0) on future-dated notifications" }
+  - { id: APT-AUDIT-LOW-008,  status: not_started,  severity: low,  title: "SupabaseAuthApiService: return Response<Unit> instead of manual ResponseBody.close()" }
+  - { id: APT-AUDIT-LOW-009,  status: not_started,  severity: low,  title: "TokenProvider.tokenBlocking() abstract (force conscious impl)" }
