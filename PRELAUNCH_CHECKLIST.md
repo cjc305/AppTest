@@ -121,15 +121,19 @@ These run on Cloud Run (asia-northeast1) per spec. You decide: same repo / separ
 
 ---
 
-## 4. CI/CD (APT-X-003)
-
-Workflows generated ✅ — only `git init` + push remain:
+## 4. CI/CD (APT-X-003) ✅ DONE (2026-05-23)
 
 - [x] `.github/workflows/pr.yml` — spotless + detekt + lint + build + test on every PR
 - [x] `.github/workflows/release.yml` — bundleRelease + optional Play upload on tag push
-- [ ] `git init && git remote add origin git@github.com:cjc305/AppTest.git`
-- [ ] Initial commit + push to GitHub
-- [ ] Add GitHub Actions secrets: `KEYSTORE_BASE64`, `KEY_ALIAS`, `KEY_PASSWORD`, `STORE_PASSWORD` (after §2.6)
+- [x] Repo initialized + connected to `https://github.com/cjc305/AppTest.git`
+- [x] All commits pushed — latest: `3d1efbf` (pass 18 checklist + versionCode bump)
+- [x] GitHub Actions secrets set (2026-05-23):
+  - `KEYSTORE_BASE64` — base64 of `upload.keystore`
+  - `STORE_PASSWORD` — keystore store password
+  - `KEY_PASSWORD` — keystore key password
+  - `KEY_ALIAS` — `upload`
+  - `SUPABASE_URL` — `https://jefgixmmlqtgbxobukkt.supabase.co`
+  - `SUPABASE_ANON_KEY` — anon/public key
 
 ---
 
