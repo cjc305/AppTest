@@ -22,9 +22,13 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.put
+import kotlinx.serialization.json.putJsonArray
+import kotlinx.serialization.json.putJsonObject
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
@@ -161,8 +165,29 @@ class RealtimeManager @Inject constructor(
         }
     }
 
+    // MED-006: use buildJsonObject so the JWT value is properly escaped rather than interpolated
+    // as raw string (base64url chars are safe, but belt-and-suspenders for future JWT changes).
     private fun joinPayload(ref: String, jwt: String): String =
-        """{"event":"phx_join","topic":"realtime:public:notifications","payload":{"config":{"broadcast":{"self":false},"presence":{"key":""},"postgres_changes":[{"event":"*","schema":"public","table":"notifications"}]},"access_token":"$jwt"},"ref":"$ref","join_ref":"$ref"}"""
+        buildJsonObject {
+            put("event", "phx_join")
+            put("topic", "realtime:public:notifications")
+            putJsonObject("payload") {
+                putJsonObject("config") {
+                    putJsonObject("broadcast") { put("self", false) }
+                    putJsonObject("presence") { put("key", "") }
+                    putJsonArray("postgres_changes") {
+                        add(buildJsonObject {
+                            put("event", "*")
+                            put("schema", "public")
+                            put("table", "notifications")
+                        })
+                    }
+                }
+                put("access_token", jwt)
+            }
+            put("ref", ref)
+            put("join_ref", ref)
+        }.toString()
 
     private fun parseEvent(text: String): RealtimeEvent? = runCatching {
         val root = AppJson.parseToJsonElement(text).jsonObject

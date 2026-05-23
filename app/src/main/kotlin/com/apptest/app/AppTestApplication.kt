@@ -1,9 +1,12 @@
 package com.apptest.app
 
 import android.app.Application
+import android.app.NotificationManager
+import android.content.Context
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import androidx.work.WorkManager
+import com.apptest.app.fcm.AppTestMessagingService
 import com.apptest.app.fcm.FcmTopicManager
 import com.apptest.core.data.worker.SupabaseHeartbeatWorker
 import dagger.hilt.android.HiltAndroidApp
@@ -33,9 +36,11 @@ class AppTestApplication : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
-        // Schedule the Supabase keep-alive heartbeat (idempotent; uses KEEP policy).
+        // MED-008: create FCM notification channel eagerly so first message doesn't pay the cost.
+        AppTestMessagingService.ensureChannel(
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        )
         SupabaseHeartbeatWorker.scheduleIfNeeded(WorkManager.getInstance(this))
-        // Start FCM topic management (drains pending unsubscribes + watches session for switches).
         fcmTopicManager.observe()
     }
 }

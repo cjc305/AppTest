@@ -9,6 +9,7 @@ import com.apptest.core.common.AppError
 import com.apptest.core.common.AppResult
 import com.apptest.core.common.AuthState
 import com.apptest.core.common.EmailValidator
+import com.apptest.core.common.jwtExpiryEpochMs
 import com.apptest.core.data.di.ApplicationScope
 import com.apptest.core.data.session.AuthSession
 import com.apptest.core.data.session.SessionStore
@@ -95,7 +96,9 @@ class SupabaseAuthRepository @Inject constructor(
                 AuthSession(
                     jwt = response.accessToken,
                     refreshToken = response.refreshToken,
-                    expiresAtEpochMs = System.currentTimeMillis() + response.expiresIn * 1000L,
+                    // MED-003: prefer JWT exp claim; fall back to response.expiresIn if missing.
+                    expiresAtEpochMs = response.accessToken.jwtExpiryEpochMs()
+                        ?: (System.currentTimeMillis() + response.expiresIn * 1000L),
                 ),
             )
             pendingEmail = null
@@ -135,7 +138,9 @@ class SupabaseAuthRepository @Inject constructor(
                 AuthSession(
                     jwt = response.accessToken,
                     refreshToken = response.refreshToken,
-                    expiresAtEpochMs = System.currentTimeMillis() + response.expiresIn * 1000L,
+                    // MED-003: prefer JWT exp claim; fall back to response.expiresIn if missing.
+                    expiresAtEpochMs = response.accessToken.jwtExpiryEpochMs()
+                        ?: (System.currentTimeMillis() + response.expiresIn * 1000L),
                 ),
             )
             // MED-1 fix: M-4 added pendingEmail clear in signOut(), but not here — stale email

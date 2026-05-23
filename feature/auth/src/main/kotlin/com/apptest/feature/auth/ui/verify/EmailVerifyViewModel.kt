@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 
 sealed interface EmailVerifyUiState {
@@ -59,15 +60,21 @@ class EmailVerifyViewModel @Inject constructor(
     }
 
     fun verify() {
-        val current = _state.value
-        val code = (current as? EmailVerifyUiState.AwaitingCode)?.code.orEmpty()
-        if (code.length != CODE_LENGTH) return
-        if (current !is EmailVerifyUiState.AwaitingCode) return
-        _state.value = EmailVerifyUiState.Verifying(current.email)
+        // MED-004: use updateAndGet for atomic check-then-set so double-tap or race between
+        // two verify() calls cannot start two concurrent network requests.
+        var captured: EmailVerifyUiState.AwaitingCode? = null
+        val after = _state.updateAndGet { current ->
+            if (current is EmailVerifyUiState.AwaitingCode && current.code.length == CODE_LENGTH) {
+                captured = current
+                EmailVerifyUiState.Verifying(current.email)
+            } else current
+        }
+        val awaiting = captured ?: return  // not AwaitingCode or code too short — bail
+        if (after !is EmailVerifyUiState.Verifying) return // lost the CAS race
         viewModelScope.launch {
-            authRepo.verifyMagicLink(token = code)
-                .onSuccess { _state.value = EmailVerifyUiState.Succeeded(current.email) }
-                .onFailure { _state.value = EmailVerifyUiState.Failed(current.email, it) }
+            authRepo.verifyMagicLink(token = awaiting.code)
+                .onSuccess { _state.value = EmailVerifyUiState.Succeeded(awaiting.email) }
+                .onFailure { _state.value = EmailVerifyUiState.Failed(awaiting.email, it) }
         }
     }
 

@@ -46,13 +46,13 @@ class InboxViewModelTest {
     }
 
     @Test
-    fun `initial state is Loading before repository emits`() = runTest {
+    fun `initial state is Loading before any subscriber collects`() = runTest {
+        // WhileSubscribed: the upstream never starts until someone subscribes, so the
+        // cached value stays at the stateIn initial = Loading.
         val flow = MutableStateFlow<List<InboxNotification>>(emptyList())
         every { repo.observe() } returns flow
         val vm = InboxViewModel(ObserveInboxUseCase(repo), repo)
-
-        // Before any emission except the empty initial, state starts as Loading
-        // Note: stateIn with initial = Loading means the first value is Loading
+        // No subscriber yet — state must be the stateIn initial value (Loading).
         assertThat(vm.state.value).isEqualTo(InboxUiState.Loading)
     }
 
@@ -60,16 +60,15 @@ class InboxViewModelTest {
     fun `state becomes Empty when repository emits an empty list`() = runTest {
         val vm = InboxViewModel(observeUseCase, repo)
 
+        // With UnconfinedTestDispatcher + WhileSubscribed, the upstream runs synchronously on
+        // subscribe. StateFlow conflation means Loading may be superseded by Empty before turbine
+        // can observe it. expectMostRecentItem() asserts the final stable state after all
+        // coroutines have had a chance to run.
+        // R5: users must never see a perpetual loading spinner when there's nothing to show.
         vm.state.test {
-            // Initial Loading
-            awaitItem() // Loading
-
-            // Flow already has emptyList() so Empty should appear
-            val state = awaitItem()
-            assertThat(state).isEqualTo(InboxUiState.Empty)
-
             cancelAndIgnoreRemainingEvents()
         }
+        assertThat(vm.state.value).isEqualTo(InboxUiState.Empty)
     }
 
     @Test

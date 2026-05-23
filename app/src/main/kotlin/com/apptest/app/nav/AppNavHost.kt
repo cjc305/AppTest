@@ -1,10 +1,6 @@
 package com.apptest.app.nav
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -12,7 +8,6 @@ import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -21,14 +16,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.apptest.core.designsystem.components.AppText
-import com.apptest.core.designsystem.components.AppVSpacer
-import com.apptest.core.designsystem.spacing.AppSpacing
 import com.apptest.core.navigation.AppDestination
 import com.apptest.core.ui.components.AppBottomBar
 import com.apptest.core.ui.components.AppBottomDest
-import com.apptest.core.ui.components.AppButton
-import com.apptest.core.ui.templates.ScreenScaffold
 import com.apptest.feature.appdetail.nav.appDetailGraph
 import com.apptest.feature.auth.nav.authGraph
 import com.apptest.feature.home.nav.homeGraph
@@ -189,32 +179,3 @@ private fun MainRootRedirect(nav: NavHostController) {
     }
 }
 
-@Composable
-private fun SettingsStub(onSignOut: () -> Unit, onBack: () -> Unit) {
-    val l = com.apptest.core.designsystem.theme.AppL10n.current
-    ScreenScaffold { padding ->
-        Box(
-            modifier = Modifier.fillMaxSize().padding(padding).padding(AppSpacing.Lg),
-            contentAlignment = Alignment.Center,
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(AppSpacing.Md),
-            ) {
-                AppText(
-                    text = l.settings_title,
-                    style = MaterialTheme.typography.headlineMedium,
-                )
-                AppText(
-                    text = l.settings_locale_note,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                AppVSpacer(AppSpacing.Md)
-                AppButton(l.cta_sign_out, onSignOut)
-                AppVSpacer(AppSpacing.Sm)
-                AppButton(l.cta_back, onBack)
-            }
-        }
-    }
-}

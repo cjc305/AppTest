@@ -10,15 +10,18 @@ import com.apptest.app.MainActivity
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * R-042 — Firebase Cloud Messaging integration.
  *
- * Handles:
- *  - [onMessageReceived]: display system notification for FCM push (used by matching and
- *    fraud-alert notifications when the app is in background / killed).
- *  - [onNewToken]: store the refreshed token so the Ktor backend can send targeted pushes.
- *    Token upload to backend is deferred to V2 (requires authenticated endpoint).
+ * MED-007/008 (audit 2026-05-23):
+ *  - Notification channel is created once in [ensureChannel] (idempotent; still safe to call
+ *    repeatedly, but the heavy [createNotificationChannel] is skipped once [channelCreated] is
+ *    set). Application.onCreate creates it proactively via [ensureChannel].
+ *  - [notifId] is a process-wide AtomicInteger so each message gets a unique notification ID
+ *    and a unique PendingIntent requestCode — prevents tap on older notification overriding a
+ *    newer one's Intent.
  */
 @AndroidEntryPoint
 class AppTestMessagingService : FirebaseMessagingService() {
@@ -33,36 +36,34 @@ class AppTestMessagingService : FirebaseMessagingService() {
         // TODO V2: POST token to Ktor backend /v1/devices/token (requires auth)
     }
 
-    // ── private ──────────────────────────────────────────────────────────────
-
     private fun showNotification(title: String, body: String) {
-        val channelId = CHANNEL_ID
         val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-
-        nm.createNotificationChannel(
-            NotificationChannel(channelId, "AppTest 通知", NotificationManager.IMPORTANCE_DEFAULT),
-        )
-
+        ensureChannel(nm)
+        val id = notifId.incrementAndGet()
         val intent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
         }
         val pending = PendingIntent.getActivity(
-            this, 0, intent,
-            PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE,
+            this, id, intent, PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE,
         )
-
-        val notification = NotificationCompat.Builder(this, channelId)
+        nm.notify(id, NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle(title)
-            .setContentText(body)
-            .setAutoCancel(true)
-            .setContentIntent(pending)
-            .build()
-
-        nm.notify(System.currentTimeMillis().toInt(), notification)
+            .setContentTitle(title).setContentText(body)
+            .setAutoCancel(true).setContentIntent(pending).build())
     }
 
     companion object {
-        private const val CHANNEL_ID = "apptest_push"
+        const val CHANNEL_ID = "apptest_push"
+        private val notifId = AtomicInteger(0)
+        private var channelCreated = false
+
+        /** Idempotent; safe to call from Application.onCreate before any message arrives. */
+        fun ensureChannel(nm: NotificationManager) {
+            if (channelCreated) return
+            nm.createNotificationChannel(
+                NotificationChannel(CHANNEL_ID, "AppTest 通知", NotificationManager.IMPORTANCE_DEFAULT)
+            )
+            channelCreated = true
+        }
     }
 }
