@@ -20,6 +20,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
@@ -40,7 +41,9 @@ class SupabaseInboxRepository @Inject constructor(
     @ApplicationScope private val scope: CoroutineScope,
 ) : InboxRepository {
 
-    private val _notifications = MutableStateFlow<List<InboxNotification>>(emptyList())
+    // LOW-004: null = initial load not yet complete; prevents Loading→Empty flash in InboxViewModel.
+    // observe() filters nulls so the ViewModel's stateIn(initial=Loading) stays until first real data.
+    private val _notifications = MutableStateFlow<List<InboxNotification>?>(null)
     private val readIds = MutableStateFlow<Set<String>>(emptySet())
 
     // HIGH-7 fix: replace AtomicBoolean (which ran loadInitial only once per process) with a
@@ -60,7 +63,7 @@ class SupabaseInboxRepository @Inject constructor(
                     "INSERT" -> {
                         val n = event.fields.toDomain(readIds.value) ?: return@collect
                         _notifications.update { current ->
-                            listOf(n) + current.filter { it.id != n.id }
+                            current?.let { listOf(n) + it.filter { it.id != n.id } } ?: listOf(n)
                         }
                     }
                     "UPDATE" -> {
@@ -69,7 +72,7 @@ class SupabaseInboxRepository @Inject constructor(
                         // readIds flush is async. OR the local read state so a freshly-tapped row
                         // doesn't flicker back to unread.
                         _notifications.update { current ->
-                            current.map { existing ->
+                            current?.map { existing ->
                                 if (existing.id == incoming.id) {
                                     incoming.copy(isRead = existing.isRead || incoming.isRead)
                                 } else existing
@@ -88,23 +91,23 @@ class SupabaseInboxRepository @Inject constructor(
             lastLoadAt = now
             scope.launch { loadInitial() }
         }
-        return _notifications.asStateFlow()
+        return _notifications.asStateFlow().filterNotNull()
     }
 
     override suspend fun markRead(id: String): AppResult<Unit> = runCatching {
         dataStore.edit { prefs ->
             prefs[KEY_READ_IDS] = (prefs[KEY_READ_IDS] ?: emptySet()) + id
         }
-        _notifications.update { list -> list.map { if (it.id == id) it.copy(isRead = true) else it } }
+        _notifications.update { list -> list?.map { if (it.id == id) it.copy(isRead = true) else it } }
         AppResult.Success(Unit)
     }.getOrElse { AppResult.Failure(AppError.fromThrowable(it)) }
 
     override suspend fun markAllRead(): AppResult<Unit> = runCatching {
-        val allIds = _notifications.value.map { it.id }.toSet()
+        val allIds = _notifications.value?.map { it.id }?.toSet() ?: emptySet()
         dataStore.edit { prefs ->
             prefs[KEY_READ_IDS] = (prefs[KEY_READ_IDS] ?: emptySet()) + allIds
         }
-        _notifications.update { list -> list.map { it.copy(isRead = true) } }
+        _notifications.update { list -> list?.map { it.copy(isRead = true) } }
         AppResult.Success(Unit)
     }.getOrElse { AppResult.Failure(AppError.fromThrowable(it)) }
 

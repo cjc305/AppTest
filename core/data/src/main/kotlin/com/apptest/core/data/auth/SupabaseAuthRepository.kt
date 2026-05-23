@@ -5,6 +5,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringSetPreferencesKey
+import androidx.work.WorkManager
 import com.apptest.core.common.AppError
 import com.apptest.core.common.AppResult
 import com.apptest.core.common.AuthState
@@ -13,6 +14,7 @@ import com.apptest.core.common.jwtExpiryEpochMs
 import com.apptest.core.data.di.ApplicationScope
 import com.apptest.core.data.session.AuthSession
 import com.apptest.core.data.session.SessionStore
+import com.apptest.core.data.worker.SignOutRevocationWorker
 import com.apptest.core.domain.auth.AuthRepository
 import com.apptest.core.network.auth.OtpRequest
 import com.apptest.core.network.auth.SupabaseAuthApiService
@@ -47,6 +49,7 @@ class SupabaseAuthRepository @Inject constructor(
     private val authApiService: SupabaseAuthApiService,
     private val sessionStore: SessionStore,
     private val dataStore: DataStore<Preferences>,
+    private val workManager: WorkManager,
     @ApplicationScope private val scope: CoroutineScope,
 ) : AuthRepository {
 
@@ -117,7 +120,11 @@ class SupabaseAuthRepository @Inject constructor(
     override suspend fun signOut(): AppResult<Unit> {
         val jwt = sessionStore.session.firstOrNull()?.jwt
         if (jwt != null) {
-            runCatching { authApiService.signOut(bearer = "Bearer $jwt") } // best-effort
+            // LOW-005: if offline (or any network error), enqueue a WorkManager job so the token
+            // is revoked on Supabase once connectivity returns. JWT is cleared from SessionStore
+            // below — passing it to the worker before that happens.
+            val revoked = runCatching { authApiService.signOut(bearer = "Bearer $jwt") }.isSuccess
+            if (!revoked) SignOutRevocationWorker.enqueue(workManager, jwt)
         }
         pendingEmail = null
         sessionStore.clear()

@@ -1,11 +1,14 @@
 package com.apptest.app.di
 
+import androidx.work.WorkManager
 import com.apptest.core.common.DefaultDispatcherProvider
 import com.apptest.core.common.DispatcherProvider
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import android.content.Context
 import javax.inject.Singleton
 
 /**
@@ -23,4 +26,10 @@ object CoreModule {
     @Provides
     @Singleton
     fun provideDispatcherProvider(): DispatcherProvider = DefaultDispatcherProvider()
+
+    /** WorkManager singleton — used by SignOutRevocationWorker + SupabaseHeartbeatWorker. */
+    @Provides
+    @Singleton
+    fun provideWorkManager(@ApplicationContext context: Context): WorkManager =
+        WorkManager.getInstance(context)
 }

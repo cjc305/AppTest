@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
+import com.apptest.app.R
 import com.apptest.app.MainActivity
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
@@ -47,7 +48,7 @@ class AppTestMessagingService : FirebaseMessagingService() {
             this, id, intent, PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE,
         )
         nm.notify(id, NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setSmallIcon(R.drawable.ic_notification) // LOW-003: app monochrome icon
             .setContentTitle(title).setContentText(body)
             .setAutoCancel(true).setContentIntent(pending).build())
     }
