@@ -51,7 +51,10 @@ fun AppEditorScreen(
             AppTopBar(
                 title = if (state.isEdit) l.editor_title_edit else l.editor_title_create,
                 navIcon = {
-                    IconButton(onClick = onCancel) {
+                    // HIGH-011: disable toolbar back while save in flight (matches BackHandler
+                    // in AppEditorRoute and the Cancel button disable state). Prevents
+                    // viewModelScope cancellation mid-save → silent data loss.
+                    IconButton(onClick = onCancel, enabled = !state.isSaving) {
                         AppIcon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = l.cta_back,
@@ -192,7 +195,7 @@ private fun EditorActions(canSave: Boolean, isSaving: Boolean, onSave: () -> Uni
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(AppSpacing.Sm),
     ) {
-        AppButton(text = l.cta_cancel, onClick = onCancel, variant = AppButtonVariant.Text)
+        AppButton(text = l.cta_cancel, onClick = onCancel, enabled = !isSaving, variant = AppButtonVariant.Text)
         AppButton(
             text = if (isSaving) l.cta_saving else l.cta_save,
             onClick = onSave,

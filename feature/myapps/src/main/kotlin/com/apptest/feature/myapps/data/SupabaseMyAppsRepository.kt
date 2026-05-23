@@ -47,6 +47,10 @@ class SupabaseMyAppsRepository @Inject constructor(
      * server-side, so the user's editor input would be lost on reload. Cache them
      * process-locally keyed by app id so the editor shows back what the user typed within
      * the same process. (Cleared on process death — fix properly when schema migration lands.)
+     *
+     * HIGH-005: description IS in DB (AppDto.description) so it's not in DraftExtras — read
+     * directly from the DTO via [toRow]. playOptInUrl remains client-side until V1 schema
+     * migration adds the column.
      */
     private val draftExtras = java.util.concurrent.ConcurrentHashMap<String, DraftExtras>()
 
@@ -149,8 +153,10 @@ class SupabaseMyAppsRepository @Inject constructor(
 
     private fun OwnedAppRow.mergeExtras(extras: DraftExtras?): OwnedAppRow {
         if (extras == null) return this
+        // HIGH-005 fix: also merge playOptInUrl (was being dropped between save and re-load).
         return copy(
             packageName = extras.packageName.ifBlank { packageName },
+            playOptInUrl = extras.playOptInUrl.ifBlank { playOptInUrl },
             requiredTesters = extras.requiredTesters,
             requiredDays = extras.requiredDays,
         )
@@ -162,11 +168,13 @@ class SupabaseMyAppsRepository @Inject constructor(
 private fun com.apptest.core.network.apps.AppDto.toRow() = OwnedAppRow(
     id = id,
     name = name,
-    packageName = "", // V1: not in DB
+    packageName = "",                       // V1: not in DB
+    description = description,              // HIGH-005: description IS in DB (AppDto.description)
+    playOptInUrl = "",                      // V1: not in DB (overlaid by draftExtras when present)
     status = status.toOwnedAppStatus(),
     currentTesters = 0,
-    requiredTesters = 12, // V1: not in DB
-    requiredDays = 14, // V1: not in DB
+    requiredTesters = 12,                   // V1: not in DB (overlaid by draftExtras)
+    requiredDays = 14,                      // V1: not in DB (overlaid by draftExtras)
     daysLeft = 14,
 )
 

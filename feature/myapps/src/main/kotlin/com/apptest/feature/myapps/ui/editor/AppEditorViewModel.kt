@@ -62,9 +62,17 @@ class AppEditorViewModel @Inject constructor(
             _state.update { it.copy(isLoading = false, loadError = AppError.NotFound("App")) }
             return
         }
+        // HIGH-005 (audit 2026-05-23): now populates description + playOptInUrl too. Previously
+        // they defaulted to "" and the user lost their saved values + couldn't re-save (the
+        // Empty URL state blocked canSave).
         val draft = AppDraft(
-            id = row.id, name = row.name, packageName = row.packageName,
-            requiredTesters = row.requiredTesters, requiredDays = row.requiredDays,
+            id = row.id,
+            name = row.name,
+            packageName = row.packageName,
+            description = row.description,
+            playOptInUrl = row.playOptInUrl,
+            requiredTesters = row.requiredTesters,
+            requiredDays = row.requiredDays,
         )
         _state.update { it.copy(draft = draft, isLoading = false, loadError = null).recomputed() }
     }

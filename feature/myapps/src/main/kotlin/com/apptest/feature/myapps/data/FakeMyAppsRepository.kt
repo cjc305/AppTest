@@ -42,6 +42,8 @@ class FakeMyAppsRepository @Inject constructor() : MyAppsRepository {
             id = id,
             name = draft.name,
             packageName = draft.packageName,
+            description = draft.description,            // HIGH-005: now round-trips
+            playOptInUrl = draft.playOptInUrl,          // HIGH-005: now round-trips
             status = OwnedAppStatus.Recruiting,
             currentTesters = if (draft.id == null) 0 else (_items.value.firstOrNull { it.id == id }?.currentTesters ?: 0),
             requiredTesters = draft.requiredTesters,
@@ -73,11 +75,15 @@ class FakeMyAppsRepository @Inject constructor() : MyAppsRepository {
         fun seed(): List<OwnedAppRow> = listOf(
             OwnedAppRow(
                 id = "my1", name = "MyApp1", packageName = "com.example.myapp1",
+                description = "Sample first app for testing UI flows.",
+                playOptInUrl = "https://play.google.com/apps/testing/com.example.myapp1",
                 status = OwnedAppStatus.Recruiting,
                 currentTesters = 8, requiredTesters = 12, requiredDays = 14, daysLeft = 6,
             ),
             OwnedAppRow(
                 id = "my2", name = "MyApp2", packageName = "com.example.myapp2",
+                description = "Sample second app for testing UI flows.",
+                playOptInUrl = "https://play.google.com/apps/testing/com.example.myapp2",
                 status = OwnedAppStatus.Recruiting,
                 currentTesters = 0, requiredTesters = 12, requiredDays = 14, daysLeft = 14,
             ),

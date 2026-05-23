@@ -9,11 +9,20 @@ package com.apptest.feature.myapps.domain.model
 
 enum class OwnedAppStatus { Recruiting, Active, Completed, Paused }
 
-/** Row item for My apps list. */
+/**
+ * Row item for My apps list AND editor source-of-truth on edit mode.
+ *
+ * HIGH-005 (audit 2026-05-23): `description` + `playOptInUrl` added. Previously the editor
+ * built its AppDraft from this row and defaulted both fields to "" → user opened edit and
+ * saw their saved description/URL replaced with blanks; PlayUrlValidation.Empty then made
+ * the Save button non-clickable.
+ */
 data class OwnedAppRow(
     val id: String,
     val name: String,
     val packageName: String,
+    val description: String,            // HIGH-005: was dropped on edit
+    val playOptInUrl: String,           // HIGH-005: was dropped on edit
     val status: OwnedAppStatus,
     val currentTesters: Int,
     val requiredTesters: Int,
