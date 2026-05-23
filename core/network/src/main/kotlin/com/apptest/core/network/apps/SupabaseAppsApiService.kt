@@ -78,8 +78,13 @@ interface SupabaseAppsApiService {
     ): ResponseBody
 
     private companion object {
+        // SELECT_LIST is the source of truth for the My Apps list cache.
+        // It MUST include every column that AppEditor reads back when the user taps
+        // "Edit" — otherwise cached rows missing the field cause the editor to show
+        // blank inputs (regression noted 2026-05-24).
         const val SELECT_LIST =
-            "id,name,status,category,created_at"
+            "id,name,status,category,description,play_url," +
+                "package_name,play_opt_in_url,required_testers,required_days,created_at"
         const val SELECT_DETAIL =
             "id,name,description,category,icon_url,owner_id,status,play_url," +
                 "package_name,play_opt_in_url,required_testers,required_days," +
