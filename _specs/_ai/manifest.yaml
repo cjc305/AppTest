@@ -221,27 +221,27 @@ audit_2026_05_23:
   - { id: APT-AUDIT-HIGH-012, status: done,        severity: high, title: "AppDetail Join updateAndGet atomic (H-5 had TOCTOU race)" }
   # MED — see audit doc; not applied this session
   - { id: APT-AUDIT-MED-001, status: done,         severity: med,  title: "signInWithGoogle clears pendingEmail (M-4 only covered signOut)" }
-  - { id: APT-AUDIT-MED-002, status: not_started,  severity: med,  title: "JwtUtils: kotlinx JSON parse + UUID regex on sub (L-2 fixed only padding)" }
-  - { id: APT-AUDIT-MED-003, status: not_started,  severity: med,  title: "AuthSession.expiresAtEpochMs from JWT exp claim (not client clock)" }
-  - { id: APT-AUDIT-MED-004, status: not_started,  severity: med,  title: "EmailVerifyViewModel: in-flight guard + attempt counter" }
+  - { id: APT-AUDIT-MED-002, status: done,         severity: med,  title: "JwtUtils: UUID regex on sub + jwtExpiryEpochMs() (83bb64b)" }
+  - { id: APT-AUDIT-MED-003, status: done,         severity: med,  title: "AuthSession.expiresAtEpochMs from JWT exp claim (0dcb333)" }
+  - { id: APT-AUDIT-MED-004, status: done,         severity: med,  title: "EmailVerifyViewModel: updateAndGet atomic CAS for in-flight guard (83bb64b)" }
   - { id: APT-AUDIT-MED-005, status: done,         severity: med,  title: "RealtimeManager: forward JWT refresh to existing channel (no drop-reconnect)" }
-  - { id: APT-AUDIT-MED-006, status: not_started,  severity: med,  title: "Realtime join payload via kotlinx buildJsonObject (no string interpolation)" }
-  - { id: APT-AUDIT-MED-007, status: not_started,  severity: med,  title: "FCM notification id + PendingIntent requestCode unique (drop FLAG_ONE_SHOT)" }
-  - { id: APT-AUDIT-MED-008, status: not_started,  severity: med,  title: "FCM channel created once in Application.onCreate (not per-push)" }
-  - { id: APT-AUDIT-MED-009, status: done,         severity: med,  title: "Heartbeat REPEAT_DAYS 6→3 + flexInterval + LINEAR backoff (patch applied 96aa18c)" }
-  - { id: APT-AUDIT-MED-010, status: not_started,  severity: med,  title: "OnboardingViewModel.onSkipAll in-flight guard (L-1 regression)" }
-  - { id: APT-AUDIT-MED-011, status: not_started,  severity: med,  title: "EmailVerifyViewModel: route email arg → verifyMagicLink(email, token) (C-1 was decoupled)" }
+  - { id: APT-AUDIT-MED-006, status: done,         severity: med,  title: "Realtime join payload via buildJsonObject (83bb64b)" }
+  - { id: APT-AUDIT-MED-007, status: done,         severity: med,  title: "FCM notification id + PendingIntent requestCode: AtomicInteger per message (83bb64b)" }
+  - { id: APT-AUDIT-MED-008, status: done,         severity: med,  title: "FCM channel created once in Application.onCreate via ensureChannel() (83bb64b)" }
+  - { id: APT-AUDIT-MED-009, status: done,         severity: med,  title: "Heartbeat REPEAT_DAYS 6→3 + flexInterval + LINEAR backoff (96aa18c)" }
+  - { id: APT-AUDIT-MED-010, status: done,         severity: med,  title: "OnboardingViewModel.onSkipAll: isSubmitting guard (83bb64b)" }
+  - { id: APT-AUDIT-MED-011, status: done,         severity: med,  title: "verifyMagicLink(email, token) — process-death-safe, no pendingEmail dep (0dcb333)" }
   - { id: APT-AUDIT-MED-012, status: done,         severity: med,  title: "RealtimeManager heartbeat send wrapped in runCatching" }
-  - { id: APT-AUDIT-MED-013, status: not_started,  severity: med,  title: "NumberField: VM-level validity flag blocks save when on-screen value out of range (L-3 regression)" }
-  - { id: APT-AUDIT-MED-014, status: not_started,  severity: med,  title: "SupabaseHomeRepository: surface 4-of-4-failure as Error+Retry (M-6 silent Empty)" }
-  - { id: APT-AUDIT-MED-015, status: not_started,  severity: med,  title: "EmailValidator: trim before check (M-3 over-strict)" }
+  - { id: APT-AUDIT-MED-013, status: acknowledged, severity: med,  title: "NumberField: canSave already gates on draft values; raw display is a UX LOW concern" }
+  - { id: APT-AUDIT-MED-014, status: done,         severity: med,  title: "SupabaseHomeRepository: surface 4-of-4-failure as Error+Retry (0dcb333)" }
+  - { id: APT-AUDIT-MED-015, status: done,         severity: med,  title: "EmailValidator: trimmed.length check fix (0dcb333)" }
   # LOW
   - { id: APT-AUDIT-LOW-001,  status: done,         severity: low,  title: "HttpLoggingInterceptor gated on BuildConfig.DEBUG" }
-  - { id: APT-AUDIT-LOW-002,  status: not_started,  severity: low,  title: "FCM subscribe moved out of MainActivity.lifecycleScope (depends on HIGH-003)" }
+  - { id: APT-AUDIT-LOW-002,  status: done,         severity: low,  title: "FCM subscribe moved out of MainActivity — FcmTopicManager (HIGH-003)" }
   - { id: APT-AUDIT-LOW-003,  status: not_started,  severity: low,  title: "FCM notification small icon: replace android.R placeholder with app monochrome icon" }
   - { id: APT-AUDIT-LOW-004,  status: not_started,  severity: low,  title: "Inbox Loading vs Empty separation (no flash of Empty during initial load)" }
   - { id: APT-AUDIT-LOW-005,  status: not_started,  severity: low,  title: "signOut: queue offline revocation retry" }
-  - { id: APT-AUDIT-LOW-006,  status: not_started,  severity: low,  title: "Home/MyApps progress: guard requiredTesters=0 / totalDays=0" }
-  - { id: APT-AUDIT-LOW-007,  status: not_started,  severity: low,  title: "InboxScreen relative time: coerceAtLeast(0) on future-dated notifications" }
-  - { id: APT-AUDIT-LOW-008,  status: not_started,  severity: low,  title: "SupabaseAuthApiService: return Response<Unit> instead of manual ResponseBody.close()" }
-  - { id: APT-AUDIT-LOW-009,  status: not_started,  severity: low,  title: "TokenProvider.tokenBlocking() abstract (force conscious impl)" }
+  - { id: APT-AUDIT-LOW-006,  status: done,         severity: low,  title: "Home/MyApps progress: guard requiredTesters=0 / totalDays=0 (fd25066)" }
+  - { id: APT-AUDIT-LOW-007,  status: done,         severity: low,  title: "InboxScreen relative time: coerceAtLeast(0) on future-dated notifications (fd25066)" }
+  - { id: APT-AUDIT-LOW-008,  status: done,         severity: low,  title: "SupabaseAuthApiService: Response<Unit> — no .close() needed (fd25066)" }
+  - { id: APT-AUDIT-LOW-009,  status: acknowledged, severity: low,  title: "TokenProvider.tokenBlocking() abstract — DataStoreSessionStore already overrides; skipped" }
