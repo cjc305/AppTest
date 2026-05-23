@@ -14,7 +14,6 @@ import com.apptest.core.domain.inbox.InboxRepository
 import com.apptest.core.network.notifications.NotificationDto
 import com.apptest.core.network.notifications.SupabaseNotificationsApiService
 import java.time.Instant
-import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
@@ -43,7 +42,11 @@ class SupabaseInboxRepository @Inject constructor(
 
     private val _notifications = MutableStateFlow<List<InboxNotification>>(emptyList())
     private val readIds = MutableStateFlow<Set<String>>(emptySet())
-    private val initialized = AtomicBoolean(false)
+
+    // HIGH-7 fix: replace AtomicBoolean (which ran loadInitial only once per process) with a
+    // time-throttled re-load so coming back to Inbox after WhileSubscribed(5000) expiry triggers
+    // a refresh. Realtime push alone is unreliable in the background (Doze, WS drop).
+    @Volatile private var lastLoadAt: Long = 0L
 
     init {
         // Hydrate read-id cache from DataStore once, then keep it in sync with subsequent edits.
@@ -61,9 +64,16 @@ class SupabaseInboxRepository @Inject constructor(
                         }
                     }
                     "UPDATE" -> {
-                        val n = event.fields.toDomain(readIds.value) ?: return@collect
+                        val incoming = event.fields.toDomain(readIds.value) ?: return@collect
+                        // HIGH-6 fix: realtime UPDATE may carry stale isRead because DataStore →
+                        // readIds flush is async. OR the local read state so a freshly-tapped row
+                        // doesn't flicker back to unread.
                         _notifications.update { current ->
-                            current.map { if (it.id == n.id) n else it }
+                            current.map { existing ->
+                                if (existing.id == incoming.id) {
+                                    incoming.copy(isRead = existing.isRead || incoming.isRead)
+                                } else existing
+                            }
                         }
                     }
                     else -> Unit
@@ -73,7 +83,9 @@ class SupabaseInboxRepository @Inject constructor(
     }
 
     override fun observe(): Flow<List<InboxNotification>> {
-        if (initialized.compareAndSet(false, true)) {
+        val now = System.currentTimeMillis()
+        if (now - lastLoadAt > MIN_RELOAD_MS) {
+            lastLoadAt = now
             scope.launch { loadInitial() }
         }
         return _notifications.asStateFlow()
@@ -110,6 +122,7 @@ class SupabaseInboxRepository @Inject constructor(
 
     private companion object {
         const val TABLE_NOTIFICATIONS = "notifications"
+        const val MIN_RELOAD_MS = 30_000L   // throttle: don't refetch more than every 30s
         val KEY_READ_IDS = stringSetPreferencesKey("inbox_read_notification_ids")
     }
 }

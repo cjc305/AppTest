@@ -10,7 +10,9 @@ import com.apptest.core.network.di.SupabaseRest
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.min
+import kotlin.random.Random
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -32,14 +34,14 @@ import okhttp3.WebSocketListener
 /**
  * Manages a single Supabase Realtime WebSocket connection per `_specs/api_contracts.md` §4.
  *
- * Lifecycle:
- * - Opens on first valid [SessionStore.session]; reuses the [@SupabaseRest][SupabaseRest] client.
- * - Subscribes to `realtime:public:notifications`; RLS ensures user-scoped delivery.
- * - Sends Phoenix heartbeats every 30 s to keep the connection alive.
- * - Reconnects after failure with exponential back-off (1s → 60s cap); reset on successful join.
- * - Closes on sign-out (null session).
- *
- * Consumers call [events] and filter by [RealtimeEvent.table].
+ * Lifecycle (post audit-2026-05-23 fixes):
+ * - Opens on first valid [SessionStore.session]; reuses the [@SupabaseRest] OkHttpClient.
+ * - On JWT rotation (refresh while signed in), sends Phoenix `access_token` message to the
+ *   existing channel instead of dropping the connection (MED-1).
+ * - Phoenix heartbeat every 30 s; send wrapped in runCatching to tolerate closed-WS races (HIGH-2-realtime).
+ * - Reconnects after failure with exponential back-off + jitter (HIGH-8). Only ONE pending
+ *   reconnect coroutine at a time — prior failures cancel any in-flight reconnect (HIGH-4 / CRIT-2).
+ * - Closes on sign-out (null session); explicitly cancels the pending reconnect (CRIT-2).
  */
 @Singleton
 class RealtimeManager @Inject constructor(
@@ -58,22 +60,24 @@ class RealtimeManager @Inject constructor(
     @Volatile private var currentJwt: String? = null
     @Volatile private var refCounter = 0
     @Volatile private var backoffMs: Long = INITIAL_BACKOFF_MS
+    @Volatile private var reconnectJob: Job? = null
 
     init {
         scope.launch {
             sessionStore.session.collect { session ->
-                if (session != null && !session.isExpired()) {
-                    currentJwt = session.jwt
-                    connectIfNeeded(session.jwt)
-                } else {
-                    currentJwt = null
-                    disconnect()
+                val newJwt = session?.takeIf { !it.isExpired() }?.jwt
+                val prev = currentJwt
+                currentJwt = newJwt
+                when {
+                    newJwt == null -> disconnect()
+                    prev == null -> connectIfNeeded(newJwt)
+                    prev != newJwt -> rotateAccessToken(newJwt)  // MED-1: refresh without drop
+                    else -> Unit
                 }
             }
         }
     }
 
-    /** Serializes connect/disconnect so concurrent session flips don't double-open the socket. */
     private suspend fun connectIfNeeded(jwt: String) = connectionMutex.withLock {
         if (ws != null) return@withLock
         val realtimeBase = supabaseBaseUrl.replace("https://", "wss://").replace("http://", "ws://")
@@ -83,7 +87,20 @@ class RealtimeManager @Inject constructor(
         Log.d(TAG, "WebSocket connecting")
     }
 
+    /** MED-1: forward the new JWT to the existing channel without recreating the socket. */
+    private suspend fun rotateAccessToken(newJwt: String) = connectionMutex.withLock {
+        val current = ws ?: return@withLock
+        runCatching {
+            current.send(
+                """{"event":"access_token","topic":"realtime:public:notifications","payload":{"access_token":"$newJwt"},"ref":"${nextRef()}"}"""
+            )
+        }
+    }
+
     private fun disconnect() {
+        // CRIT-2: cancel any pending reconnect so the user's sign-out actually closes the channel.
+        reconnectJob?.cancel()
+        reconnectJob = null
         scope.launch {
             connectionMutex.withLock {
                 ws?.close(CLOSE_NORMAL, "signed out")
@@ -101,7 +118,7 @@ class RealtimeManager @Inject constructor(
             Log.d(TAG, "WebSocket open — joining notifications channel")
             backoffMs = INITIAL_BACKOFF_MS
             val ref = nextRef()
-            webSocket.send(joinPayload(ref, jwt))
+            runCatching { webSocket.send(joinPayload(ref, jwt)) }
             scheduleHeartbeat(webSocket)
         }
 
@@ -112,12 +129,18 @@ class RealtimeManager @Inject constructor(
 
         override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
             Log.w(TAG, "WebSocket failure: ${t.message} — retry in ${backoffMs}ms")
-            scope.launch {
-                connectionMutex.withLock { ws = null }
-                val delayMs = backoffMs
+            // HIGH-4: cancel any prior in-flight reconnect; only one pending reconnect ever.
+            reconnectJob?.cancel()
+            reconnectJob = scope.launch {
+                connectionMutex.withLock { if (ws === webSocket) ws = null }
+                val base = backoffMs
                 backoffMs = min(backoffMs * 2, MAX_BACKOFF_MS)
-                delay(delayMs)
-                currentJwt?.let { connectIfNeeded(it) }
+                // HIGH-8 fix: equal-jitter so N devices don't reconnect in lockstep.
+                val jitter = Random.nextLong(0, base / 2 + 1)
+                delay(base + jitter)
+                // CRIT-2: re-check current session under the mutex — sign-out during backoff aborts here.
+                val jwtNow = currentJwt ?: return@launch
+                connectIfNeeded(jwtNow)
             }
         }
 
@@ -129,24 +152,18 @@ class RealtimeManager @Inject constructor(
             scope.launch {
                 while (ws === webSocket) {
                     delay(HEARTBEAT_MS)
-                    webSocket.send("""{"event":"heartbeat","topic":"phoenix","payload":{},"ref":"${nextRef()}","join_ref":null}""")
+                    // MED-12: WS can close between the `===` check and the send — wrap to tolerate.
+                    runCatching {
+                        webSocket.send("""{"event":"heartbeat","topic":"phoenix","payload":{},"ref":"${nextRef()}","join_ref":null}""")
+                    }.onFailure { return@launch }
                 }
             }
         }
     }
 
-    // ─── JSON helpers ─────────────────────────────────────────────────────────
-
     private fun joinPayload(ref: String, jwt: String): String =
         """{"event":"phx_join","topic":"realtime:public:notifications","payload":{"config":{"broadcast":{"self":false},"presence":{"key":""},"postgres_changes":[{"event":"*","schema":"public","table":"notifications"}]},"access_token":"$jwt"},"ref":"$ref","join_ref":"$ref"}"""
 
-    /**
-     * Phoenix realtime payload shape (Supabase):
-     * `{ "payload": { "data": { "table": ..., "type": ..., "schema": ..., "record"|"new": { ... } } } }`
-     *
-     * We parse defensively (any field may be missing) and tolerate either `"new"` (older)
-     * or `"record"` (current) keys for the row body.
-     */
     private fun parseEvent(text: String): RealtimeEvent? = runCatching {
         val root = AppJson.parseToJsonElement(text).jsonObject
         val data = root["payload"]?.jsonObject?.get("data")?.jsonObject ?: return@runCatching null
@@ -157,7 +174,11 @@ class RealtimeManager @Inject constructor(
         val row = (data["record"] ?: data["new"])?.jsonObject
         val fields: Map<String, String> = row.orEmpty().mapValues { (_, v) -> v.asString() }
         RealtimeEvent(table = table, eventType = eventType, schema = schema, fields = fields)
-    }.onFailure { Log.v(TAG, "skipped malformed payload: ${it.message}") }.getOrNull()
+    }.onFailure {
+        // HIGH-1: previous Log.v was filtered in release. Use Log.w with truncated payload so prod
+        // surfaces malformed frames (still bounded — log only first 200 chars).
+        Log.w(TAG, "malformed payload (first 200 chars): ${text.take(200)}", it)
+    }.getOrNull()
 
     private fun JsonElement.asString(): String =
         (this as? kotlinx.serialization.json.JsonPrimitive)?.contentOrNull ?: toString()
