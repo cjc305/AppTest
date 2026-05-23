@@ -85,6 +85,14 @@ class SupabaseMyAppsRepository @Inject constructor(
     override suspend fun save(draft: AppDraft): AppResult<String> = withContext(dispatchers.io) {
         try {
             val isCreate = draft.id == null
+
+            // Snapshot status BEFORE the upsert so we know whether to auto-activate.
+            // Only DRAFT apps get auto-activated on save; PAUSED stays PAUSED so users
+            // who explicitly paused don't get re-activated against their will.
+            val priorStatus: OwnedAppStatus? = if (!isCreate) {
+                _state.value.firstOrNull { it.id == draft.id }?.status
+            } else null
+
             val id = if (isCreate) {
                 val created = appsApi.create(draft.toUpsertBody()).firstOrNull()
                     ?: throw IllegalStateException("No row returned after create")
@@ -93,13 +101,14 @@ class SupabaseMyAppsRepository @Inject constructor(
                 appsApi.update("eq.${draft.id}", draft.toUpsertBody()).close()
                 draft.id!!
             }
-            // Auto-activate newly created apps so they immediately enter the matching pool.
-            // (DB defaults status='DRAFT' which is excluded from matching by the WHEN-filtered
-            // INSERT trigger; activate_app flips to ACTIVE and fires the UPDATE trigger that
-            // calls the backend webhook.)
-            // Activation failure is non-fatal — the app is still saved; user can retry via
-            // a future "Activate" button.
-            if (isCreate) {
+            // Auto-activate so the app enters the matching pool.
+            //   - new app (isCreate=true): always activate (DB default is DRAFT)
+            //   - existing DRAFT app: activate too — user clearly wants this live now
+            //   - existing PAUSED/ARCHIVED app: leave alone (user's explicit intent)
+            // Activation failure is non-fatal — the row is still saved; user can retry
+            // by re-saving once any transient error clears.
+            val shouldActivate = isCreate || priorStatus == OwnedAppStatus.Paused
+            if (shouldActivate) {
                 runCatching { appsApi.activateApp(ActivateAppRequest(id)) }
             }
             refreshCache()
