@@ -39,36 +39,15 @@ object NetworkModule {
     private const val MEDIA_TYPE_JSON = "application/json; charset=utf-8"
     private const val HEADER_API_KEY = "apikey"
 
+    // LOW-1: BASIC level logs URL + status — gated on BuildConfig.DEBUG so release builds
+    // don't leak request URLs to logcat (which manufacturer telemetry may collect).
     @Provides
     @Singleton
-    fun provideLoggingInterceptor(): HttpLoggingInterceptor =
-        HttpLoggingInterceptor().apply {
-            // LOW-1 fix: BASIC logs URL + status to logcat — unsafe to ship in release where
-            // device manufacturers may collect logs. Gate on BuildConfig.DEBUG (consumer module
-            // must enable `buildFeatures { buildConfig = true }`).
-            level = if (com.apptest.core.network.BuildConfig.DEBUG)
-                HttpLoggingInterceptor.Level.BASIC
-            else
-                HttpLoggingInterceptor.Level.NONE
-        }
-
-    /**
-     * Host allowlist for [AuthInterceptor]. The Supabase JWT carries row-level-security claims —
-     * sending it to any other host (Ktor backend, third-party APIs) is a cross-domain token
-     * leak (HIGH-2). Derived at runtime from the configured Supabase URL.
-     */
-    @Provides
-    @Singleton
-    @javax.inject.Named("auth_interceptor_allowed_hosts")
-    fun provideAuthInterceptorAllowedHosts(
-        @SupabaseBaseUrl baseUrl: String,
-    ): Set<String> {
-        val host = baseUrl
-            .removePrefix("https://").removePrefix("http://")
-            .substringBefore("/")
-            .substringBefore(":")
-        return setOf(host)
+    fun provideLoggingInterceptor(): HttpLoggingInterceptor = HttpLoggingInterceptor().apply {
+        level = if (com.apptest.core.network.BuildConfig.DEBUG)
+            HttpLoggingInterceptor.Level.BASIC else HttpLoggingInterceptor.Level.NONE
     }
+    // HIGH-2 host allowlist provider lives in [AuthAllowedHostsModule].
 
     /** Shared OkHttp for Ktor — auth JWT only. */
     @Provides
@@ -168,45 +147,26 @@ object NetworkModule {
     fun provideSupabaseAuthApiService(@SupabaseAuth retrofit: Retrofit): SupabaseAuthApiService =
         retrofit.create(SupabaseAuthApiService::class.java)
 
-    /** Notifications CRUD — uses [@SupabaseRest][SupabaseRest] Retrofit (PostgREST base URL). */
-    @Provides
-    @Singleton
-    fun provideSupabaseNotificationsApiService(
-        @SupabaseRest retrofit: Retrofit,
-    ): SupabaseNotificationsApiService =
-        retrofit.create(SupabaseNotificationsApiService::class.java)
+    // Supabase REST API services (PostgREST base URL via [@SupabaseRest][SupabaseRest] Retrofit).
+    @Provides @Singleton
+    fun provideNotificationsApi(@SupabaseRest r: Retrofit): SupabaseNotificationsApiService =
+        r.create(SupabaseNotificationsApiService::class.java)
 
-    /** Active-match queries + abandon — used by heartbeat worker (R-040). */
-    @Provides
-    @Singleton
-    fun provideSupabaseTestingApiService(
-        @SupabaseRest retrofit: Retrofit,
-    ): SupabaseTestingApiService =
-        retrofit.create(SupabaseTestingApiService::class.java)
+    @Provides @Singleton
+    fun provideTestingApi(@SupabaseRest r: Retrofit): SupabaseTestingApiService =
+        r.create(SupabaseTestingApiService::class.java)
 
-    /** Apps CRUD — My Apps editor + Home owned list + App Detail. */
-    @Provides
-    @Singleton
-    fun provideSupabaseAppsApiService(
-        @SupabaseRest retrofit: Retrofit,
-    ): SupabaseAppsApiService =
-        retrofit.create(SupabaseAppsApiService::class.java)
+    @Provides @Singleton
+    fun provideAppsApi(@SupabaseRest r: Retrofit): SupabaseAppsApiService =
+        r.create(SupabaseAppsApiService::class.java)
 
-    /** Richer match queries for Home hero card + Testing screen. */
-    @Provides
-    @Singleton
-    fun provideSupabaseMatchesApiService(
-        @SupabaseRest retrofit: Retrofit,
-    ): SupabaseMatchesApiService =
-        retrofit.create(SupabaseMatchesApiService::class.java)
+    @Provides @Singleton
+    fun provideMatchesApi(@SupabaseRest r: Retrofit): SupabaseMatchesApiService =
+        r.create(SupabaseMatchesApiService::class.java)
 
-    /** Profile + proofs — Profile screen. */
-    @Provides
-    @Singleton
-    fun provideSupabaseProfilesApiService(
-        @SupabaseRest retrofit: Retrofit,
-    ): SupabaseProfilesApiService =
-        retrofit.create(SupabaseProfilesApiService::class.java)
+    @Provides @Singleton
+    fun provideProfilesApi(@SupabaseRest r: Retrofit): SupabaseProfilesApiService =
+        r.create(SupabaseProfilesApiService::class.java)
 }
 
 @Qualifier

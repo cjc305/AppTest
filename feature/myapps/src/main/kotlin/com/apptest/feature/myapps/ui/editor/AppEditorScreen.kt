@@ -51,14 +51,9 @@ fun AppEditorScreen(
             AppTopBar(
                 title = if (state.isEdit) l.editor_title_edit else l.editor_title_create,
                 navIcon = {
-                    // HIGH-011: disable toolbar back while save in flight (matches BackHandler
-                    // in AppEditorRoute and the Cancel button disable state). Prevents
-                    // viewModelScope cancellation mid-save → silent data loss.
+                    // HIGH-011: disable while saving (matches BackHandler + Cancel button).
                     IconButton(onClick = onCancel, enabled = !state.isSaving) {
-                        AppIcon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = l.cta_back,
-                        )
+                        AppIcon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = l.cta_back)
                     }
                 },
             )
@@ -156,13 +151,7 @@ fun AppEditorScreen(
     }
 }
 
-/**
- * Numeric input with an inline string buffer so the user can clear the field, type "0"-prefixed
- * values, or paste non-digit chars without silently dropping their keystrokes. Length is capped
- * at the digits needed for the range's upper bound; non-digit chars are stripped on input.
- * The model receives a parsed Int only when it falls inside [range]; out-of-range or unparseable
- * input is surfaced via [isError] + supportingText rather than swallowed.
- */
+/** Numeric input with inline string buffer; non-digit input stripped, out-of-range surfaced. */
 @Composable
 private fun NumberField(value: Int, onChange: (Int) -> Unit, label: String, range: IntRange) {
     val maxLen = range.last.toString().length
