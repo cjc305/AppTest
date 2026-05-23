@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.cjc305.apptest",
+      "sha256_cert_fingerprints": [
+        "22:65:E4:D6:0D:DE:35:5C:59:88:0D:1A:22:D6:14:9A:AB:DF:9A:97:A1:B2:99:E9:C9:DC:70:C2:4E:5B:6D:3C"
+      ]
+    }
+  }
+]
