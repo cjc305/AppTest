@@ -236,19 +236,57 @@
     .pillar-title { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
     .pillar-body  { color: var(--text-2); font-size: .875rem; line-height: 1.65; }
 
-    /* ── CTA Banner ── */
-    #cta-banner {
-      background: linear-gradient(135deg, var(--accent-dim) 0%, var(--accent) 60%, var(--accent-hl) 100%);
-      padding: 80px 0;
+    /* ── Beta Signup ── */
+    #beta {
+      background: var(--bg-2);
+      padding: 96px 0;
     }
-    .cta-inner { text-align: center; }
-    .cta-h2 {
-      font-size: clamp(1.8rem, 4vw, 3rem);
+    .beta-inner { max-width: 580px; margin: 0 auto; text-align: center; }
+    .beta-badge {
+      display: inline-block;
+      background: rgba(91,94,244,.15);
+      border: 1px solid var(--border);
+      color: var(--accent);
+      font-size: .75rem; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; font-family: var(--mono);
+      padding: 5px 14px; border-radius: 20px; margin-bottom: 24px;
+    }
+    .beta-h2 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
       font-weight: 800; letter-spacing: -.025em;
       margin-bottom: 8px;
     }
-    .cta-h2-zh { font-size: clamp(1.2rem, 2.5vw, 1.8rem); opacity: .8; margin-bottom: 32px; }
-    .cta-note { font-size: .85rem; opacity: .7; margin-top: 18px; font-family: var(--mono); }
+    .beta-h2-zh { font-size: clamp(1.1rem, 2.5vw, 1.5rem); color: var(--text-2); margin-bottom: 20px; }
+    .beta-desc    { color: var(--text-2); font-size: .95rem; line-height: 1.7; margin-bottom: 8px; }
+    .beta-desc-zh { color: var(--text-3); font-size: .875rem; line-height: 1.7; margin-bottom: 32px; }
+    .beta-form {
+      display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+      margin-bottom: 16px;
+    }
+    .beta-input {
+      flex: 1; min-width: 220px; max-width: 320px;
+      background: var(--bg-3);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-size: .95rem; padding: 12px 16px;
+      outline: none; transition: border-color .15s;
+    }
+    .beta-input::placeholder { color: var(--text-3); }
+    .beta-input:focus { border-color: var(--accent); }
+    .beta-submit {
+      background: var(--accent); color: #fff;
+      border: none; border-radius: var(--radius);
+      font-size: .95rem; font-weight: 700;
+      padding: 12px 24px; cursor: pointer;
+      transition: background .15s;
+      white-space: nowrap;
+    }
+    .beta-submit:hover { background: var(--accent-hl); }
+    .beta-note {
+      color: var(--text-3); font-size: .82rem; line-height: 1.65;
+    }
+    .beta-note a { color: var(--accent); text-decoration: underline; }
 
     /* ── Footer ── */
     footer {
@@ -287,7 +325,7 @@
 <nav>
   <div class="container nav-inner">
     <div class="nav-logo">App<span>Test</span></div>
-    <a href="#cta-banner" class="btn-ghost">Join Beta</a>
+    <a href="#beta" class="btn-ghost">參加封閉測試</a>
   </div>
 </nav>
 
@@ -302,8 +340,8 @@
         <p class="hero-sub">Android devs testing each other's apps — no money, no fake reviews, just reciprocity.</p>
         <p class="hero-sub-zh">Android 開發者互測平台——不花錢、不灌假評論，用互惠解決上架瓶頸。</p>
         <div class="hero-cta-row">
-          <a href="#cta-banner" class="btn-primary">
-            Join Beta — Free
+          <a href="#beta" class="btn-primary">
+            🔔 加入測試
           </a>
           <span class="hero-note">免費 · Free · No credit card</span>
         </div>
@@ -448,16 +486,23 @@
   </div>
 </section>
 
-<!-- ── CTA Banner ── -->
-<section id="cta-banner">
+<!-- ── Beta Signup ── -->
+<section id="beta">
   <div class="container">
-    <div class="cta-inner">
-      <h2 class="cta-h2">Join the network. Hit your 12/14. Ship.</h2>
-      <div class="cta-h2-zh">加入網路。湊滿 12/14。上架。</div>
-      <a href="#cta-banner" class="btn-primary" style="display:inline-flex; background:#fff; color:#5b5ef4;">
-        Join Beta — Free
-      </a>
-      <p class="cta-note">Free during closed beta · 封測期間完全免費</p>
+    <div class="beta-inner reveal">
+      <div class="beta-badge">封閉測試招募中 · Closed Beta</div>
+      <h2 class="beta-h2">成為 AppTest 第一批開發者</h2>
+      <div class="beta-h2-zh">Be a Founding Dev</div>
+      <p class="beta-desc">把你的 Google 帳號 email 寄給我，加入名單後我會傳測試連結給你。完全免費！</p>
+      <p class="beta-desc-zh">Send your Google account email — I'll send you the Play Store testing link. Free forever during beta.</p>
+      <form class="beta-form" id="betaForm">
+        <input class="beta-input" type="email" id="betaEmail" placeholder="your@gmail.com" required />
+        <button class="beta-submit" type="submit">申請測試 →</button>
+      </form>
+      <p class="beta-note">
+        需要使用 Google 帳號的 email 加入測試。加入後可透過 Google Play 商店直接下載。<br>
+        也可以直接 email 至 <a href="mailto:cjc305@gmail.com">cjc305@gmail.com</a>
+      </p>
     </div>
   </div>
 </section>
@@ -480,6 +525,17 @@
     { threshold: 0.12 }
   );
   document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Beta form → mailto
+  document.getElementById('betaForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const email = document.getElementById('betaEmail').value.trim();
+    const subject = encodeURIComponent('AppTest 封閉測試申請');
+    const body = encodeURIComponent(
+      'Hi,\n\n我想申請加入 AppTest 封閉測試。\n我的 Google 帳號 email：' + email + '\n\n謝謝！'
+    );
+    window.location.href = 'mailto:cjc305@gmail.com?subject=' + subject + '&body=' + body;
+  });
 </script>
 
 </body>
