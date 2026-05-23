@@ -35,14 +35,22 @@ fun ProofViewerScreen(
     modifier: Modifier = Modifier,
 ) {
     val l = AppL10n.current
-    val url = "https://apptest.dev/v/$proofId.png"
+    // CRIT-2 fix: server-controlled proofId could otherwise URL-inject (e.g. "../evil.com/x").
+    // Reject anything that's not a safe Supabase UUID / nanoid. Defense-in-depth on top of
+    // backend validation — the path segment is interpolated raw into Coil's HTTP fetch.
+    val safeId = com.apptest.core.navigation.AppDeepLink.safeId(proofId)
+    if (safeId == null) {
+        androidx.compose.runtime.LaunchedEffect(Unit) { onBack() }
+        return
+    }
+    val url = "https://apptest.dev/v/${android.net.Uri.encode(safeId)}.png"
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
         containerColor = Color.Black,
         topBar = {
             AppTopBar(
-                title = l.cta_back.let { /* TopBar wants a title; use proof id short */ "Proof · $proofId" },
+                title = "Proof · $safeId",
                 navIcon = {
                     IconButton(onClick = onBack) {
                         AppIcon(
@@ -64,12 +72,12 @@ fun ProofViewerScreen(
         ) {
             AsyncImage(
                 model = url,
-                contentDescription = "Proof $proofId",
+                contentDescription = "Proof $safeId",
                 contentScale = ContentScale.Fit,
                 modifier = Modifier.fillMaxSize(),
             )
             AppText(
-                text = "$proofId",
+                text = safeId,
                 style = MaterialTheme.typography.labelSmall,
                 color = Color.White.copy(alpha = 0.5f),
                 modifier = Modifier.padding(AppSpacing.Sm),

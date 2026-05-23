@@ -94,12 +94,17 @@ class MainActivity : ComponentActivity() {
             AppTheme {
                 val windowSizeClass = calculateWindowSizeClass(this)
                 val authState by authRepo.state.collectAsStateWithLifecycle(initialValue = AuthState.SignedOut)
-                AppNavHost(
-                    startDestination = startDestinationFor(authState),
-                    windowSizeClass = windowSizeClass,
-                    onShareInvite = ::shareInvite,
-                    onSignOut = ::signOut,
-                )
+                // CRIT-3 fix: NavHost ignores startDestination changes after first composition.
+                // Re-key on authState so sign-in/sign-out re-creates the graph, popping the user
+                // off SignIn → Onboarding/Home (or vice versa) without explicit nav.navigate calls.
+                androidx.compose.runtime.key(authState) {
+                    AppNavHost(
+                        startDestination = startDestinationFor(authState),
+                        windowSizeClass = windowSizeClass,
+                        onShareInvite = ::shareInvite,
+                        onSignOut = ::signOut,
+                    )
+                }
             }
         }
     }

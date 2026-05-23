@@ -10,10 +10,22 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <!--
-        NOTE on QUERY_ALL_PACKAGES (install detection):
-        Defer to APT-V1-R-040. When that lands, add <queries> + targeted permission with
-        rationale per https://developer.android.com/training/package-visibility.
+        CRIT-4 fix (audit-2026-05-23): on Android 11+ targetSdk 30+, PackageManager.getPackageInfo()
+        throws NameNotFoundException for any package not declared in <queries> or covered by
+        QUERY_ALL_PACKAGES. Without this, PackageInstallChecker.isInstalled() always returns false
+        → every active match was being abandoned by the heartbeat worker as "uninstalled".
+
+        We declare an intent filter for ACTION_MAIN (which covers virtually all launchable apps —
+        sufficient for V1's per-match install check) and the Play Store package (for App Detail's
+        "Join" deep-link). When V2 graduates to Play Integrity API + per-package query, narrow
+        this scope to declared test-app packages only.
     -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.MAIN" />
+        </intent>
+        <package android:name="com.android.vending" />
+    </queries>
 
     <application
         android:name=".AppTestApplication"
