@@ -1,10 +1,12 @@
 # AppTest — Agent Handover
 
-> **Last refresh:** 2026-05-23 (pass 10 — 客戶端 audit + 14 個 CRIT/HIGH patch landed) · **State:** Play Console 已送審 13 項變更（pending Google review 7d 內），客戶端剛經歷 41-bug 深度 audit，12 個 prior "completed" 修復被找到 incomplete/regression
+> **Last refresh:** 2026-05-23 (pass 10 — 客戶端 audit 全 6/6 CRIT + 12/12 HIGH closed) · **State:** Play Console 已送審 13 項變更（pending Google review 7d 內），客戶端剛經歷 41-bug 深度 audit + 8 個原子 commit 已 land
 >
-> **⚠️ 下個 session 首要事項：先讀 `_specs/_ai/audit-2026-05-23.md`** — 22 個 prior bug-fix 任務（C-1 ~ L-3）其中 12 個其實沒完全修好。Audit doc 列出全部 41 bugs，14 個 patch 已套用，6 個 CRIT 未處理項 (CRIT-005/006) + 4 個 HIGH 未處理項 (HIGH-003/005/011) 需要 next-release。
+> **⚠️ 下個 session 首要事項：先讀 `_specs/_ai/audit-2026-05-23.md`** — 22 個 prior bug-fix 任務（C-1 ~ L-3）其中 12 個其實沒完全修好；audit-2026-05-23 已把所有 CRIT/HIGH 補完。剩下 22 個 MED/LOW 在 manifest.yaml §audit_2026_05_23 可逐項排入下個 sprint。
 >
 > 然後讀 `_specs/_ai/README.md` + `manifest.yaml` (§audit_2026_05_23) + `PRELAUNCH_CHECKLIST.md`。
+>
+> **Local commits 未 push**：8 個今天 audit 的 commit（76e689f → 9492d69 + 9859965 docs）+ 2 個之前的（8bcfc0c, 7047641）→ 共 10 個等 explicit `git push` 同意。
 
 ---
 

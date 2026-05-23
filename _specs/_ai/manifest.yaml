@@ -204,20 +204,20 @@ audit_2026_05_23:
   - { id: APT-AUDIT-CRIT-002, status: done,        severity: crit, title: "MainActivity NavHost re-keyed on AuthState (fixes stuck-on-SignIn after sign-in)" }
   - { id: APT-AUDIT-CRIT-003, status: done,        severity: crit, title: "(folded into CRIT-001) ProofViewer proofId validated before URL interpolation" }
   - { id: APT-AUDIT-CRIT-004, status: done,        severity: crit, title: "AndroidManifest <queries> for Android 11+ package visibility (R-040 install detection)" }
-  - { id: APT-AUDIT-CRIT-005, status: not_started, severity: crit, title: "SupabaseHeartbeatWorker: gate on signed-in; UninstallEventStore peek+ack instead of drainAll", blocks: [next_release] }
-  - { id: APT-AUDIT-CRIT-006, status: not_started, severity: crit, title: "UninstallEventStore user-scoped key (prevents cross-account contamination)",                 blocks: [next_release] }
+  - { id: APT-AUDIT-CRIT-005, status: done,        severity: crit, title: "SupabaseHeartbeatWorker: signed-in gate + UninstallEventStore peek+ack (patch applied 96aa18c)" }
+  - { id: APT-AUDIT-CRIT-006, status: done,        severity: crit, title: "UninstallEventStore user-scoped key (patch applied 96aa18c, same PR as CRIT-005)" }
   # HIGH — patches applied this session unless noted
   - { id: APT-AUDIT-HIGH-001, status: done,        severity: high, title: "DataStoreSessionStore: snapshot cache + per-read expiry recheck (M-1 was incomplete)" }
   - { id: APT-AUDIT-HIGH-002, status: done,        severity: high, title: "AuthInterceptor host allowlist (Supabase JWT not leaked to Ktor; C-3 was scope-limited)" }
-  - { id: APT-AUDIT-HIGH-003, status: not_started, severity: high, title: "FcmTopicManager singleton (replaces Activity-scoped FCM subscribe/unsubscribe; H-2 was incomplete)" }
+  - { id: APT-AUDIT-HIGH-003, status: done,        severity: high, title: "FcmTopicManager singleton (patch applied c3268bd; replaces Activity-scoped H-2)" }
   - { id: APT-AUDIT-HIGH-004, status: done,        severity: high, title: "RealtimeManager: cancel reconnect on sign-out (H-6 was missing this)" }
-  - { id: APT-AUDIT-HIGH-005, status: not_started, severity: high, title: "OwnedAppRow gains description + playOptInUrl (H-4 regression: edit dropped them)" }
+  - { id: APT-AUDIT-HIGH-005, status: done,        severity: high, title: "OwnedAppRow gains description + playOptInUrl (patch applied 9492d69; fixes H-4 regression)" }
   - { id: APT-AUDIT-HIGH-006, status: done,        severity: high, title: "Inbox UPDATE handler ORs existing isRead (H-7 was clobbered by realtime UPDATE)" }
   - { id: APT-AUDIT-HIGH-007, status: done,        severity: high, title: "InboxRepository time-throttled reload (M-8 AtomicBoolean prevented re-fetch)" }
   - { id: APT-AUDIT-HIGH-008, status: done,        severity: high, title: "Realtime reconnect jitter (H-6 had no jitter — thundering herd risk)" }
   - { id: APT-AUDIT-HIGH-009, status: done,        severity: high, title: "signOut clears home_skipped + inbox_read keys (M-2 was cross-account leak)" }
   - { id: APT-AUDIT-HIGH-010, status: done,        severity: high, title: "(folded into CRIT-004) Android 11+ package visibility" }
-  - { id: APT-AUDIT-HIGH-011, status: not_started, severity: high, title: "AppEditor back-during-save guard + NonCancellable cache write (C-2 was incomplete)" }
+  - { id: APT-AUDIT-HIGH-011, status: done,        severity: high, title: "AppEditor BackHandler + back/Cancel disable during save (patch applied 9492d69)" }
   - { id: APT-AUDIT-HIGH-012, status: done,        severity: high, title: "AppDetail Join updateAndGet atomic (H-5 had TOCTOU race)" }
   # MED — see audit doc; not applied this session
   - { id: APT-AUDIT-MED-001, status: done,         severity: med,  title: "signInWithGoogle clears pendingEmail (M-4 only covered signOut)" }
@@ -228,7 +228,7 @@ audit_2026_05_23:
   - { id: APT-AUDIT-MED-006, status: not_started,  severity: med,  title: "Realtime join payload via kotlinx buildJsonObject (no string interpolation)" }
   - { id: APT-AUDIT-MED-007, status: not_started,  severity: med,  title: "FCM notification id + PendingIntent requestCode unique (drop FLAG_ONE_SHOT)" }
   - { id: APT-AUDIT-MED-008, status: not_started,  severity: med,  title: "FCM channel created once in Application.onCreate (not per-push)" }
-  - { id: APT-AUDIT-MED-009, status: not_started,  severity: med,  title: "Heartbeat REPEAT_DAYS=3 + flexInterval (avoid Supabase 7d auto-pause)" }
+  - { id: APT-AUDIT-MED-009, status: done,         severity: med,  title: "Heartbeat REPEAT_DAYS 6→3 + flexInterval + LINEAR backoff (patch applied 96aa18c)" }
   - { id: APT-AUDIT-MED-010, status: not_started,  severity: med,  title: "OnboardingViewModel.onSkipAll in-flight guard (L-1 regression)" }
   - { id: APT-AUDIT-MED-011, status: not_started,  severity: med,  title: "EmailVerifyViewModel: route email arg → verifyMagicLink(email, token) (C-1 was decoupled)" }
   - { id: APT-AUDIT-MED-012, status: done,         severity: med,  title: "RealtimeManager heartbeat send wrapped in runCatching" }
