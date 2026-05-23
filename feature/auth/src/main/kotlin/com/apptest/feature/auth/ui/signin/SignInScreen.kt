@@ -47,7 +47,12 @@ fun SignInScreen(
                     onBack = onBack,
                 )
                 SignInUiState.Working -> AppLoadingState(message = l.signin_signing_in)
-                is SignInUiState.MagicLinkSent -> MagicLinkSentBody(email = state.email, onBack = onBack)
+                // MagicLinkSent state no longer shown — SignInRoute emits a NavigateToVerify
+                // event the moment the OTP is sent and immediately navigates to EmailVerify.
+                // The state is reset to EnteringEmail right after success, so this branch is
+                // technically unreachable but kept as a safe fallback to avoid an exhaustive
+                // when warning. Renders the same as Working (1-frame visible at most).
+                is SignInUiState.MagicLinkSent -> AppLoadingState(message = l.signin_signing_in)
                 is SignInUiState.Error -> ErrorBody(message = state.message, onBack = onBack)
             }
         }
@@ -113,26 +118,6 @@ private fun EmailFormBody(
         )
         AppVSpacer(AppSpacing.Sm)
         TextButton(onClick = onBack) { AppText(l.cta_back) }
-    }
-}
-
-@Composable
-private fun MagicLinkSentBody(email: String, onBack: () -> Unit) {
-    val l = AppL10n.current
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        AppText(l.signin_link_sent_title, style = MaterialTheme.typography.headlineMedium)
-        AppVSpacer(AppSpacing.Md)
-        AppText(
-            text = l.signin_link_sent_body.format(email),
-            style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.Center,
-        )
-        AppVSpacer(AppSpacing.Lg)
-        TextButton(onClick = onBack) { AppText(l.signin_change_email) }
     }
 }
 

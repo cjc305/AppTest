@@ -2,6 +2,7 @@ package com.apptest.feature.auth.ui.signin
 
 import android.content.Context
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
@@ -9,16 +10,37 @@ import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialCancellationException
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import kotlinx.coroutines.launch
 
 @Composable
-fun SignInRoute(viewModel: SignInViewModel = hiltViewModel()) {
+fun SignInRoute(
+    onNavigateToVerify: (email: String) -> Unit,
+    viewModel: SignInViewModel = hiltViewModel(),
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    // One-shot event collection. repeatOnLifecycle ensures we only collect when STARTED;
+    // emissions while STOPPED are buffered (capacity=1) or dropped (DROP_OLDEST).
+    // Critically: SharedFlow with replay=0 means re-entering this composable (e.g. user
+    // navigates back from EmailVerify) does NOT re-fire stale NavigateToVerify events.
+    LaunchedEffect(viewModel, lifecycleOwner) {
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewModel.events.collect { event ->
+                when (event) {
+                    is SignInEvent.NavigateToVerify -> onNavigateToVerify(event.email)
+                }
+            }
+        }
+    }
 
     SignInScreen(
         state = state,

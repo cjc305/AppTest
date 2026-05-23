@@ -31,6 +31,12 @@ interface MyAppsRepository : Repository {
     /** Create (id null) or update (id set). Returns id on success. */
     suspend fun save(draft: AppDraft): AppResult<String>
 
+    /**
+     * Flip a DRAFT/PAUSED app to ACTIVE — starts matching with testers.
+     * Calls the `activate_app` Postgres RPC server-side (validates ownership).
+     */
+    suspend fun activate(id: String): AppResult<Unit>
+
     suspend fun pause(id: String): AppResult<Unit>
     suspend fun resume(id: String): AppResult<Unit>
     suspend fun delete(id: String): AppResult<Unit>

@@ -107,7 +107,7 @@ fun AppNavHost(
             composable<AppDestination.AuthRoot> { SignInRedirect(navController) }
             composable<AppDestination.MainRoot> { MainRootRedirect(navController) }
 
-            authGraph()
+            authGraph(navController)
             onboardingGraph()
 
             homeGraph(

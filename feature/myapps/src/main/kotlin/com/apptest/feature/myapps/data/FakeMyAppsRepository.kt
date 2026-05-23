@@ -56,6 +56,7 @@ class FakeMyAppsRepository @Inject constructor() : MyAppsRepository {
         return AppResult.Success(id)
     }
 
+    override suspend fun activate(id: String): AppResult<Unit> = mutateStatus(id, OwnedAppStatus.Recruiting)
     override suspend fun pause(id: String): AppResult<Unit> = mutateStatus(id, OwnedAppStatus.Paused)
     override suspend fun resume(id: String): AppResult<Unit> = mutateStatus(id, OwnedAppStatus.Recruiting)
 
