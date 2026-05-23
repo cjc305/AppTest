@@ -1,22 +1,33 @@
 # AppTest — Agent Handover
 
-> **Last refresh:** 2026-05-23 (pass 16 — screenshots done ✅) · **State:** Play Console 已送審（pending Google review）。所有 client + backend code 完成。Legal pages live。Screenshots ready。
+> **Last refresh:** 2026-05-23 (pass 18 — Backend ✅ + Google OAuth ✅)
+> **State:** All Claude-executable tasks done. Waiting on owner actions (closed testing track).
 >
-> **下個 session 首要事項（純 owner action）：**
-> 1. **✅ DONE** Legal pages live at `https://cjc305.github.io/AppTest/legal/privacy.html`
-> 2. **✅ DONE** 6 Play Store screenshots ready at `screenshots/play_01_signin.png` … `play_06_myapps.png`
-> 3. **YOU DO:** Play Console → Store listing:
->    - Upload `screenshots/play_01_*.png` … `play_06_*.png` (6 phone screenshots)
->    - Privacy policy URL: `https://cjc305.github.io/AppTest/legal/privacy.html`
->    - Copy store listing copy from `_specs/store_listing.md` (en + zh-TW)
->    - Upload `screenshots/icon_512.png` (512×512 app icon)
->    - Upload `screenshots/feature_graphic.png` (1024×500)
-> 4. **YOU DO:** Content rating questionnaire + Data safety form in Play Console
-> 5. **YOU DO:** Backend Cloud Scheduler deploy: `AppTest-backend/deploy/cloud-scheduler.yaml`
+> **Play Console 完成狀態（automation 完成）：**
+> 1. ✅ AAB uploaded → Internal Testing (versionCode=2, versionName=0.1.1)
+> 2. ✅ Store listing zh-TW (title/short/full + 6 screenshots + icon + feature graphic)
+> 3. ✅ Store listing en-US added: title "AppTest: Android Beta Exchange" (30/30) + short/full desc
+> 4. ✅ Privacy policy URL saved: `https://cjc305.github.io/AppTest/legal/privacy.html`
+> 5. ✅ Content rating: IARC 已完成 (Everyone / no violence / no COPPA issues)
+> 6. ✅ Data safety form: email (auth) + crash logs (Crashlytics) + device ID (FCM); no data sold/shared
 >
-> 然後讀 `_specs/_ai/README.md` + `PRELAUNCH_CHECKLIST.md`。
+> **Backend (Cloud Run) ✅ LIVE:**
+> - Service URL: `https://apptest-backend-oimpzsbxaq-an.a.run.app` (health → `{"status":"ok"}`)
+> - Region: asia-northeast1 | Image: Artifact Registry · apptest-backend:latest
+> - Cloud Scheduler: 3 cron jobs (matching 02:00 UTC daily, reputation recompute, anti-fraud scan)
+> - Secrets: all in Secret Manager (Supabase service_role, Proof signing key)
 >
-> **All commits pushed pending your push permission. Run `git push` in both repos.**
+> **Google OAuth §2.3 ✅ COMPLETE:**
+> - Web Client ID: `726162458626-aug0siobtbtt8gbgbhse3qh44t2tb1md.apps.googleusercontent.com`
+> - Supabase callback URI registered in Google Cloud Console
+> - Supabase Google provider: Enabled + Client ID + Client Secret configured
+> - `GOOGLE_WEB_CLIENT_ID` wired into `local.properties` + `BuildConfig`
+>
+> **下個 session 唯一剩餘 owner action：**
+> - Play Console → 測試 → 封閉測試 → 建立測試群組 → 加 tester email → 啟動測試軌道
+> - Then submit for review when ready.
+>
+> **Remaining Claude tasks (unblocked):** §4 GitHub CI/CD — `git init` AppTest + push + add Actions secrets
 
 ---
 
@@ -40,7 +51,8 @@
 | **Per-module 4-docs** | ✅ 15/15 | 14 modules + `:app` 全部 README/API/FLOW/DEPENDENCY |
 | **Test coverage (core)** | ✅ partial | core/common (Result/Tier/Error)・core/domain (UseCase)・core/data (AuthSession + DataStoreSessionStore)・core/network (AuthInterceptor) |
 | **i18n bootstrap** | ✅ partial | values/strings.xml + values-zh-rTW/ for OS-level surfaces; in-app strings still in AppStringsCatalog (E task TODO) |
-| **Backend code (Ktor)** | ⏳ Not started | Separate sibling repo 規劃中 |
+| **Backend (Cloud Run)** | ✅ LIVE | `https://apptest-backend-oimpzsbxaq-an.a.run.app` · asia-northeast1 · Cloud Scheduler 3 crons |
+| **Google OAuth** | ✅ Done | Supabase Google provider enabled + Client ID/Secret set; GOOGLE_WEB_CLIENT_ID in local.properties |
 | **CI** | ⏳ Not started | Repo 還沒 `git init`（APT-X-003） |
 | **Firebase** | ✅ Done | Firebase project apptest-7fced (Spark) + google-services.json + FCM (R-042) + Crashlytics (APT-X-004) wired. Build green. |
 

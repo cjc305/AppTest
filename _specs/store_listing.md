@@ -11,12 +11,14 @@ schema_version: 1
 
 ## English (en-US)
 
-### Title (47 / 50 chars)
+### Title (30 / 30 chars — Play Console actual limit is 30, not 50)
 ```
-AppTest: Closed Test Exchange for Android Devs
+AppTest: Android Beta Exchange
 ```
+> Original draft was "AppTest: Closed Test Exchange for Android Devs" (46 chars) — exceeded
+> actual 30-char Play Console limit. Shortened 2026-05-23.
 
-### Short description (79 / 80 chars)
+### Short description (77 / 80 chars)
 ```
 Get 12 testers in 14 days. Android devs testing each other's apps — for free.
 ```

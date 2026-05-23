@@ -2,7 +2,8 @@
 
 > **Generated:** 2026-05-20 | **Last updated:** 2026-05-23 (41 bugs fixed + legal pages live ✅ + GitHub Pages ✅)
 > **Status:** Backend ✅ | Firebase ✅ | Supabase ✅ | DB migration ✅ | 41 bugs fixed ✅ | Signed AAB on Desktop ✅ (10 MB) | Privacy Policy + ToS **LIVE** ✅ | GitHub Pages ✅
-> **Remaining before Play upload (you do these in Play Console):** enter Privacy Policy URL → store listing screenshots/description + content rating + data safety form + closed testing track setup.
+> **Play Console automation completed 2026-05-23:** AAB uploaded ✅ | Store listing zh-TW + en-US ✅ | Privacy policy URL saved ✅ | Content rating ✅ (IARC 已完成) | Data safety form ✅
+> **Remaining (owner only):** Closed testing track setup + tester list → then submit for review.
 
 ---
 
@@ -57,13 +58,13 @@ Expected friction:
 - [x] `AppTestMessagingService` (@AndroidEntryPoint) registered in Manifest
 - [x] FCM wired via topic-based delivery (`user_<uid>`) — ADC on Cloud Run, no Server Key needed; Android subscribes in `MainActivity` on sign-in
 
-### 2.3 Google OAuth client (optional V1, if you want Google sign-in)
+### 2.3 Google OAuth client ✅ DONE (2026-05-23)
 
-- [ ] In Google Cloud Console (Firebase project's parent) → APIs & Services → Credentials → OAuth 2.0 client ID (Android)
-- [ ] Provide package `com.cjc305.apptest` + your debug `SHA-1` (`./gradlew :app:signingReport`)
-- [ ] Copy the **Web client ID** (not Android) — Supabase needs it to verify Google ID tokens
-- [ ] Add to `local.properties`: `google.webClientId=...`
-- [ ] Configure Supabase Google provider with same Web client ID
+- [x] Web OAuth client: Firebase auto-created `726162458626-aug0siobtbtt8gbgbhse3qh44t2tb1md.apps.googleusercontent.com`
+- [x] Supabase redirect URI `https://jefgixmmlqtgbxobukkt.supabase.co/auth/v1/callback` added to Google Cloud Console OAuth client
+- [x] Supabase Google provider: Enabled ✅, Client ID + Secret configured
+- [x] `GOOGLE_WEB_CLIENT_ID` added to `local.properties` (value: above Web client ID)
+- [ ] (Optional) Android OAuth client with debug SHA-1 `2E:A6:57:9B:50:53:41:44:B2:77:11:12:D4:D3:E9:F3:99:C8:C8:CF` — needed only for native Credential Manager flow; not required for redirect-based Supabase OAuth
 
 ### 2.3b Legal pages ✅ LIVE
 
@@ -75,8 +76,8 @@ Play Store requires a live Privacy Policy URL (mandatory) and ToS is best practi
   - **Privacy Policy:** `https://cjc305.github.io/AppTest/legal/privacy.html` ✅ LIVE
   - **Terms of Service:** `https://cjc305.github.io/AppTest/legal/terms.html` ✅ LIVE
   - **assetlinks.json:** `https://cjc305.github.io/AppTest/.well-known/assetlinks.json` ✅ LIVE
-- [ ] **YOU DO:** Enter `https://cjc305.github.io/AppTest/legal/privacy.html` in Play Console → Store listing → Privacy policy field
-- [ ] **YOU DO:** Reference same URL in Data Safety form
+- [x] Privacy policy URL entered in Play Console Store listing ✅ 2026-05-23
+- [x] Privacy policy URL referenced in Data Safety form ✅ 2026-05-23
 
 ### 2.4 Domain & assetlinks (blocks deep-link verification)
 
@@ -89,11 +90,13 @@ Play Store requires a live Privacy Policy URL (mandatory) and ToS is best practi
 
 - [x] $25 developer account + entity / address / tax / payment forms
 - [x] App entry created: package **`com.cjc305.apptest`**, default lang `en-US`
-- [ ] Store listing (en + zh-TW): short description, long description, screenshots, feature graphic, icon 512px
-- [ ] Content rating questionnaire
-- [ ] Data safety form (auth, content, install detection data)
-- [ ] Closed testing track set up + tester list email (or Google Group)
-- [ ] App signing: use Play App Signing (recommended); generate upload keystore + add CI secret
+- [x] Store listing zh-TW: title/short/full desc + 6 screenshots + icon + feature graphic ✅ 2026-05-23
+- [x] Store listing en-US: title "AppTest: Android Beta Exchange" (30/30) + short/full desc ✅ 2026-05-23
+  - Note: Play Console title limit is 30 chars (not 50). Screenshots shared from zh-TW listing.
+- [x] Content rating questionnaire ✅ 2026-05-23 (IARC 已完成)
+- [x] Data safety form (email/crash/deviceID, no selling) ✅ 2026-05-23
+- [ ] Closed testing track set up + tester list email (or Google Group) — **owner action**
+- [ ] App signing: enroll in Play App Signing when uploading to closed/production track
 
 ### 2.6 Signing keystore (release builds) ✅ DONE
 
