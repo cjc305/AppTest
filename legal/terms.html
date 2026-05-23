@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AppTest 使用者條款 | Terms of Service</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC",
+                   "Helvetica Neue", Arial, sans-serif;
+      font-size: 16px; line-height: 1.75; color: #1a1a1a;
+      background: #fafafa;
+    }
+    .container { max-width: 780px; margin: 0 auto; padding: 48px 24px 80px; }
+    .lang-toggle { display: flex; gap: 12px; margin-bottom: 40px; }
+    .lang-toggle a {
+      font-size: 14px; color: #555; text-decoration: none;
+      border: 1px solid #ccc; border-radius: 6px;
+      padding: 4px 12px; transition: background .15s;
+    }
+    .lang-toggle a.active, .lang-toggle a:hover {
+      background: #111; color: #fff; border-color: #111;
+    }
+    .logo { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+    .logo span { color: #5b5ef4; }
+    h1 { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+    .meta { font-size: 14px; color: #666; margin-bottom: 40px; }
+    h2 {
+      font-size: 18px; font-weight: 600; margin-top: 40px; margin-bottom: 10px;
+      padding-bottom: 6px; border-bottom: 1px solid #e5e5e5;
+    }
+    p { margin-bottom: 14px; }
+    ul { padding-left: 20px; margin-bottom: 14px; }
+    li { margin-bottom: 6px; }
+    .highlight {
+      background: #fff8ec; border-left: 4px solid #f5a623;
+      padding: 14px 18px; border-radius: 0 6px 6px 0;
+      margin-bottom: 16px; font-size: 15px;
+    }
+    .danger {
+      background: #fff0f0; border-left: 4px solid #e53e3e;
+      padding: 14px 18px; border-radius: 0 6px 6px 0;
+      margin-bottom: 16px; font-size: 15px;
+    }
+    .section-en { display: none; }
+    a { color: #5b5ef4; }
+    footer {
+      margin-top: 60px; padding-top: 24px;
+      border-top: 1px solid #e5e5e5;
+      font-size: 13px; color: #888;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="logo">App<span>Test</span></div>
+
+  <div class="lang-toggle">
+    <a href="#" class="active" onclick="setLang('zh');return false;">繁體中文</a>
+    <a href="#" onclick="setLang('en');return false;">English</a>
+  </div>
+
+  <!-- ────────────────────────── CHINESE ────────────────────────── -->
+  <div id="zh">
+    <h1>使用者條款</h1>
+    <p class="meta">生效日期：2026 年 06 月 01 日 &nbsp;|&nbsp; 版本：1.0</p>
+
+    <div class="highlight">
+      請在使用 AppTest 前詳閱本條款。使用本服務即表示您同意受本條款約束。<br>
+      本服務目前處於公開測試（Beta）階段，功能與政策可能持續更新。
+    </div>
+
+    <h2>1. 服務說明</h2>
+    <p>
+      AppTest（「本服務」）是一個媒合 Android 應用程式開發者與測試者的平台。
+      開發者可以在平台上提交待測 App，測試者可以接受任務、安裝 App 並提供真實使用回饋，
+      雙方通過信譽系統建立互信。
+    </p>
+
+    <h2>2. 帳號資格與設立</h2>
+    <ul>
+      <li>您必須年滿 13 歲（或您所在地區的法定使用年齡）才能使用本服務。</li>
+      <li>每人限設立一個帳號。建立多個帳號以操縱信譽分數屬嚴重違規。</li>
+      <li>您有責任妥善保護帳號安全，並對帳號下的所有活動負責。</li>
+      <li>帳號不可轉讓或出售給第三方。</li>
+    </ul>
+
+    <h2>3. 開發者義務</h2>
+    <p>作為開發者，您承諾：</p>
+    <ul>
+      <li>提交的 App 必須真實存在於 Google Play 並已開放封閉 / 開放測試。</li>
+      <li>提供真實的 Play Store 測試連結，不得偽造或指向惡意內容。</li>
+      <li>App 內容不得違反 Google Play 政策、法律法規或本服務規範。</li>
+      <li>不得提交包含惡意程式碼、隱私竊取或欺詐功能的 App。</li>
+      <li>測試任務完成後，信譽點數由系統自動計算，不得對結算結果進行申訴或干預。</li>
+    </ul>
+
+    <h2>4. 測試者義務</h2>
+    <p>作為測試者，您承諾：</p>
+    <ul>
+      <li>誠實安裝並實際使用分配的測試 App，達到任務要求的天數。</li>
+      <li>在測試期間保持 App 安裝狀態，配合系統的安裝驗證（心跳檢測）。</li>
+      <li>不使用模擬器、虛擬裝置或技術手段偽裝安裝狀態。</li>
+      <li>不接受超過合理數量的測試任務，避免無法真實完成。</li>
+    </ul>
+
+    <h2>5. 禁止行為</h2>
+    <div class="danger">
+      以下行為將導致帳號永久停用，且不予退還任何點數或補償：
+    </div>
+    <ul>
+      <li><strong>作弊：</strong>使用虛擬機、Xposed 框架、模擬安裝等方式欺騙驗證系統</li>
+      <li><strong>帳號操縱：</strong>建立多個帳號互相刷信譽</li>
+      <li><strong>虛假 App：</strong>提交不存在或無效的 Play Store 連結</li>
+      <li><strong>騷擾：</strong>對其他用戶進行任何形式的騷擾、歧視或威脅</li>
+      <li><strong>系統攻擊：</strong>試圖破解、逆向工程或攻擊本服務的基礎設施</li>
+      <li><strong>爬取資料：</strong>以自動化方式大量擷取本服務的用戶資料或 App 資訊</li>
+      <li><strong>商業轉售：</strong>將本服務的媒合資源轉售或用於商業牟利</li>
+    </ul>
+
+    <h2>6. 信譽與點數系統</h2>
+    <ul>
+      <li>信譽分數由系統依據測試完成率、App 保留率等行為指標自動計算。</li>
+      <li>點數（Credits）用於發起測試任務，不具現金價值，不可兌換或轉讓。</li>
+      <li>我們保留調整點數規則、信譽算法的權利，不另行個別通知。</li>
+      <li>若因違規被停用帳號，所有未使用的點數將予以沒收。</li>
+    </ul>
+
+    <h2>7. 智慧財產權</h2>
+    <ul>
+      <li>本服務的軟體、設計、商標及文字內容著作權歸我們所有。</li>
+      <li>您提交至平台的 App 資訊（名稱、說明等），您保留其著作權，
+          但授予我們在服務範圍內展示及傳遞該資訊的必要授權。</li>
+      <li>未經我們書面同意，不得重製、散布或商業使用本服務的任何部分。</li>
+    </ul>
+
+    <h2>8. 服務可用性與免責</h2>
+    <div class="highlight">
+      本服務目前為 Beta 測試版，「現狀」提供，不保證持續可用性。
+    </div>
+    <ul>
+      <li>我們不保證服務不中斷、無錯誤，或媒合結果符合您的期望。</li>
+      <li>對於因服務中斷、資料遺失或媒合失敗導致的損失，我們不承擔責任。</li>
+      <li>我們不就第三方 App（測試目標）的內容、品質或安全性作出任何保證。</li>
+      <li>測試者在安裝第三方 App 前，應自行評估風險。</li>
+    </ul>
+
+    <h2>9. 責任限制</h2>
+    <p>
+      在法律允許的最大範圍內，我們對任何間接、附帶、特殊或懲罰性損害
+      （包括利潤損失、資料遺失）不承擔責任。
+      我們對您的總責任上限為您在過去 12 個月內向本服務支付的金額（如有），
+      若從未付費，則責任上限為新台幣 0 元。
+    </p>
+
+    <h2>10. 帳號終止</h2>
+    <p><strong>您可以隨時刪除帳號。</strong></p>
+    <p>
+      我們保留在以下情況下暫停或終止您帳號的權利，不另行通知：
+    </p>
+    <ul>
+      <li>違反本條款任何條款</li>
+      <li>從事詐欺、作弊或有害其他用戶的行為</li>
+      <li>長達 12 個月無任何活動（帳號休眠）</li>
+      <li>依法律要求或政府命令</li>
+    </ul>
+
+    <h2>11. 條款變更</h2>
+    <p>
+      我們可能不定期更新本條款。重大變更將提前至少 14 天透過 App 通知或電子郵件告知。
+      更新生效後繼續使用本服務，即視為接受新條款。
+    </p>
+
+    <h2>12. 爭議解決</h2>
+    <p>
+      本條款依中華民國法律解釋及執行。
+      因本條款或本服務所生之爭議，雙方同意以台灣台北地方法院為第一審管轄法院。
+    </p>
+
+    <h2>13. 聯絡我們</h2>
+    <p>
+      如對本條款有任何疑問，請聯絡：<br>
+      📧 <a href="mailto:support@apptest.dev">support@apptest.dev</a>
+    </p>
+  </div>
+
+  <!-- ────────────────────────── ENGLISH ────────────────────────── -->
+  <div id="en" class="section-en">
+    <h1>Terms of Service</h1>
+    <p class="meta">Effective Date: June 1, 2026 &nbsp;|&nbsp; Version: 1.0</p>
+
+    <div class="highlight">
+      Please read these Terms carefully before using AppTest. By using the Service you agree
+      to be bound by these Terms. The Service is currently in public Beta and may change over time.
+    </div>
+
+    <h2>1. About the Service</h2>
+    <p>
+      AppTest ("the Service") is a matchmaking platform connecting Android app developers with
+      testers. Developers submit apps for testing; testers install them and provide genuine usage
+      over a required period. Both parties build reputation through a trust scoring system.
+    </p>
+
+    <h2>2. Account Eligibility & Setup</h2>
+    <ul>
+      <li>You must be at least 13 years old (or the minimum age in your jurisdiction).</li>
+      <li>Each person may hold only one account. Creating multiple accounts to manipulate reputation is a serious violation.</li>
+      <li>You are responsible for all activity under your account.</li>
+      <li>Accounts may not be transferred or sold.</li>
+    </ul>
+
+    <h2>3. Developer Obligations</h2>
+    <ul>
+      <li>Submitted apps must be real and available on Google Play (closed or open testing).</li>
+      <li>Play Store test invitation links must be genuine and not lead to malicious content.</li>
+      <li>App content must comply with Google Play policies, applicable laws, and these Terms.</li>
+      <li>Apps containing malware, spyware, or fraudulent features are strictly prohibited.</li>
+    </ul>
+
+    <h2>4. Tester Obligations</h2>
+    <ul>
+      <li>Honestly install and actively use assigned test apps for the required duration.</li>
+      <li>Keep the app installed throughout the testing period to pass heartbeat verification.</li>
+      <li>Do not use emulators, virtual devices, or technical means to fake install status.</li>
+    </ul>
+
+    <h2>5. Prohibited Conduct</h2>
+    <div class="danger">
+      The following will result in permanent account suspension with no refund of credits:
+    </div>
+    <ul>
+      <li><strong>Cheating:</strong> using emulators, Xposed hooks, or any method to fake install verification</li>
+      <li><strong>Multi-accounting:</strong> creating multiple accounts to manipulate reputation scores</li>
+      <li><strong>Fake apps:</strong> submitting non-existent or invalid Play Store links</li>
+      <li><strong>Harassment:</strong> any form of harassment, discrimination, or threats toward other users</li>
+      <li><strong>System attacks:</strong> attempting to hack, reverse-engineer, or attack the Service infrastructure</li>
+      <li><strong>Scraping:</strong> automated bulk extraction of user or app data</li>
+      <li><strong>Resale:</strong> reselling matchmaking resources for commercial gain</li>
+    </ul>
+
+    <h2>6. Reputation & Credits</h2>
+    <ul>
+      <li>Reputation scores are computed automatically based on behavioral metrics.</li>
+      <li>Credits have no cash value and cannot be exchanged or transferred.</li>
+      <li>We reserve the right to modify credit rules and reputation algorithms without individual notice.</li>
+      <li>Accounts suspended for violations forfeit all unused credits.</li>
+    </ul>
+
+    <h2>7. Intellectual Property</h2>
+    <ul>
+      <li>The Service software, design, trademarks, and content are owned by us.</li>
+      <li>You retain ownership of app information you submit but grant us a license to display it within the Service.</li>
+      <li>Reproducing, distributing, or commercially exploiting any part of the Service without written consent is prohibited.</li>
+    </ul>
+
+    <h2>8. Service Availability & Disclaimer</h2>
+    <div class="highlight">
+      The Service is provided in Beta "as-is" without warranty of availability or suitability.
+    </div>
+    <ul>
+      <li>We do not guarantee uninterrupted, error-free service.</li>
+      <li>We are not liable for losses resulting from service interruptions or failed matches.</li>
+      <li>We make no representations about the quality or safety of third-party apps listed on the platform.</li>
+    </ul>
+
+    <h2>9. Limitation of Liability</h2>
+    <p>
+      To the maximum extent permitted by law, we are not liable for indirect, incidental, special,
+      or punitive damages. Our total liability to you shall not exceed amounts paid to the Service
+      in the past 12 months, or TWD 0 if you have never paid.
+    </p>
+
+    <h2>10. Account Termination</h2>
+    <p>You may delete your account at any time. We may suspend or terminate accounts without notice for violations of these Terms, fraudulent activity, 12 months of inactivity, or as required by law.</p>
+
+    <h2>11. Changes to Terms</h2>
+    <p>We may update these Terms. Material changes will be communicated at least 14 days in advance via in-app notification or email. Continued use after the effective date constitutes acceptance.</p>
+
+    <h2>12. Dispute Resolution</h2>
+    <p>
+      These Terms are governed by the laws of the Republic of China (Taiwan).
+      The parties agree that the Taipei District Court shall have jurisdiction over any disputes
+      arising from these Terms.
+    </p>
+
+    <h2>13. Contact</h2>
+    <p>📧 <a href="mailto:support@apptest.dev">support@apptest.dev</a></p>
+  </div>
+
+  <footer>
+    &copy; 2026 AppTest. All rights reserved. &nbsp;|&nbsp;
+    <a href="./privacy.html">隱私權政策 / Privacy Policy</a>
+  </footer>
+</div>
+
+<script>
+  function setLang(lang) {
+    document.getElementById('zh').style.display = lang === 'zh' ? '' : 'none';
+    document.getElementById('en').style.display = lang === 'en' ? '' : 'none';
+    document.querySelectorAll('.lang-toggle a').forEach((a, i) => {
+      a.classList.toggle('active', (i === 0 && lang === 'zh') || (i === 1 && lang === 'en'));
+    });
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AppTest 隱私權政策 | Privacy Policy</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC",
+                   "Helvetica Neue", Arial, sans-serif;
+      font-size: 16px; line-height: 1.75; color: #1a1a1a;
+      background: #fafafa;
+    }
+    .container {
+      max-width: 780px; margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+    .lang-toggle {
+      display: flex; gap: 12px; margin-bottom: 40px;
+    }
+    .lang-toggle a {
+      font-size: 14px; color: #555; text-decoration: none;
+      border: 1px solid #ccc; border-radius: 6px;
+      padding: 4px 12px; transition: background .15s;
+    }
+    .lang-toggle a.active, .lang-toggle a:hover {
+      background: #111; color: #fff; border-color: #111;
+    }
+    .logo { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+    .logo span { color: #5b5ef4; }
+    h1 { font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+    .meta { font-size: 14px; color: #666; margin-bottom: 40px; }
+    h2 {
+      font-size: 18px; font-weight: 600; margin-top: 40px; margin-bottom: 10px;
+      padding-bottom: 6px; border-bottom: 1px solid #e5e5e5;
+    }
+    p { margin-bottom: 14px; }
+    ul { padding-left: 20px; margin-bottom: 14px; }
+    li { margin-bottom: 6px; }
+    table {
+      width: 100%; border-collapse: collapse; margin-bottom: 16px;
+      font-size: 14px;
+    }
+    th, td {
+      text-align: left; padding: 10px 12px;
+      border: 1px solid #e0e0e0;
+    }
+    th { background: #f4f4f4; font-weight: 600; }
+    .section-en { display: none; }
+    .highlight {
+      background: #f0f0ff; border-left: 4px solid #5b5ef4;
+      padding: 14px 18px; border-radius: 0 6px 6px 0;
+      margin-bottom: 16px; font-size: 15px;
+    }
+    a { color: #5b5ef4; }
+    footer {
+      margin-top: 60px; padding-top: 24px;
+      border-top: 1px solid #e5e5e5;
+      font-size: 13px; color: #888;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <div class="logo">App<span>Test</span></div>
+
+  <!-- Language toggle -->
+  <div class="lang-toggle">
+    <a href="#" class="active" onclick="setLang('zh');return false;">繁體中文</a>
+    <a href="#" onclick="setLang('en');return false;">English</a>
+  </div>
+
+  <!-- ────────────────────────── CHINESE ────────────────────────── -->
+  <div id="zh">
+    <h1>隱私權政策</h1>
+    <p class="meta">生效日期：2026 年 06 月 01 日 &nbsp;|&nbsp; 版本：1.0</p>
+
+    <div class="highlight">
+      本政策說明 AppTest（「本服務」、「我們」）如何收集、使用及保護您的個人資料。<br>
+      使用本服務即表示您同意本政策。如不同意，請停止使用並刪除帳號。
+    </div>
+
+    <h2>1. 我們是誰</h2>
+    <p>
+      AppTest 是一個連結 Android 應用程式開發者與測試者的媒合平台，
+      由個人開發者（以下稱「我們」）營運，聯絡信箱：
+      <a href="mailto:support@apptest.dev">support@apptest.dev</a>。
+    </p>
+
+    <h2>2. 我們收集哪些資料</h2>
+    <table>
+      <tr>
+        <th>資料類別</th>
+        <th>具體內容</th>
+        <th>收集時機</th>
+      </tr>
+      <tr>
+        <td>帳號資料</td>
+        <td>電子郵件地址、顯示名稱、大頭照網址（選填）</td>
+        <td>註冊 / 登入時</td>
+      </tr>
+      <tr>
+        <td>Google 帳號資訊</td>
+        <td>姓名、電子郵件、大頭照（僅 Google 登入時）</td>
+        <td>使用 Google 登入時</td>
+      </tr>
+      <tr>
+        <td>使用者偏好</td>
+        <td>語言、感興趣的 App 類別、測試身份（開發者 / 測試者）</td>
+        <td>新手引導問卷</td>
+      </tr>
+      <tr>
+        <td>App 安裝清單（局部）</td>
+        <td>您裝置上已安裝的特定 App 是否存在（僅查詢媒合結果中的目標 App）</td>
+        <td>參與測試任務後的心跳驗證</td>
+      </tr>
+      <tr>
+        <td>使用行為</td>
+        <td>媒合紀錄、測試進度、加入 / 完成時間</td>
+        <td>使用本服務期間</td>
+      </tr>
+      <tr>
+        <td>裝置識別符</td>
+        <td>Firebase Cloud Messaging (FCM) 推播 token</td>
+        <td>App 啟動時自動產生</td>
+      </tr>
+      <tr>
+        <td>當機回報</td>
+        <td>崩潰日誌、裝置型號、作業系統版本（去除個人識別後）</td>
+        <td>App 當機時（Firebase Crashlytics）</td>
+      </tr>
+    </table>
+
+    <p>
+      <strong>我們不收集：</strong>您的密碼（使用無密碼登入）、通訊錄、相機、麥克風、GPS 位置、
+      完整的 App 安裝清單（僅查詢特定媒合 App）。
+    </p>
+
+    <h2>3. 我們如何使用您的資料</h2>
+    <ul>
+      <li><strong>提供服務：</strong>帳號驗證、媒合算法、測試任務管理</li>
+      <li><strong>防止作弊：</strong>驗證測試者是否確實安裝並保持特定 App</li>
+      <li><strong>推播通知：</strong>媒合成功、任務更新等服務型通知</li>
+      <li><strong>品質改善：</strong>分析崩潰原因、優化使用體驗</li>
+      <li><strong>客服溝通：</strong>回覆您透過 support@apptest.dev 提出的問題</li>
+    </ul>
+    <p>我們<strong>不會</strong>將您的個人資料出售給第三方，也不會用於廣告投放。</p>
+
+    <h2>4. 第三方服務</h2>
+    <table>
+      <tr>
+        <th>服務商</th>
+        <th>用途</th>
+        <th>隱私政策</th>
+      </tr>
+      <tr>
+        <td>Google Firebase</td>
+        <td>帳號認證、推播通知（FCM）、當機回報（Crashlytics）</td>
+        <td><a href="https://firebase.google.com/support/privacy" target="_blank">firebase.google.com/support/privacy</a></td>
+      </tr>
+      <tr>
+        <td>Supabase</td>
+        <td>資料庫、身份驗證後端、即時訊息</td>
+        <td><a href="https://supabase.com/privacy" target="_blank">supabase.com/privacy</a></td>
+      </tr>
+    </table>
+    <p>上述服務商依其各自的隱私政策處理資料，並符合 GDPR 等國際標準。</p>
+
+    <h2>5. 資料儲存與安全</h2>
+    <ul>
+      <li>資料儲存於 Supabase 新加坡（ap-southeast-1）資料中心，並以行列層級安全（RLS）隔離用戶資料。</li>
+      <li>所有網路傳輸均透過 TLS 1.2+ 加密。</li>
+      <li>存取令牌（JWT）有效期短，過期後自動刷新；您登出時令牌立即失效。</li>
+      <li>我們不儲存明文密碼（無密碼登入設計）。</li>
+    </ul>
+
+    <h2>6. 您的權利</h2>
+    <p>依 GDPR、台灣個人資料保護法及相關法規，您有權：</p>
+    <ul>
+      <li><strong>查閱：</strong>要求取得我們持有您的個人資料副本</li>
+      <li><strong>更正：</strong>修正不正確的個人資料（在 App 設定頁面即可操作）</li>
+      <li><strong>刪除（被遺忘權）：</strong>刪除帳號後，您的個人識別資料將於 30 天內從我們的系統中刪除</li>
+      <li><strong>撤回同意：</strong>您可隨時登出並刪除帳號</li>
+      <li><strong>可攜性：</strong>可要求以機器可讀格式取得您的資料</li>
+    </ul>
+    <p>如需行使上述權利，請聯絡 <a href="mailto:support@apptest.dev">support@apptest.dev</a>，我們將於 30 個工作天內回覆。</p>
+
+    <h2>7. 未成年人</h2>
+    <p>
+      本服務適用對象為 13 歲（或您所在地區法定年齡）以上之用戶。
+      我們不會主動收集未成年人的個人資料。若發現未成年用戶，我們將刪除其帳號。
+    </p>
+
+    <h2>8. 資料保留期限</h2>
+    <ul>
+      <li>活躍帳號資料：持續保留至您刪除帳號為止</li>
+      <li>刪除帳號後：個人識別資料於 30 天內清除；匿名化的統計資料可能繼續保留用於服務改善</li>
+      <li>當機日誌：保留 90 天後自動刪除</li>
+    </ul>
+
+    <h2>9. Cookie 及追蹤技術</h2>
+    <p>
+      本 Android App 本身不使用 Cookie。Firebase 服務可能使用裝置識別符進行
+      崩潰分析；請參閱 Google 的隱私政策。
+    </p>
+
+    <h2>10. 本政策的變更</h2>
+    <p>
+      若我們變更本政策，將透過 App 內通知或電子郵件告知您。
+      重大變更將在生效前至少 14 天通知。繼續使用本服務視為接受更新後的政策。
+    </p>
+
+    <h2>11. 管轄法律</h2>
+    <p>
+      本政策依中華民國法律解釋及執行。
+      若本政策的中文版本與英文版本有任何歧異，以中文版本為準。
+    </p>
+
+    <h2>12. 聯絡我們</h2>
+    <p>
+      如有任何隱私相關問題，請聯絡：<br>
+      📧 <a href="mailto:support@apptest.dev">support@apptest.dev</a><br>
+      我們承諾於 5 個工作天內回覆。
+    </p>
+  </div>
+
+  <!-- ────────────────────────── ENGLISH ────────────────────────── -->
+  <div id="en" class="section-en">
+    <h1>Privacy Policy</h1>
+    <p class="meta">Effective Date: June 1, 2026 &nbsp;|&nbsp; Version: 1.0</p>
+
+    <div class="highlight">
+      This Privacy Policy explains how AppTest ("we", "our", "the Service") collects, uses,
+      and protects your personal data. By using the Service, you agree to this Policy.
+    </div>
+
+    <h2>1. Who We Are</h2>
+    <p>
+      AppTest is an app-testing matchmaking platform that connects Android developers with testers,
+      operated by an individual developer. Contact:
+      <a href="mailto:support@apptest.dev">support@apptest.dev</a>.
+    </p>
+
+    <h2>2. Data We Collect</h2>
+    <table>
+      <tr><th>Category</th><th>Specifics</th><th>When</th></tr>
+      <tr>
+        <td>Account Data</td>
+        <td>Email address, display name, profile photo URL (optional)</td>
+        <td>Registration / sign-in</td>
+      </tr>
+      <tr>
+        <td>Google Account Info</td>
+        <td>Name, email, profile photo (Google sign-in only)</td>
+        <td>When using Google sign-in</td>
+      </tr>
+      <tr>
+        <td>Preferences</td>
+        <td>Language, app categories of interest, role (developer/tester)</td>
+        <td>Onboarding questionnaire</td>
+      </tr>
+      <tr>
+        <td>App Install Check (partial)</td>
+        <td>Whether a specific matched app is installed on your device</td>
+        <td>Heartbeat verification during active tests</td>
+      </tr>
+      <tr>
+        <td>Usage Behavior</td>
+        <td>Match records, test progress, join/complete timestamps</td>
+        <td>While using the Service</td>
+      </tr>
+      <tr>
+        <td>Device Identifier</td>
+        <td>Firebase Cloud Messaging (FCM) push token</td>
+        <td>App launch</td>
+      </tr>
+      <tr>
+        <td>Crash Reports</td>
+        <td>Crash logs, device model, OS version (de-identified)</td>
+        <td>On app crash via Firebase Crashlytics</td>
+      </tr>
+    </table>
+    <p>
+      <strong>We do NOT collect:</strong> passwords (passwordless login design), contacts,
+      camera, microphone, GPS location, or your full app install list — only specific matched apps are queried.
+    </p>
+
+    <h2>3. How We Use Your Data</h2>
+    <ul>
+      <li><strong>Service delivery:</strong> account authentication, matching algorithm, test management</li>
+      <li><strong>Anti-cheat verification:</strong> confirm testers have the matched app installed</li>
+      <li><strong>Push notifications:</strong> match alerts, task updates</li>
+      <li><strong>Quality improvement:</strong> crash analysis, UX optimization</li>
+      <li><strong>Customer support:</strong> responding to emails sent to support@apptest.dev</li>
+    </ul>
+    <p>We <strong>do not</strong> sell your data or use it for advertising.</p>
+
+    <h2>4. Third-Party Services</h2>
+    <table>
+      <tr><th>Provider</th><th>Purpose</th><th>Privacy Policy</th></tr>
+      <tr>
+        <td>Google Firebase</td>
+        <td>Authentication, push (FCM), crash reporting (Crashlytics)</td>
+        <td><a href="https://firebase.google.com/support/privacy" target="_blank">firebase.google.com/support/privacy</a></td>
+      </tr>
+      <tr>
+        <td>Supabase</td>
+        <td>Database, auth backend, real-time messaging</td>
+        <td><a href="https://supabase.com/privacy" target="_blank">supabase.com/privacy</a></td>
+      </tr>
+    </table>
+
+    <h2>5. Data Storage & Security</h2>
+    <ul>
+      <li>Data is stored in Supabase's Singapore (ap-southeast-1) data center with row-level security (RLS).</li>
+      <li>All network communication is encrypted with TLS 1.2+.</li>
+      <li>JWTs are short-lived and invalidated on sign-out.</li>
+      <li>No plaintext passwords are stored (passwordless design).</li>
+    </ul>
+
+    <h2>6. Your Rights</h2>
+    <ul>
+      <li><strong>Access:</strong> request a copy of your personal data</li>
+      <li><strong>Correction:</strong> fix inaccurate data via the app settings</li>
+      <li><strong>Deletion (Right to be Forgotten):</strong> upon account deletion, personal identifiers are removed within 30 days</li>
+      <li><strong>Withdraw Consent:</strong> sign out and delete your account at any time</li>
+      <li><strong>Data Portability:</strong> request your data in a machine-readable format</li>
+    </ul>
+    <p>Email <a href="mailto:support@apptest.dev">support@apptest.dev</a> to exercise these rights. We will respond within 30 business days.</p>
+
+    <h2>7. Minors</h2>
+    <p>The Service is intended for users aged 13 or older (or the minimum age in your jurisdiction). We do not knowingly collect data from minors.</p>
+
+    <h2>8. Data Retention</h2>
+    <ul>
+      <li>Active account data: retained until account deletion</li>
+      <li>After deletion: personal identifiers removed within 30 days; anonymized statistics may be retained</li>
+      <li>Crash logs: automatically deleted after 90 days</li>
+    </ul>
+
+    <h2>9. Cookies & Tracking</h2>
+    <p>The AppTest Android app itself does not use cookies. Firebase services may use device identifiers for crash analysis; see Google's Privacy Policy.</p>
+
+    <h2>10. Policy Changes</h2>
+    <p>We will notify you of material changes via in-app notification or email at least 14 days before they take effect. Continued use constitutes acceptance of the updated policy.</p>
+
+    <h2>11. Governing Law</h2>
+    <p>This Policy is governed by the laws of the Republic of China (Taiwan). In case of discrepancy between the Chinese and English versions, the Chinese version prevails.</p>
+
+    <h2>12. Contact Us</h2>
+    <p>
+      📧 <a href="mailto:support@apptest.dev">support@apptest.dev</a><br>
+      We aim to respond within 5 business days.
+    </p>
+  </div>
+
+  <footer>
+    &copy; 2026 AppTest. All rights reserved. &nbsp;|&nbsp;
+    <a href="./terms.html">使用者條款 / Terms of Service</a>
+  </footer>
+</div>
+
+<script>
+  function setLang(lang) {
+    document.getElementById('zh').style.display = lang === 'zh' ? '' : 'none';
+    document.getElementById('en').style.display = lang === 'en' ? '' : 'none';
+    document.querySelectorAll('.lang-toggle a').forEach((a, i) => {
+      a.classList.toggle('active', (i === 0 && lang === 'zh') || (i === 1 && lang === 'en'));
+    });
+  }
+</script>
+</body>
+</html>
