@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AppTest — Get 12 Android testers in 14 days</title>
+  <meta name="description" content="Android devs testing each other's apps. Join the mutual beta testing network — free." />
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"SoftwareApplication","name":"AppTest","applicationCategory":"DeveloperApplication","operatingSystem":"Android","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Android devs testing each other's apps. Mutual beta testing network."}
+  </script>
+  <style>
+    /* ── Design Tokens ── */
+    :root {
+      --bg:        #0f0f13;
+      --bg-2:      #15151c;
+      --bg-3:      #1c1c26;
+      --accent:    #5b5ef4;
+      --accent-hl: #7b7ef7;
+      --accent-dim:#3a3db8;
+      --text:      #ffffff;
+      --text-2:    #a0a0b8;
+      --text-3:    #606078;
+      --border:    rgba(91,94,244,.18);
+      --radius:    10px;
+      --radius-lg: 18px;
+      --font:      system-ui, -apple-system, 'Segoe UI', sans-serif;
+      --mono:      'SF Mono', 'Fira Code', 'Consolas', monospace;
+    }
+
+    /* ── Reset ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: inherit; text-decoration: none; }
+    img, svg { display: block; }
+
+    /* ── Layout ── */
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+    .section    { padding: 96px 0; }
+    .section-sm { padding: 64px 0; }
+
+    /* ── NavBar ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(15,15,19,.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 60px;
+    }
+    .nav-logo {
+      font-size: 1.15rem; font-weight: 700; letter-spacing: -.02em;
+      color: var(--text);
+    }
+    .nav-logo span { color: var(--accent); }
+    .btn-ghost {
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 7px 18px;
+      border-radius: var(--radius);
+      font-size: .875rem; font-weight: 600;
+      transition: background .15s, color .15s;
+      cursor: pointer;
+    }
+    .btn-ghost:hover { background: var(--accent); color: #fff; }
+
+    /* ── Buttons ── */
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--accent);
+      color: #fff;
+      padding: 14px 32px;
+      border-radius: var(--radius);
+      font-size: 1rem; font-weight: 700;
+      border: none; cursor: pointer;
+      transition: background .15s, transform .1s;
+    }
+    .btn-primary:hover { background: var(--accent-hl); transform: translateY(-1px); }
+    .btn-primary:active { transform: translateY(0); }
+
+    /* ── Hero ── */
+    #hero {
+      min-height: 92vh;
+      display: flex; align-items: center;
+      padding: 80px 0 60px;
+      position: relative; overflow: hidden;
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px; align-items: center;
+    }
+    .hero-eyebrow {
+      font-size: .8rem; font-weight: 600; letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--accent); margin-bottom: 20px;
+      font-family: var(--mono);
+    }
+    .hero-h1 {
+      font-size: clamp(2.4rem, 5vw, 4rem);
+      font-weight: 800; line-height: 1.1;
+      letter-spacing: -.03em; margin-bottom: 16px;
+    }
+    .hero-h1-zh {
+      font-size: clamp(1.5rem, 3vw, 2.2rem);
+      font-weight: 700; line-height: 1.3;
+      color: var(--text-2); margin-bottom: 24px;
+    }
+    .hero-sub {
+      font-size: 1.1rem; color: var(--text-2);
+      max-width: 480px; margin-bottom: 12px;
+    }
+    .hero-sub-zh {
+      font-size: .95rem; color: var(--text-3);
+      max-width: 480px; margin-bottom: 36px;
+    }
+    .hero-cta-row { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
+    .hero-note {
+      font-size: .8rem; color: var(--text-3);
+      font-family: var(--mono);
+    }
+
+    /* ── Orbit SVG ── */
+    .orbit-wrap {
+      display: flex; justify-content: center; align-items: center;
+      position: relative;
+    }
+    .orbit-svg { width: 100%; max-width: 440px; }
+    @keyframes spin-slow  { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes spin-rev   { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+    @keyframes pulse-node { 0%,100% { opacity:.7; r:5; } 50% { opacity:1; r:7; } }
+    @keyframes dash-flow  {
+      from { stroke-dashoffset: 300; }
+      to   { stroke-dashoffset: 0; }
+    }
+    .ring-outer { transform-origin: 220px 220px; animation: spin-slow 28s linear infinite; }
+    .ring-inner { transform-origin: 220px 220px; animation: spin-rev 18s linear infinite; }
+    .node { animation: pulse-node 2.4s ease-in-out infinite; }
+    .node:nth-child(2)  { animation-delay: .3s; }
+    .node:nth-child(3)  { animation-delay: .6s; }
+    .node:nth-child(4)  { animation-delay: .9s; }
+    .node:nth-child(5)  { animation-delay: 1.2s; }
+    .node:nth-child(6)  { animation-delay: 1.5s; }
+    .signal {
+      stroke-dasharray: 24 276;
+      animation: dash-flow 3s linear infinite;
+    }
+    .signal-2 { animation-delay: 1.5s; }
+
+    /* ── Problem ── */
+    #problem { background: var(--bg-2); }
+    .problem-inner {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start;
+    }
+    .problem-block { padding: 36px; background: var(--bg-3); border-radius: var(--radius-lg); border: 1px solid var(--border); }
+    .problem-block.bad  { border-color: rgba(255,80,80,.15); }
+    .problem-block.good { border-color: rgba(91,94,244,.3); }
+    .problem-label {
+      font-size: .75rem; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; font-family: var(--mono);
+      margin-bottom: 16px;
+    }
+    .problem-label.bad  { color: #ff6060; }
+    .problem-label.good { color: var(--accent); }
+    .problem-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 12px; }
+    .problem-body  { color: var(--text-2); font-size: .95rem; line-height: 1.7; }
+    .problem-body-zh { color: var(--text-3); font-size: .85rem; margin-top: 10px; line-height: 1.7; }
+
+    /* ── Section headings ── */
+    .section-label {
+      font-size: .75rem; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--accent);
+      font-family: var(--mono); margin-bottom: 12px;
+    }
+    .section-title {
+      font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+      font-weight: 800; line-height: 1.2;
+      letter-spacing: -.025em; margin-bottom: 8px;
+    }
+    .section-sub { color: var(--text-2); font-size: 1rem; max-width: 560px; margin-bottom: 56px; }
+
+    /* ── How It Works ── */
+    .steps-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+    }
+    .step-card {
+      padding: 32px 28px;
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      position: relative;
+    }
+    .step-num {
+      font-size: .75rem; font-weight: 700; font-family: var(--mono);
+      color: var(--accent); margin-bottom: 20px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .step-num::after {
+      content: ''; flex: 1; height: 1px;
+      background: linear-gradient(90deg, var(--accent-dim), transparent);
+    }
+    .step-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
+    .step-title-zh { font-size: .9rem; color: var(--text-2); margin-bottom: 12px; }
+    .step-body    { color: var(--text-2); font-size: .9rem; line-height: 1.65; }
+    .step-body-zh { color: var(--text-3); font-size: .82rem; margin-top: 8px; line-height: 1.65; }
+
+    /* ── Why It Works ── */
+    #why { background: var(--bg-2); }
+    .pillars-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;
+    }
+    .pillar-card {
+      padding: 28px 28px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      transition: border-color .2s;
+    }
+    .pillar-card:hover { border-color: var(--accent); }
+    .pillar-icon {
+      width: 36px; height: 36px;
+      background: rgba(91,94,244,.15);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; margin-bottom: 16px;
+    }
+    .pillar-title { font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
+    .pillar-body  { color: var(--text-2); font-size: .875rem; line-height: 1.65; }
+
+    /* ── CTA Banner ── */
+    #cta-banner {
+      background: linear-gradient(135deg, var(--accent-dim) 0%, var(--accent) 60%, var(--accent-hl) 100%);
+      padding: 80px 0;
+    }
+    .cta-inner { text-align: center; }
+    .cta-h2 {
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      font-weight: 800; letter-spacing: -.025em;
+      margin-bottom: 8px;
+    }
+    .cta-h2-zh { font-size: clamp(1.2rem, 2.5vw, 1.8rem); opacity: .8; margin-bottom: 32px; }
+    .cta-note { font-size: .85rem; opacity: .7; margin-top: 18px; font-family: var(--mono); }
+
+    /* ── Footer ── */
+    footer {
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+      padding: 32px 0;
+    }
+    .footer-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 16px;
+    }
+    .footer-copy { color: var(--text-3); font-size: .85rem; }
+    .footer-links { display: flex; gap: 24px; }
+    .footer-links a { color: var(--text-3); font-size: .85rem; transition: color .15s; }
+    .footer-links a:hover { color: var(--accent); }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .hero-grid   { grid-template-columns: 1fr; }
+      .orbit-wrap  { display: none; }
+      .problem-inner { grid-template-columns: 1fr; }
+      .steps-grid  { grid-template-columns: 1fr; }
+      .pillars-grid { grid-template-columns: 1fr; }
+      .footer-inner { flex-direction: column; align-items: flex-start; }
+      .section { padding: 64px 0; }
+    }
+
+    /* ── Scroll reveal ── */
+    .reveal { opacity: 0; transform: translateY(20px); transition: opacity .5s ease, transform .5s ease; }
+    .reveal.visible { opacity: 1; transform: none; }
+  </style>
+</head>
+<body>
+
+<!-- ── NavBar ── -->
+<nav>
+  <div class="container nav-inner">
+    <div class="nav-logo">App<span>Test</span></div>
+    <a href="#cta-banner" class="btn-ghost">Join Beta</a>
+  </div>
+</nav>
+
+<!-- ── Hero ── -->
+<section id="hero">
+  <div class="container">
+    <div class="hero-grid">
+      <div>
+        <div class="hero-eyebrow">// Closed Beta · 封閉測試招募中</div>
+        <h1 class="hero-h1">12 testers.<br>14 days.<br>Done.</h1>
+        <div class="hero-h1-zh">14 天，湊滿 12 位 tester，上架。</div>
+        <p class="hero-sub">Android devs testing each other's apps — no money, no fake reviews, just reciprocity.</p>
+        <p class="hero-sub-zh">Android 開發者互測平台——不花錢、不灌假評論，用互惠解決上架瓶頸。</p>
+        <div class="hero-cta-row">
+          <a href="[BETA_OPT_IN_URL]" class="btn-primary">
+            Join Beta — Free
+          </a>
+          <span class="hero-note">免費 · Free · No credit card</span>
+        </div>
+      </div>
+      <div class="orbit-wrap">
+        <!-- Orbit SVG: 2 rings of dev nodes around AppTest core -->
+        <svg class="orbit-svg" viewBox="0 0 440 440" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <defs>
+            <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+              <stop offset="0%"   stop-color="#5b5ef4" stop-opacity=".25"/>
+              <stop offset="100%" stop-color="#5b5ef4" stop-opacity="0"/>
+            </radialGradient>
+            <filter id="blur-node">
+              <feGaussianBlur stdDeviation="2" result="blur"/>
+              <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+            </filter>
+          </defs>
+          <!-- Glow bg -->
+          <circle cx="220" cy="220" r="200" fill="url(#glow)"/>
+          <!-- Outer ring -->
+          <circle cx="220" cy="220" r="150" stroke="#5b5ef4" stroke-opacity=".12" stroke-width="1"/>
+          <!-- Inner ring -->
+          <circle cx="220" cy="220" r="90"  stroke="#5b5ef4" stroke-opacity=".2"  stroke-width="1"/>
+          <!-- Signal paths -->
+          <circle cx="220" cy="220" r="150" stroke="#7b7ef7" stroke-width="1.5" stroke-opacity=".6" fill="none"
+            stroke-dasharray="24 276" class="signal"/>
+          <circle cx="220" cy="220" r="90"  stroke="#7b7ef7" stroke-width="1.5" stroke-opacity=".6" fill="none"
+            stroke-dasharray="18 180" class="signal signal-2"/>
+          <!-- Outer ring nodes (8 nodes) -->
+          <g class="ring-outer">
+            <circle class="node" cx="220" cy="70"  r="5" fill="#7b7ef7"/>
+            <circle class="node" cx="326" cy="114" r="5" fill="#7b7ef7"/>
+            <circle class="node" cx="370" cy="220" r="5" fill="#7b7ef7"/>
+            <circle class="node" cx="326" cy="326" r="5" fill="#7b7ef7"/>
+            <circle class="node" cx="220" cy="370" r="5" fill="#7b7ef7"/>
+            <circle class="node" cx="114" cy="326" r="5" fill="#7b7ef7"/>
+            <circle class="node" cx="70"  cy="220" r="5" fill="#7b7ef7"/>
+            <circle class="node" cx="114" cy="114" r="5" fill="#7b7ef7"/>
+          </g>
+          <!-- Inner ring nodes (4 nodes) -->
+          <g class="ring-inner">
+            <circle class="node" cx="220" cy="130" r="4" fill="#5b5ef4"/>
+            <circle class="node" cx="310" cy="220" r="4" fill="#5b5ef4"/>
+            <circle class="node" cx="220" cy="310" r="4" fill="#5b5ef4"/>
+            <circle class="node" cx="130" cy="220" r="4" fill="#5b5ef4"/>
+          </g>
+          <!-- Core -->
+          <circle cx="220" cy="220" r="28" fill="#5b5ef4" fill-opacity=".18" stroke="#5b5ef4" stroke-width="1.5"/>
+          <circle cx="220" cy="220" r="18" fill="#5b5ef4" fill-opacity=".35"/>
+          <circle cx="220" cy="220" r="10" fill="#7b7ef7"/>
+          <!-- Core label -->
+          <text x="220" y="268" text-anchor="middle" fill="#a0a0b8" font-size="11" font-family="monospace">AppTest</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Problem ── -->
+<section id="problem" class="section">
+  <div class="container">
+    <div class="section-label reveal">// The Problem · 問題</div>
+    <h2 class="section-title reveal">Stuck at 12 testers? You're not alone.</h2>
+    <p class="section-sub reveal">找不到人測試，才是上架最難的一關。</p>
+    <div class="problem-inner">
+      <div class="problem-block bad reveal">
+        <div class="problem-label bad">// Without AppTest</div>
+        <div class="problem-title">Cold DMs. Zero replies.</div>
+        <p class="problem-body">You built the app. You did the work. But Play Store won't let you publish until 12 real people test it for 14 days. Finding them is the hardest part.</p>
+        <p class="problem-body-zh">App 做好了，但 Play Store 要求 12 位真實測試者測試 14 天才能正式上架。找人，才是最難的一關。</p>
+      </div>
+      <div class="problem-block good reveal">
+        <div class="problem-label good">// With AppTest</div>
+        <div class="problem-title">Matched overnight. Ship in 14.</div>
+        <p class="problem-body">Every indie dev in the network is both a developer and a tester. You test my app, I test yours. The engine runs at 02:00 UTC — wake up to your matches.</p>
+        <p class="problem-body-zh">網路裡每位開發者同時是 tester。你測我的，我測你的。引擎每天 02:00 UTC 跑，早上醒來就有配對結果。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── How It Works ── -->
+<section id="how" class="section">
+  <div class="container">
+    <div class="section-label reveal">// How It Works · 流程</div>
+    <h2 class="section-title reveal">Three steps to 12/14.</h2>
+    <p class="section-sub reveal">Post, get matched, ship.</p>
+    <div class="steps-grid">
+      <div class="step-card reveal">
+        <div class="step-num">01</div>
+        <div class="step-title">Post Your App</div>
+        <div class="step-title-zh">登錄你的 App</div>
+        <p class="step-body">Add your package name + opt-in URL. Free for your first app.</p>
+        <p class="step-body-zh">填上 package name + 測試連結，第一個免費。</p>
+      </div>
+      <div class="step-card reveal">
+        <div class="step-num">02</div>
+        <div class="step-title">Get Matched Daily</div>
+        <div class="step-title-zh">每天自動配對</div>
+        <p class="step-body">Every day at 02:00 UTC, the engine pairs devs who can help each other — by category, language, and reputation.</p>
+        <p class="step-body-zh">每天 02:00 UTC，配對引擎根據類別、語言、信譽自動配對。</p>
+      </div>
+      <div class="step-card reveal">
+        <div class="step-num">03</div>
+        <div class="step-title">Test &amp; Earn</div>
+        <div class="step-title-zh">測試 + 累積信譽</div>
+        <p class="step-body">14 days, daily opens. Both sides earn reputation points and signed proof cards.</p>
+        <p class="step-body-zh">14 天每日開啟，雙方獲得信譽分與完成證明卡。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Why It Works ── -->
+<section id="why" class="section">
+  <div class="container">
+    <div class="section-label reveal">// Why It Works · 為什麼有效</div>
+    <h2 class="section-title reveal">Built against every cheat.</h2>
+    <p class="section-sub reveal">四個支柱讓互惠真正運作。</p>
+    <div class="pillars-grid">
+      <div class="pillar-card reveal">
+        <div class="pillar-icon">⇄</div>
+        <div class="pillar-title">Real Reciprocity · 真實互惠</div>
+        <p class="pillar-body">Everyone is both dev and tester. No freeloaders — if you don't test, you don't get tested. The incentive is structural.</p>
+      </div>
+      <div class="pillar-card reveal">
+        <div class="pillar-icon">◆</div>
+        <div class="pillar-title">Reputation System · 信譽系統</div>
+        <p class="pillar-body">Bronze → Silver → Gold → Platinum. Higher tier = better matches, faster pairing, priority queue.</p>
+      </div>
+      <div class="pillar-card reveal">
+        <div class="pillar-icon">✓</div>
+        <div class="pillar-title">Proof Cards · 完成證明卡</div>
+        <p class="pillar-body">Signed completion record for every test. Screenshot it for Play Console. Cryptographically verifiable.</p>
+      </div>
+      <div class="pillar-card reveal">
+        <div class="pillar-icon">⊘</div>
+        <div class="pillar-title">Anti-Cheat · 防作弊</div>
+        <p class="pillar-body">Emulators, Xposed, multi-accounts detected. Permanent bans. The network stays clean so your testers are real.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA Banner ── -->
+<section id="cta-banner">
+  <div class="container">
+    <div class="cta-inner">
+      <h2 class="cta-h2">Join the network. Hit your 12/14. Ship.</h2>
+      <div class="cta-h2-zh">加入網路。湊滿 12/14。上架。</div>
+      <a href="[BETA_OPT_IN_URL]" class="btn-primary" style="display:inline-flex; background:#fff; color:#5b5ef4;">
+        Join Beta — Free
+      </a>
+      <p class="cta-note">Free during closed beta · 封測期間完全免費</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── Footer ── -->
+<footer>
+  <div class="container footer-inner">
+    <span class="footer-copy">© 2026 AppTest</span>
+    <nav class="footer-links">
+      <a href="https://cjc305.github.io/AppTest/legal/privacy.html">Privacy Policy</a>
+      <a href="https://cjc305.github.io/AppTest/legal/terms.html">Terms of Service</a>
+    </nav>
+  </div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const observer = new IntersectionObserver(
+    entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
+    { threshold: 0.12 }
+  );
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+
+</body>
+</html>
