@@ -110,7 +110,9 @@ private fun TypeDot(type: InboxNotificationType, read: Boolean) {
 }
 
 private fun relative(t: Instant, l: AppStrings): String {
-    val secs = Duration.between(t, Instant.now()).seconds
+    // LOW-007: coerceAtLeast(0) guards against future-dated server timestamps showing
+    // negative values like "-5 minutes ago".
+    val secs = Duration.between(t, Instant.now()).seconds.coerceAtLeast(0)
     return when {
         secs < 60 -> l.time_just_now
         secs < 3600 -> l.time_min_ago.format(secs / 60)

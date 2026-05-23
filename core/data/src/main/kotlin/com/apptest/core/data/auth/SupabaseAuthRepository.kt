@@ -28,7 +28,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import okhttp3.ResponseBody
 import retrofit2.HttpException
 
 /**
@@ -77,7 +76,7 @@ class SupabaseAuthRepository @Inject constructor(
         }
         pendingEmail = email
         return runCatching {
-            authApiService.sendOtp(OtpRequest(email = email)).close()
+            authApiService.sendOtp(OtpRequest(email = email))
             AppResult.Success(Unit)
         }.getOrElse { AppResult.Failure(mapError(it)) }
     }
@@ -118,7 +117,7 @@ class SupabaseAuthRepository @Inject constructor(
     override suspend fun signOut(): AppResult<Unit> {
         val jwt = sessionStore.session.firstOrNull()?.jwt
         if (jwt != null) {
-            runCatching { authApiService.signOut(bearer = "Bearer $jwt").close() } // best-effort
+            runCatching { authApiService.signOut(bearer = "Bearer $jwt") } // best-effort
         }
         pendingEmail = null
         sessionStore.clear()

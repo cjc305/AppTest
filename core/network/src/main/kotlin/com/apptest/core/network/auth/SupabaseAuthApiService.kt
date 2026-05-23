@@ -4,7 +4,7 @@ import kotlinx.serialization.EncodeDefault
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import okhttp3.ResponseBody
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.Header
 import retrofit2.http.POST
@@ -23,7 +23,7 @@ interface SupabaseAuthApiService {
 
     /** Send 6-digit OTP + magic link to [OtpRequest.email]. Returns 200 with empty body. */
     @POST("otp")
-    suspend fun sendOtp(@Body request: OtpRequest): ResponseBody
+    suspend fun sendOtp(@Body request: OtpRequest): Response<Unit>
 
     /** Verify a 6-digit email OTP code. Returns JWT session on success. */
     @POST("verify")
@@ -52,9 +52,11 @@ interface SupabaseAuthApiService {
 
     /**
      * Revoke the current session server-side. Caller passes `"Bearer <jwt>"`.
+     * LOW-008: Response<Unit> is idiomatic Retrofit for empty-body responses — no need to
+     * call .close() on a ResponseBody at the call site.
      */
     @POST("logout")
-    suspend fun signOut(@Header("Authorization") bearer: String): ResponseBody
+    suspend fun signOut(@Header("Authorization") bearer: String): Response<Unit>
 }
 
 // ─── Request DTOs ──────────────────────────────────────────────────────────

@@ -160,8 +160,9 @@ private fun ActiveTestRow(test: ActiveTest, onClick: () -> Unit) {
         headline = test.appName,
         supporting = supporting,
         trailing = {
+            // LOW-006: guard totalDays=0 (V1 placeholder) to avoid NaN/Infinity progress.
             AppProgressBar(
-                progress = test.day.toFloat() / test.totalDays.toFloat(),
+                progress = if (test.totalDays > 0) test.day.toFloat() / test.totalDays else 0f,
                 modifier = Modifier.fillMaxWidth(0.3f),
             )
         },
@@ -176,8 +177,9 @@ private fun OwnedAppRow(app: OwnedApp, onClick: () -> Unit) {
         headline = app.name,
         supporting = l.home_owned_testers.format(app.currentTesters, app.requiredTesters),
         trailing = {
+            // LOW-006: guard requiredTesters=0 to avoid NaN/Infinity progress.
             AppProgressBar(
-                progress = app.currentTesters.toFloat() / app.requiredTesters.toFloat(),
+                progress = if (app.requiredTesters > 0) app.currentTesters.toFloat() / app.requiredTesters else 0f,
                 modifier = Modifier.fillMaxWidth(0.3f),
             )
         },
