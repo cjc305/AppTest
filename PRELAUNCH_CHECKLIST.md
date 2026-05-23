@@ -79,12 +79,15 @@ Play Store requires a live Privacy Policy URL (mandatory) and ToS is best practi
 - [x] Privacy policy URL entered in Play Console Store listing ✅ 2026-05-23
 - [x] Privacy policy URL referenced in Data Safety form ✅ 2026-05-23
 
-### 2.4 Domain & assetlinks (blocks deep-link verification)
+### 2.4 Domain & assetlinks ✅ DONE via GitHub Pages (2026-05-23)
 
-- [ ] Buy `apptest.dev` (or your chosen domain — search/replace `apptest.dev` repo-wide)
-- [ ] Generate `assetlinks.json` containing your release signing cert SHA-256
-- [ ] Host at `https://apptest.dev/.well-known/assetlinks.json`
-- [ ] In `AndroidManifest.xml`, flip the `https` `<intent-filter>` `autoVerify="false"` → `"true"`
+No custom domain needed for V1. Using `cjc305.github.io` (free).
+
+- [x] Created `cjc305/cjc305.github.io` repo — GitHub Pages auto-enabled
+- [x] `assetlinks.json` live at `https://cjc305.github.io/.well-known/assetlinks.json`
+  - package: `com.cjc305.apptest` | SHA-256: `22:65:E4:D6:...:6D:3C`
+- [x] `AndroidManifest.xml` updated: `autoVerify="true"` for `cjc305.github.io/AppTest` paths
+- [ ] (V2) Buy `apptest.dev` → deploy assetlinks there → flip `autoVerify` on `apptest.dev` filter
 
 ### 2.5 Play Console (blocks submission)
 
