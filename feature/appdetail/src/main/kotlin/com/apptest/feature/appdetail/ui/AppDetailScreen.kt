@@ -170,14 +170,9 @@ private fun JoinFooter(
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.padding(top = AppSpacing.Xs),
                 )
-            } else if (!isArchived) {
-                AppText(
-                    text = l.appdetail_maybe_later,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = AppSpacing.Xs),
-                )
             }
+            // "Maybe later — back to feed" hint removed (2026-05-24): non-clickable
+            // text was confusing UX; users have the back arrow in the top bar already.
         }
     }
 }
