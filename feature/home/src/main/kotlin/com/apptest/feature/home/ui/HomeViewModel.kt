@@ -9,10 +9,13 @@ import androidx.lifecycle.viewModelScope
 import com.apptest.core.common.AppResult
 import com.apptest.core.common.onFailure
 import com.apptest.core.common.onSuccess
+import com.apptest.core.network.backend.BackendStatsApiService
 import com.apptest.feature.home.domain.model.HomeData
 import com.apptest.feature.home.domain.usecase.GetHomeDataUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,6 +33,7 @@ import kotlinx.coroutines.launch
 class HomeViewModel @Inject constructor(
     private val getHomeData: GetHomeDataUseCase,
     private val dataStore: DataStore<Preferences>,
+    private val statsApi: BackendStatsApiService,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<HomeUiState>(HomeUiState.Loading)
@@ -44,10 +48,25 @@ class HomeViewModel @Inject constructor(
             _state.value = HomeUiState.Loading
             val skipped = dataStore.data.map { it[KEY_SKIPPED_MATCH_IDS] ?: emptySet() }
                 .firstOrNull().orEmpty()
+            // Fetch home data + pool stats in parallel — stats failure is non-fatal (banner just hides).
+            val poolStatsSnapshot: PoolStatsSnapshot? = runCatching {
+                coroutineScope {
+                    val deferred = async { statsApi.poolStats() }
+                    deferred.await()
+                }
+            }.map { dto ->
+                PoolStatsSnapshot(
+                    activeApps = dto.activeApps,
+                    testers = dto.testers,
+                    immediateMatchMode = dto.immediateMatchMode,
+                    hint = dto.hint,
+                )
+            }.getOrNull()
+
             getHomeData()
                 .onSuccess { data ->
                     val filtered = if (data.newMatch?.id in skipped) data.copy(newMatch = null) else data
-                    _state.value = toLoadedOrEmpty(filtered)
+                    _state.value = toLoadedOrEmpty(filtered, poolStatsSnapshot)
                 }
                 .onFailure { _state.value = HomeUiState.Error(it) }
         }
@@ -68,15 +87,15 @@ class HomeViewModel @Inject constructor(
             }
         }
         val withoutMatch = current.data.copy(newMatch = null)
-        _state.value = toLoadedOrEmpty(withoutMatch)
+        _state.value = toLoadedOrEmpty(withoutMatch, current.poolStats)
     }
 
-    private fun toLoadedOrEmpty(data: HomeData): HomeUiState {
+    private fun toLoadedOrEmpty(data: HomeData, poolStats: PoolStatsSnapshot?): HomeUiState {
         val empty = data.newMatch == null && data.activeTests.isEmpty() && data.myApps.isEmpty()
         return if (empty) {
-            HomeUiState.Empty(nextBatchEta = nextBatchEtaLabel())
+            HomeUiState.Empty(nextBatchEta = nextBatchEtaLabel(), poolStats = poolStats)
         } else {
-            HomeUiState.Loaded(data)
+            HomeUiState.Loaded(data, poolStats = poolStats)
         }
     }
 

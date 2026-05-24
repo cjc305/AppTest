@@ -94,6 +94,13 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    fun provideBackendStatsApiService(
+        @KtorApi retrofit: Retrofit,
+    ): com.apptest.core.network.backend.BackendStatsApiService =
+        retrofit.create(com.apptest.core.network.backend.BackendStatsApiService::class.java)
+
+    @Provides
+    @Singleton
     @SupabaseRest
     fun provideSupabaseRetrofit(
         @SupabaseRest supabaseClient: OkHttpClient,

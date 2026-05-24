@@ -14,7 +14,17 @@ sealed interface HomeUiState {
 
     data class Error(val error: AppError) : HomeUiState
 
-    data class Empty(val nextBatchEta: String) : HomeUiState
+    data class Empty(val nextBatchEta: String, val poolStats: PoolStatsSnapshot? = null) : HomeUiState
 
-    data class Loaded(val data: HomeData) : HomeUiState
+    data class Loaded(val data: HomeData, val poolStats: PoolStatsSnapshot? = null) : HomeUiState
 }
+
+/** Snapshot of the matching pool for cold-start UX hint banner. */
+@Immutable
+data class PoolStatsSnapshot(
+    val activeApps: Int,
+    val testers: Int,
+    val immediateMatchMode: Boolean,
+    /** "empty" | "small" | "healthy" */
+    val hint: String,
+)

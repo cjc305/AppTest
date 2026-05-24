@@ -3,6 +3,7 @@
 package com.apptest.feature.home.ui
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,9 +13,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.apptest.core.designsystem.components.AppText
 import com.apptest.core.designsystem.components.AppVSpacer
 import com.apptest.core.designsystem.spacing.AppSpacing
@@ -51,14 +54,17 @@ fun HomeScreen(
         when (state) {
             HomeUiState.Loading -> AppLoadingState(modifier = Modifier.padding(padding))
             is HomeUiState.Error -> AppErrorState(state.error, onRetry = onRetry, modifier = Modifier.padding(padding))
-            is HomeUiState.Empty -> AppEmptyState(
-                illustration = Icons.Filled.Email,
-                title = l.testing_empty_title,
-                description = l.testing_empty_desc.format(state.nextBatchEta),
-                modifier = Modifier.padding(padding),
-            )
+            is HomeUiState.Empty -> Column(modifier = Modifier.padding(padding)) {
+                state.poolStats?.let { PoolStatusBanner(stats = it) }
+                AppEmptyState(
+                    illustration = Icons.Filled.Email,
+                    title = l.testing_empty_title,
+                    description = l.testing_empty_desc.format(state.nextBatchEta),
+                )
+            }
             is HomeUiState.Loaded -> HomeLoadedContent(
                 data = state.data,
+                poolStats = state.poolStats,
                 contentPadding = padding,
                 onAppClick = onAppClick,
                 onJoinMatch = onJoinMatch,
@@ -71,6 +77,7 @@ fun HomeScreen(
 @Composable
 private fun HomeLoadedContent(
     data: HomeData,
+    poolStats: PoolStatsSnapshot?,
     contentPadding: PaddingValues,
     onAppClick: (String) -> Unit,
     onJoinMatch: (String) -> Unit,
@@ -82,6 +89,11 @@ private fun HomeLoadedContent(
         verticalArrangement = Arrangement.spacedBy(AppSpacing.Sm),
         modifier = Modifier.padding(horizontal = AppSpacing.Md),
     ) {
+        // Pool-status banner above greeting — surfaces cold-start state ("waiting for testers")
+        // or healthy-pool reassurance ("N developers online"). Hidden if fetch failed.
+        poolStats?.let { stats ->
+            item { PoolStatusBanner(stats = stats) }
+        }
         item { GreetingHeader(user = data.user) }
 
         item { SectionLabel(l.home_section_today) }
@@ -168,6 +180,49 @@ private fun ActiveTestRow(test: ActiveTest, onClick: () -> Unit) {
         },
         onClick = onClick,
     )
+}
+
+/**
+ * Cold-start awareness banner. Tells user the pool state so empty home isn't read as broken:
+ *   - empty:    "Only you in the pool — invite friends"
+ *   - small:    "N active app(s), immediate matching on new arrivals"
+ *   - healthy:  "N developers in pool, next batch at 02:00 UTC"
+ */
+@Composable
+private fun PoolStatusBanner(stats: PoolStatsSnapshot) {
+    val (titleText, bodyText, tone) = when (stats.hint) {
+        "empty" -> Triple(
+            "🌱 配對池剛起步 / Pool is brand new",
+            "目前只有你註冊。邀請開發者朋友一起來,配對才會開始。\n" +
+                "Only you here so far. Invite developer friends to start matching.",
+            MaterialTheme.colorScheme.tertiaryContainer,
+        )
+        "small" -> Triple(
+            "⚡ 小池立即配對 / Small-pool active",
+            "目前 ${stats.activeApps} 個 App、${stats.testers} 位測試者線上。\n" +
+                "新 App 啟用時立即配對(不必等每日批次)。\n" +
+                "$ {stats.activeApps} apps × ${stats.testers} testers — instant matching on new app activation.",
+            MaterialTheme.colorScheme.primaryContainer,
+        )
+        else -> Triple(
+            "✅ 配對池健康 / Pool healthy",
+            "${stats.activeApps} 個 App、${stats.testers} 位測試者線上。每天 02:00 UTC 批次配對。\n" +
+                "${stats.activeApps} apps × ${stats.testers} testers — daily batch at 02:00 UTC.",
+            MaterialTheme.colorScheme.secondaryContainer,
+        )
+    }
+    Surface(
+        tonalElevation = 2.dp,
+        color = tone,
+        shape = MaterialTheme.shapes.medium,
+        modifier = Modifier.fillMaxWidth().padding(vertical = AppSpacing.Xs),
+    ) {
+        Column(modifier = Modifier.padding(AppSpacing.Md)) {
+            AppText(text = titleText, style = MaterialTheme.typography.titleSmall)
+            AppVSpacer(AppSpacing.Xs)
+            AppText(text = bodyText, style = MaterialTheme.typography.bodySmall)
+        }
+    }
 }
 
 @Composable
