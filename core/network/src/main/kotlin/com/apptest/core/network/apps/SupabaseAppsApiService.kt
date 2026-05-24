@@ -26,18 +26,27 @@ import retrofit2.http.Query
  */
 interface SupabaseAppsApiService {
 
-    /** All apps owned by current user (RLS scopes via owner_id = auth.uid()). */
+    /**
+     * All apps owned by current user (RLS scopes via owner_id = auth.uid()).
+     * Hides soft-deleted rows by default via `deleted_at=is.null`.
+     */
     @GET("apps")
     suspend fun listOwned(
         @Query("select") select: String = SELECT_LIST,
         @Query("order") order: String = "created_at.desc",
+        @Query("deleted_at") deletedAtFilter: String = "is.null",
     ): List<AppDto>
 
-    /** Single app by id — includes embedded owner profile for AppDetail screen. */
+    /**
+     * Single app by id — includes embedded owner profile for AppDetail screen.
+     * Also filters `deleted_at=is.null` so users hitting a deep-link to a deleted
+     * app get an empty result (treated as 404 upstream).
+     */
     @GET("apps")
     suspend fun getById(
         @Query("id") idFilter: String,
         @Query("select") select: String = SELECT_DETAIL,
+        @Query("deleted_at") deletedAtFilter: String = "is.null",
     ): List<AppDto>
 
     /** Create app. Returns the created row (Prefer: return=representation). */
@@ -74,7 +83,21 @@ interface SupabaseAppsApiService {
     @POST("rpc/activate_app")
     suspend fun activateApp(@Body body: ActivateAppRequest): AppDto
 
-    /** Hard delete (RLS owner only). Use `deleted_at` flag instead for soft delete. */
+    /**
+     * Soft delete (recommended). Marks `deleted_at = now()` + `status = ARCHIVED`.
+     * - Matches already in flight are NOT cancelled — they expire naturally via
+     *   `matches.expires_at`. Testers' completion stats stay intact.
+     * - App disappears from owner's My Apps list (filter `deleted_at=is.null`).
+     * - Backend matching filters `status = ACTIVE` so ARCHIVED rows skip the pool.
+     */
+    @PATCH("apps")
+    suspend fun softDelete(
+        @Query("id") idFilter: String,
+        @Body body: SoftDeleteBody,
+        @Header("Prefer") prefer: String = "return=minimal",
+    ): Response<Unit>
+
+    /** Hard delete (RLS owner only). Use [softDelete] for typical cases. */
     @DELETE("apps")
     suspend fun hardDelete(
         @Query("id") idFilter: String,
@@ -168,3 +191,13 @@ data class AppStatusBody(val status: String) {
 
 @Serializable
 data class ActivateAppRequest(@SerialName("p_app_id") val appId: String)
+
+/**
+ * Soft-delete payload. `deletedAt` is an ISO-8601 timestamp (e.g. "2026-05-24T01:23:45Z");
+ * `status` flips to ARCHIVED so backend matching naturally excludes the row.
+ */
+@Serializable
+data class SoftDeleteBody(
+    @SerialName("deleted_at") val deletedAt: String,
+    val status: String = AppStatus.ARCHIVED.name,
+)

@@ -8,7 +8,9 @@ import com.apptest.core.network.apps.AppDto
 import com.apptest.core.network.apps.AppStatus
 import com.apptest.core.network.apps.AppStatusBody
 import com.apptest.core.network.apps.AppUpsertBody
+import com.apptest.core.network.apps.SoftDeleteBody
 import com.apptest.core.network.apps.SupabaseAppsApiService
+import java.time.Instant
 import com.apptest.feature.myapps.domain.model.AppDraft
 import com.apptest.feature.myapps.domain.model.MyAppsLoadStatus
 import com.apptest.feature.myapps.domain.model.OwnedAppRow
@@ -140,11 +142,23 @@ class SupabaseMyAppsRepository @Inject constructor(
     override suspend fun pause(id: String): AppResult<Unit> = patchStatus(id, AppStatus.PAUSED)
     override suspend fun resume(id: String): AppResult<Unit> = patchStatus(id, AppStatus.ACTIVE)
 
+    /**
+     * Soft delete: marks `deleted_at = now()` + `status = ARCHIVED`.
+     *
+     * Why soft (chosen 2026-05-24): existing matches stay intact so testers' "completed
+     * tests" stats aren't lost; active matches naturally expire via `matches.expires_at`.
+     * Backend matching already filters `status = 'ACTIVE'` so ARCHIVED rows skip the pool.
+     * The row is hidden from the owner's My Apps list via the `deleted_at=is.null` query
+     * filter in listOwned.
+     *
+     * Future: a periodic admin job can hardDelete rows where deleted_at < 90 days ago.
+     */
     override suspend fun delete(id: String): AppResult<Unit> = withContext(dispatchers.io) {
         try {
-            val resp = appsApi.hardDelete("eq.$id")
+            val body = SoftDeleteBody(deletedAt = Instant.now().toString())
+            val resp = appsApi.softDelete("eq.$id", body)
             if (!resp.isSuccessful) {
-                throw IllegalStateException("delete failed HTTP ${resp.code()}")
+                throw IllegalStateException("soft delete failed HTTP ${resp.code()}")
             }
             _state.value = _state.value.filterNot { it.id == id }
             AppResult.Success(Unit)
