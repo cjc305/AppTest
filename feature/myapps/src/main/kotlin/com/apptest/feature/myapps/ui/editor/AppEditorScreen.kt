@@ -112,7 +112,8 @@ fun AppEditorScreen(
                 label = { AppText(l.editor_field_package) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
-                enabled = !state.isEdit,
+                // Editable even in edit mode — package_name is just metadata, not a FK
+                // target (matches reference app_id uuid). Typo-fix without delete+recreate.
             )
             OutlinedTextField(
                 value = state.draft.name,
