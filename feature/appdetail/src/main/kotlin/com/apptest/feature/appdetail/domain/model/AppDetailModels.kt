@@ -38,4 +38,6 @@ data class AppDetailData(
     val requirements: Requirements,
     val matchReasons: List<MatchReason>, // 0..3 entries
     val playOptInUrl: String,
+    /** App lifecycle status from DB (DRAFT / ACTIVE / PAUSED / ARCHIVED). */
+    val status: String = "ACTIVE",
 )

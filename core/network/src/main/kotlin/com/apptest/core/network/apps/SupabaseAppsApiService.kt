@@ -39,14 +39,26 @@ interface SupabaseAppsApiService {
 
     /**
      * Single app by id — includes embedded owner profile for AppDetail screen.
-     * Also filters `deleted_at=is.null` so users hitting a deep-link to a deleted
-     * app get an empty result (treated as 404 upstream).
+     * Filters `deleted_at=is.null` by default so owner-side flows don't see archived
+     * rows. Use [getByIdIncludingArchived] for the tester-facing AppDetail screen
+     * which needs to render an "App removed" banner even for archived apps.
      */
     @GET("apps")
     suspend fun getById(
         @Query("id") idFilter: String,
         @Query("select") select: String = SELECT_DETAIL,
         @Query("deleted_at") deletedAtFilter: String = "is.null",
+    ): List<AppDto>
+
+    /**
+     * Single app by id INCLUDING archived rows — for AppDetail screen which renders
+     * an "App removed by developer" banner instead of 404 when a tester clicks an
+     * inbox notification for an app that's been archived since match assignment.
+     */
+    @GET("apps")
+    suspend fun getByIdIncludingArchived(
+        @Query("id") idFilter: String,
+        @Query("select") select: String = SELECT_DETAIL,
     ): List<AppDto>
 
     /** Create app. Returns the created row (Prefer: return=representation). */

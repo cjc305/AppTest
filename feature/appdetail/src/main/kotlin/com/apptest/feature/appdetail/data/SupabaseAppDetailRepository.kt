@@ -16,7 +16,9 @@ import kotlinx.coroutines.withContext
 /**
  * Real Supabase-backed [AppDetailRepository]. Replaces [FakeAppDetailRepository].
  *
- * V1: package_name, play_opt_in_url, required_testers, required_days not in DB — defaulted.
+ * Uses [SupabaseAppsApiService.getByIdIncludingArchived] so the screen can render
+ * an "App removed by developer" banner when testers click an inbox notification
+ * for an app that's been archived since match assignment.
  */
 @Singleton
 class SupabaseAppDetailRepository @Inject constructor(
@@ -27,13 +29,13 @@ class SupabaseAppDetailRepository @Inject constructor(
     override suspend fun getById(appId: String): AppResult<AppDetailData> =
         withContext(dispatchers.io) {
             try {
-                val rows = appsApi.getById("eq.$appId")
+                val rows = appsApi.getByIdIncludingArchived("eq.$appId")
                 val app = rows.firstOrNull()
                     ?: return@withContext AppResult.Failure(AppError.NotFound("app"))
 
                 val detail = AppDetailData(
                     id = app.id,
-                    packageName = "", // V1: not in DB
+                    packageName = app.packageName.orEmpty(),
                     name = app.name,
                     category = app.category,
                     description = app.description,
@@ -47,13 +49,14 @@ class SupabaseAppDetailRepository @Inject constructor(
                             ?: ReputationTier.Newcomer,
                     ),
                     requirements = Requirements(
-                        requiredDays = 14, // V1: not in DB
-                        requiredTesters = 12, // V1: not in DB
+                        requiredDays = app.requiredDays,
+                        requiredTesters = app.requiredTesters,
                         currentTesters = 0,
                         dailyMinutesEstimated = 15,
                     ),
                     matchReasons = emptyList(),
-                    playOptInUrl = "", // V1: not in DB
+                    playOptInUrl = app.playOptInUrl.orEmpty().ifBlank { app.playUrl },
+                    status = app.status,
                 )
                 AppResult.Success(detail)
             } catch (c: CancellationException) {

@@ -85,6 +85,7 @@ private fun LoadedBody(
     onJoin: () -> Unit,
     contentPadding: PaddingValues,
 ) {
+    val isArchived = data.status.equals("ARCHIVED", ignoreCase = true)
     Column(modifier = Modifier.padding(contentPadding).fillMaxWidth()) {
         Column(
             modifier = Modifier
@@ -93,6 +94,7 @@ private fun LoadedBody(
                 .padding(horizontal = AppSpacing.Md),
             verticalArrangement = Arrangement.spacedBy(AppSpacing.Md),
         ) {
+            if (isArchived) ArchivedBanner()
             AppDetailHeader(data = data)
             ScreenshotCarousel(
                 urls = data.screenshotUrls,
@@ -104,12 +106,45 @@ private fun LoadedBody(
             ExplainabilityCard(reasons = data.matchReasons)
             AppVSpacer(AppSpacing.Lg)
         }
-        JoinFooter(joinInProgress = joinInProgress, joinError = joinError, onJoin = onJoin)
+        JoinFooter(
+            joinInProgress = joinInProgress,
+            joinError = joinError,
+            onJoin = onJoin,
+            isArchived = isArchived,
+        )
     }
 }
 
 @Composable
-private fun JoinFooter(joinInProgress: Boolean, joinError: String?, onJoin: () -> Unit) {
+private fun ArchivedBanner() {
+    Surface(
+        tonalElevation = 2.dp,
+        color = MaterialTheme.colorScheme.errorContainer,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(modifier = Modifier.padding(AppSpacing.Md)) {
+            AppText(
+                text = "此 App 已下架 / App removed",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onErrorContainer,
+            )
+            AppText(
+                text = "開發者已將此 App 從測試池移除。已完成的測試紀錄保留。\n" +
+                    "The developer has removed this app. Completed test records are preserved.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onErrorContainer,
+            )
+        }
+    }
+}
+
+@Composable
+private fun JoinFooter(
+    joinInProgress: Boolean,
+    joinError: String?,
+    onJoin: () -> Unit,
+    isArchived: Boolean = false,
+) {
     val l = AppL10n.current
     Surface(
         tonalElevation = 3.dp,
@@ -117,9 +152,13 @@ private fun JoinFooter(joinInProgress: Boolean, joinError: String?, onJoin: () -
     ) {
         Column(modifier = Modifier.fillMaxWidth().padding(AppSpacing.Md)) {
             AppButton(
-                text = if (joinInProgress) l.appdetail_cta_join_opening else l.appdetail_cta_join_credits,
+                text = when {
+                    isArchived -> "已下架 / Unavailable"
+                    joinInProgress -> l.appdetail_cta_join_opening
+                    else -> l.appdetail_cta_join_credits
+                },
                 onClick = onJoin,
-                enabled = !joinInProgress,
+                enabled = !isArchived && !joinInProgress,
                 loading = joinInProgress,
                 variant = AppButtonVariant.Primary,
                 modifier = Modifier.fillMaxWidth(),
@@ -131,7 +170,7 @@ private fun JoinFooter(joinInProgress: Boolean, joinError: String?, onJoin: () -
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.padding(top = AppSpacing.Xs),
                 )
-            } else {
+            } else if (!isArchived) {
                 AppText(
                     text = l.appdetail_maybe_later,
                     style = MaterialTheme.typography.labelMedium,
