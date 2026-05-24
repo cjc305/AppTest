@@ -39,8 +39,12 @@ fun ScreenshotCarousel(
     fallbackCount: Int,
     modifier: Modifier = Modifier,
 ) {
+    // V1 has no screenshot upload yet — if there's nothing to show, render nothing
+    // (was previously showing a "0 screenshots" placeholder box → dead UI).
     if (urls.isEmpty()) {
-        ScreenshotsPlaceholderRow(count = fallbackCount, modifier = modifier)
+        if (fallbackCount > 0) {
+            ScreenshotsPlaceholderRow(count = fallbackCount, modifier = modifier)
+        }
         return
     }
     val state = rememberPagerState(pageCount = { urls.size })
