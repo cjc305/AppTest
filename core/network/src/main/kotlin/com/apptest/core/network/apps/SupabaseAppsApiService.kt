@@ -123,11 +123,12 @@ interface SupabaseAppsApiService {
         // blank inputs (regression noted 2026-05-24).
         const val SELECT_LIST =
             "id,name,status,category,description,play_url," +
-                "package_name,play_opt_in_url,required_testers,required_days,created_at"
+                "package_name,play_opt_in_url,required_testers,required_days," +
+                "testing_group_email,created_at"
         const val SELECT_DETAIL =
             "id,name,description,category,icon_url,owner_id,status,play_url," +
                 "package_name,play_opt_in_url,required_testers,required_days," +
-                "profiles!owner_id(display_name,tier)"
+                "testing_group_email,profiles!owner_id(display_name,tier)"
     }
 }
 
@@ -164,6 +165,8 @@ data class AppDto(
     @SerialName("play_opt_in_url") val playOptInUrl: String? = null,
     @SerialName("required_testers") val requiredTesters: Int = 12,
     @SerialName("required_days") val requiredDays: Int = 14,
+    /** Plan C: Google Group email for Play Console closed-test sync. NULL = sync disabled. */
+    @SerialName("testing_group_email") val testingGroupEmail: String? = null,
     @SerialName("created_at") val createdAt: String = "",
     val profiles: OwnerProfileDto? = null,
 )
@@ -192,6 +195,8 @@ data class AppUpsertBody(
     @SerialName("play_opt_in_url") val playOptInUrl: String? = null,
     @SerialName("required_testers") val requiredTesters: Int = 12,
     @SerialName("required_days") val requiredDays: Int = 14,
+    /** Plan C: optional. If set, AppTest auto-syncs tester emails to this Google Group. */
+    @SerialName("testing_group_email") val testingGroupEmail: String? = null,
 )
 
 @Serializable

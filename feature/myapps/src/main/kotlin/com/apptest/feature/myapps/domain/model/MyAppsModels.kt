@@ -28,6 +28,8 @@ data class OwnedAppRow(
     val requiredTesters: Int,
     val requiredDays: Int,
     val daysLeft: Int,                  // 0 when not active yet
+    /** Plan C: Google Group used for Play Console auto-sync. Blank = sync disabled. */
+    val testingGroupEmail: String = "",
 )
 
 /** Editor form draft. Used by both create (id=null) and edit (id=existing). */
@@ -39,6 +41,8 @@ data class AppDraft(
     val playOptInUrl: String = "",
     val requiredTesters: Int = 12,
     val requiredDays: Int = 14,
+    /** Plan C: optional Google Group for Play Console auto-sync. Blank = disabled. */
+    val testingGroupEmail: String = "",
 )
 
 /** Validation result for the [AppDraft.playOptInUrl] field. */

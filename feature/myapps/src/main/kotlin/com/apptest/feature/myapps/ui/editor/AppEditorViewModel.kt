@@ -73,6 +73,7 @@ class AppEditorViewModel @Inject constructor(
             playOptInUrl = row.playOptInUrl,
             requiredTesters = row.requiredTesters,
             requiredDays = row.requiredDays,
+            testingGroupEmail = row.testingGroupEmail,
         )
         _state.update { it.copy(draft = draft, isLoading = false, loadError = null).recomputed() }
     }

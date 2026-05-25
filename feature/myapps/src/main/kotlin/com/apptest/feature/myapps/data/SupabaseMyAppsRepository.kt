@@ -208,6 +208,7 @@ private fun AppDto.toRow() = OwnedAppRow(
     requiredTesters = requiredTesters,
     requiredDays = requiredDays,
     daysLeft = requiredDays,                // TODO: derive from created_at + requiredDays
+    testingGroupEmail = testingGroupEmail.orEmpty(),
 )
 
 /**
@@ -233,4 +234,5 @@ private fun AppDraft.toUpsertBody() = AppUpsertBody(
     playOptInUrl = playOptInUrl.trim().ifBlank { null },
     requiredTesters = requiredTesters,
     requiredDays = requiredDays,
+    testingGroupEmail = testingGroupEmail.trim().ifBlank { null },
 )

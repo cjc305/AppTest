@@ -8,13 +8,23 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.TextButton
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -164,6 +174,12 @@ fun AppEditorScreen(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+
+            // Plan C: optional Play Console auto-sync section (collapsed by default)
+            PlaySyncAdvancedSection(
+                groupEmail = state.draft.testingGroupEmail,
+                onChange = { v -> onField { it.copy(testingGroupEmail = v) } },
+            )
             if (state.saveError != null) {
                 AppText(
                     text = l.editor_save_error_prefix + (state.saveError.message ?: l.err_unknown),
@@ -239,6 +255,79 @@ private fun EditorActions(
             loading = isSaving,
             variant = AppButtonVariant.Primary,
         )
+    }
+}
+
+/**
+ * Plan C: collapsible "Play Console auto-sync (optional)" section.
+ *
+ * Tells dev they can paste a Google Group email; after configuration, AppTest will
+ * auto-add each matched tester's Gmail to that Group so Play Console's closed-testing
+ * allowlist accepts them. Full setup steps live in docs/PLAY_SYNC_SETUP.md.
+ */
+@Composable
+private fun PlaySyncAdvancedSection(groupEmail: String, onChange: (String) -> Unit) {
+    var expanded by rememberSaveable { mutableStateOf(groupEmail.isNotBlank()) }
+    Surface(
+        tonalElevation = 1.dp,
+        shape = MaterialTheme.shapes.medium,
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            androidx.compose.foundation.layout.Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { expanded = !expanded }
+                    .padding(AppSpacing.Md),
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+            ) {
+                AppText(
+                    text = "Play Console 自動同步 (進階・選用) / Play Console auto-sync (optional)",
+                    style = MaterialTheme.typography.titleSmall,
+                    modifier = Modifier.weight(1f),
+                )
+                AppIcon(
+                    if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                    contentDescription = if (expanded) "Collapse" else "Expand",
+                )
+            }
+            if (expanded) {
+                Column(
+                    modifier = Modifier.padding(
+                        start = AppSpacing.Md,
+                        end = AppSpacing.Md,
+                        bottom = AppSpacing.Md,
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(AppSpacing.Sm),
+                ) {
+                    AppText(
+                        text = "啟用後,AppTest 配對到的測試者 email 會自動加進你指定的 Google Group,Play Console 把該 Group 當白名單,測試者就能直接安裝。\n\n" +
+                            "Once configured, AppTest will auto-add matched testers' Gmails to the Google Group you specify. Play Console reads this Group as the closed-testing allowlist.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    OutlinedTextField(
+                        value = groupEmail,
+                        onValueChange = onChange,
+                        label = { AppText("Google Group email") },
+                        placeholder = { AppText("myapp-testers@googlegroups.com") },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    AppText(
+                        text = "設定步驟 / Setup:\n" +
+                            "1. 在 groups.google.com 建一個 Group (任何名稱)\n" +
+                            "2. 把這個 service account 加為 Manager:\n" +
+                            "   726162458626-compute@developer.gserviceaccount.com\n" +
+                            "3. Play Console → 封閉測試 → 測試者 → 貼 Group email\n" +
+                            "4. 上面欄位貼 Group email → 儲存",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
     }
 }
 
