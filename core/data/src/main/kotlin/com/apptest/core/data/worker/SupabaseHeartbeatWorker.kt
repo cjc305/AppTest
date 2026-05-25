@@ -17,6 +17,7 @@ import com.apptest.core.data.install.UninstallEventStore
 import com.apptest.core.data.session.SessionStore
 import com.apptest.core.network.notifications.SupabaseNotificationsApiService
 import com.apptest.core.network.testing.AbandonBody
+import com.apptest.core.network.testing.HeartbeatRequest
 import com.apptest.core.network.testing.SupabaseTestingApiService
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -83,24 +84,54 @@ class SupabaseHeartbeatWorker @AssistedInject constructor(
             val acked = mutableSetOf<String>()
             for (match in activeMatches) {
                 val packageName = match.apps?.packageName ?: continue
+                val installed = installChecker.isInstalled(packageName)
                 val uninstalledByEvent = packageName in pendingUninstalls
-                val uninstalledByCheck = !installChecker.isInstalled(packageName)
-                if (!uninstalledByEvent && !uninstalledByCheck) continue
-                val abandoned = runCatching {
-                    testingApiService.abandonMatch(
-                        idFilter = "eq.${match.id}",
-                        body = AbandonBody(),
-                    ).close()
-                    Log.d(TAG, "Abandoned match ${match.id} — $packageName not installed")
-                    true
-                }.getOrElse {
-                    Log.w(TAG, "Abandon failed for ${match.id}: ${it.message}")
-                    false
+
+                when {
+                    // Installed (or reinstalled) — positive heartbeat to advance day counter.
+                    // P1-1 (reinstall race): if event in queue AND now installed, drop the
+                    // stale event without abandoning — covers "uninstall → quick reinstall"
+                    // window (e.g. clear app data, factory reset restore).
+                    installed -> {
+                        val ok = runCatching {
+                            val resp = testingApiService.heartbeatMatch(HeartbeatRequest(match.id))
+                            if (!resp.isSuccessful) {
+                                Log.w(TAG, "heartbeat ${match.id} HTTP ${resp.code()}")
+                                false
+                            } else {
+                                Log.d(TAG, "Heartbeat OK ${match.id} — $packageName installed")
+                                true
+                            }
+                        }.getOrElse {
+                            Log.w(TAG, "Heartbeat ${match.id} failed: ${it.message}")
+                            false
+                        }
+                        if (ok && uninstalledByEvent) acked += packageName  // reinstall race drop
+                    }
+                    // Not installed — abandon if confirmed via event OR fresh local check.
+                    else -> {
+                        val abandoned = runCatching {
+                            val resp = testingApiService.abandonMatch(
+                                idFilter = "eq.${match.id}",
+                                body = AbandonBody(),
+                            )
+                            if (!resp.isSuccessful) {
+                                Log.w(TAG, "abandon ${match.id} HTTP ${resp.code()}")
+                                false
+                            } else {
+                                Log.d(TAG, "Abandoned match ${match.id} — $packageName not installed")
+                                true
+                            }
+                        }.getOrElse {
+                            Log.w(TAG, "Abandon failed for ${match.id}: ${it.message}")
+                            false
+                        }
+                        if (abandoned && uninstalledByEvent) acked += packageName
+                    }
                 }
-                if (abandoned && uninstalledByEvent) acked += packageName
             }
 
-            // 4. Only ack packages whose abandon call returned successfully — failed ones
+            // 4. Only ack packages whose call returned successfully — failed ones
             //    stay in the queue for the next run.
             if (acked.isNotEmpty()) {
                 uninstallEventStore.ack(userId = uid, packages = acked)
