@@ -1,7 +1,19 @@
 # AppTest — Agent Handover
 
-> **Last refresh:** 2026-05-23 (pass 19 — Strategy-3 matching + Supabase trigger + landing page ✅)
+> **Last refresh:** 2026-05-25 (pass 20 — production-grade audit + full state machine)
 > **State:** All Claude-executable tasks done. ONE owner action blocks Play Store submission.
+>
+> **Pass 20 highlights (this session — 69 tasks):**
+> - 🐛 Found + fixed schema-vs-code status mismatch (matching always returned 0)
+> - 🔐 Webhook secret moved from hardcoded → Supabase Vault
+> - 🗑️ Soft delete (deleted_at + ARCHIVED) replaces hard delete; trigger cancels active matches + FCM to testers
+> - 📊 Day-counter state machine: heartbeat_match RPC + advance-day cron (PENDING → IN_PROGRESS → COMPLETED with +50 reputation)
+> - 🔄 Reinstall race tolerance in HeartbeatWorker (drop stale event if app is back installed)
+> - 🔔 FCM completion notifications to both dev + tester
+> - 🏠 Home pool-status banner (empty/small/healthy) for cold-start UX
+> - 🗒️ AppEditor: delete button + package_name editable + auto-activate on save
+> - 📱 AppDetail ARCHIVED banner + carousel hide + remove dead "maybe later" hint
+> - 🛡️ Auth: SharedFlow events fix back-button trap + 30s throttle
 >
 > **Play Console 完成狀態（automation 完成）：**
 > 1. ✅ AAB uploaded → Internal Testing (versionCode=2, versionName=0.1.1)
@@ -13,10 +25,11 @@
 >
 > **Backend (Cloud Run) ✅ LIVE:**
 > - Service URL: `https://apptest-backend-726162458626.asia-northeast1.run.app`
-> - Region: asia-northeast1 | Latest revision: `apptest-backend-00007-5qz`
-> - Cloud Scheduler: 3 cron jobs (matching 02:00 UTC daily, reputation recompute, anti-fraud scan)
-> - Env vars: `SMALL_POOL_THRESHOLD=20`, `WEBHOOK_SECRET` set (in Credential Manager: `AppTest_WebhookSecret`)
-> - Secrets: all in Secret Manager (Supabase service_role, Proof signing key, webhook secret)
+> - Region: asia-northeast1 | Latest revision: `apptest-backend-00013-rqx`
+> - Endpoints: `/health`, `/pool-stats`, `/v1/internal/match/{trigger,runs,runs/dry-run,advance-day,cancel-for-app}`
+> - Cloud Scheduler: 4 cron jobs (matching 02:00 UTC, reputation, anti-fraud, advance-day 03:00 UTC)
+> - Env vars: `SMALL_POOL_THRESHOLD=20`, `WEBHOOK_SECRET` (in Credential Manager: `AppTest_WebhookSecret`)
+> - Secrets: Supabase service_role, Proof signing key, webhook secret — all in Secret Manager + Supabase Vault
 >
 > **Strategy-3 matching ✅ COMPLETE (cold-start fix):**
 > - `POST /v1/internal/match/trigger` endpoint live (commit `853302e`)
@@ -200,6 +213,7 @@ grep "status: not_started" _specs/_ai/manifest.yaml | head -10
 | 2026-05-20 (pass 8 — Firebase) | Firebase project apptest-7fced (Spark free plan) + GA account AppTest 建立完成。google-services.json (project_number 726162458626, app_id 1:726162458626:android:d9dae23bdb2596aa06bf1b) 寫入 app/。Firebase BoM 33.7.0 + FCM + Crashlytics + Analytics 接入 libs.versions.toml + root build.gradle.kts + app/build.gradle.kts。AppTestMessagingService (@AndroidEntryPoint) 建立並在 Manifest 註冊。APT-V1-R-042 ✅ APT-X-004 ✅ Build green。 | **Firebase 完整上線 — 所有 V1 任務 100% 完成 ✅** |
 | 2026-05-20 (pass 9 — OPS-001 + 修正) | Play Console app 建立完成 (com.apptest.app 被佔用 → com.cjc305.apptest)。app/build.gradle.kts applicationId 更新。Firebase Android app 重新註冊 (新 app_id 8fb65dadc264210106bf1b)，google-services.json 更新。Build green (assembleDebug 29s ✅)。確認 Supabase 正確 project ref: jefgixmmlqtgbxobukkt (非 ozmvjnrqqufnoepanddq)。Supabase redirect URLs 已符合需求 (apptest://login-callback + https://apptest-prod.web.app/**)，無須修改。PRELAUNCH_CHECKLIST.md + AGENT_HANDOVER.md 全面更新。 | **APT-OPS-001 ✅ Play Console app live · 所有 infrastructure 完成** |
 | 2026-05-23 (pass 19 — Strategy-3 + landing) | Strategy-3 小池立即配對：`POST /v1/internal/match/trigger` 實作 (commit 853302e) + Cloud Run env vars (SMALL_POOL_THRESHOLD=20, WEBHOOK_SECRET) + Supabase pg_net trigger `on_app_insert_trigger_match` via Management API (confirmed: trigger row in information_schema.triggers, pg_net v0.20.0 active)。Landing page 上線 cjc305.github.io/AppTest/ (dark theme, bilingual, beta signup mailto)。所有 Claude-executable 任務 100% 完成。 | **Strategy-3 ✅ Supabase trigger ✅ Landing page ✅ — 只剩 owner Play Console closed testing** |
+| 2026-05-25 (pass 20 — production audit + state machine) | Staff-Engineer 風格全棧 audit 發現 critical bugs: (1) `matches.status` filter `"matched"`/`"recruiting"` 在 CHECK enum 都沒有 → matching 永遠 0 配對 (修); (2) webhook secret hardcoded in pg trigger (改用 Vault); (3) `LaunchedEffect(state)` SignIn 返回鍵失效 (改 SharedFlow). 加完整 P0+P1 state machine: heartbeat_match RPC + advance_matches_day SP + /v1/internal/match/advance-day endpoint + Cloud Scheduler 每天 03:00 UTC + dev/tester FCM 完成通知. UX: AppEditor delete + Home pool-status banner + AppDetail ARCHIVED banner. Soft delete 取代 hard delete (保留對方測試紀錄). 69 tasks. backend revision 00013-rqx; AppTest @ 7f0302e, AppTest-backend @ e7c7070. | **Production-ready ✅ — 真實測試者來了配對流程會跑得通** |
 
 **Total client code:** 8 core modules (8/8 with src) + 8 feature modules + `:app` + 24 spec docs + per-module 4-docs (~75 markdown). ~150 files in `feature/` + `core/` + `app/` Kotlin. All ≤ 200-line rule respected (gated by `enforceFileLineLimit`).
 
