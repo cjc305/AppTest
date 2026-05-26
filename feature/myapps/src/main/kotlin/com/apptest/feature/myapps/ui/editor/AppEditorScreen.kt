@@ -2,19 +2,18 @@
 
 package com.apptest.feature.myapps.ui.editor
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -24,6 +23,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
@@ -46,6 +48,7 @@ import com.apptest.core.ui.components.AppErrorState
 import com.apptest.core.ui.components.AppLoadingState
 import com.apptest.core.ui.components.AppTopBar
 import com.apptest.core.ui.templates.ScreenScaffold
+import com.apptest.feature.myapps.domain.model.MatchedTesterEmail
 import com.apptest.feature.myapps.domain.model.PlayUrlValidation
 
 @Composable
@@ -58,6 +61,7 @@ fun AppEditorScreen(
     onRequestDelete: () -> Unit = {},
     onCancelDelete: () -> Unit = {},
     onConfirmDelete: () -> Unit = {},
+    onRetryMatchedTesters: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val l = AppL10n.current
@@ -175,11 +179,17 @@ fun AppEditorScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
-            // Plan C: optional Play Console auto-sync section (collapsed by default)
-            PlaySyncAdvancedSection(
-                groupEmail = state.draft.testingGroupEmail,
-                onChange = { v -> onField { it.copy(testingGroupEmail = v) } },
-            )
+            // Plan A (2026-05-26): show matched testers' emails so dev can paste them
+            // into Play Console's closed-test allowlist. Only meaningful in edit mode —
+            // a brand-new app has no matches yet.
+            if (state.isEdit) {
+                MatchedTestersSection(
+                    testers = state.matchedTesters,
+                    loading = state.matchedTestersLoading,
+                    error = state.matchedTestersError?.message,
+                    onRetry = onRetryMatchedTesters,
+                )
+            }
             if (state.saveError != null) {
                 AppText(
                     text = l.editor_save_error_prefix + (state.saveError.message ?: l.err_unknown),
@@ -259,72 +269,97 @@ private fun EditorActions(
 }
 
 /**
- * Plan C: collapsible "Play Console auto-sync (optional)" section.
+ * Plan A (2026-05-26): always-visible "Matched testers' emails" section in edit mode.
  *
- * Tells dev they can paste a Google Group email; after configuration, AppTest will
- * auto-add each matched tester's Gmail to that Group so Play Console's closed-testing
- * allowlist accepts them. Full setup steps live in docs/PLAY_SYNC_SETUP.md.
+ * Dev copies the list (one-per-line or comma-separated) into Play Console's
+ * closed-testing allowlist. Replaces the previous Plan C Google-Group auto-sync
+ * section, which required a 5-step service-account setup most devs skipped.
+ *
+ * Source: `MyAppsRepository.getMatchedTesterEmails(appId)` → SECURITY DEFINER RPC
+ * `get_matched_tester_emails` (migration 002). RPC enforces caller == app.owner_id,
+ * so this safely surfaces tester emails that profile RLS would otherwise mask.
  */
 @Composable
-private fun PlaySyncAdvancedSection(groupEmail: String, onChange: (String) -> Unit) {
-    var expanded by rememberSaveable { mutableStateOf(groupEmail.isNotBlank()) }
+private fun MatchedTestersSection(
+    testers: List<MatchedTesterEmail>,
+    loading: Boolean,
+    error: String?,
+    onRetry: () -> Unit,
+) {
+    val l = AppL10n.current
+    val clipboard = LocalClipboardManager.current
+    val context = LocalContext.current
+
+    fun copy(joined: String, count: Int) {
+        clipboard.setText(AnnotatedString(joined))
+        Toast.makeText(
+            context,
+            l.editor_matched_testers_copied_fmt.format(count),
+            Toast.LENGTH_SHORT,
+        ).show()
+    }
+
     Surface(
         tonalElevation = 1.dp,
         shape = MaterialTheme.shapes.medium,
         color = MaterialTheme.colorScheme.surfaceContainerLow,
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            androidx.compose.foundation.layout.Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { expanded = !expanded }
-                    .padding(AppSpacing.Md),
-                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
-            ) {
-                AppText(
-                    text = "Play Console 自動同步 (進階・選用) / Play Console auto-sync (optional)",
-                    style = MaterialTheme.typography.titleSmall,
-                    modifier = Modifier.weight(1f),
-                )
-                AppIcon(
-                    if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
-                    contentDescription = if (expanded) "Collapse" else "Expand",
-                )
-            }
-            if (expanded) {
-                Column(
-                    modifier = Modifier.padding(
-                        start = AppSpacing.Md,
-                        end = AppSpacing.Md,
-                        bottom = AppSpacing.Md,
-                    ),
-                    verticalArrangement = Arrangement.spacedBy(AppSpacing.Sm),
-                ) {
+        Column(
+            modifier = Modifier.fillMaxWidth().padding(AppSpacing.Md),
+            verticalArrangement = Arrangement.spacedBy(AppSpacing.Sm),
+        ) {
+            AppText(
+                text = l.editor_matched_testers_title,
+                style = MaterialTheme.typography.titleSmall,
+            )
+            AppText(
+                text = l.editor_matched_testers_help,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            when {
+                loading -> CircularProgressIndicator(modifier = Modifier.padding(AppSpacing.Sm))
+                error != null -> {
                     AppText(
-                        text = "啟用後,AppTest 配對到的測試者 email 會自動加進你指定的 Google Group,Play Console 把該 Group 當白名單,測試者就能直接安裝。\n\n" +
-                            "Once configured, AppTest will auto-add matched testers' Gmails to the Google Group you specify. Play Console reads this Group as the closed-testing allowlist.",
+                        text = l.editor_matched_testers_error_prefix.format(error),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = MaterialTheme.colorScheme.error,
                     )
-                    OutlinedTextField(
-                        value = groupEmail,
-                        onValueChange = onChange,
-                        label = { AppText("Google Group email") },
-                        placeholder = { AppText("myapp-testers@googlegroups.com") },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
+                    TextButton(onClick = onRetry) { AppText(l.editor_matched_testers_retry) }
+                }
+                testers.isEmpty() -> AppText(
+                    text = l.editor_matched_testers_empty,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                else -> {
                     AppText(
-                        text = "設定步驟 / Setup:\n" +
-                            "1. 在 groups.google.com 建一個 Group (任何名稱)\n" +
-                            "2. 把這個 service account 加為 Manager:\n" +
-                            "   726162458626-compute@developer.gserviceaccount.com\n" +
-                            "3. Play Console → 封閉測試 → 測試者 → 貼 Group email\n" +
-                            "4. 上面欄位貼 Group email → 儲存",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        text = l.editor_matched_testers_count_fmt.format(testers.size),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
                     )
+                    testers.forEach { t ->
+                        AppText(
+                            text = "• ${t.email}  (${t.status})",
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                    androidx.compose.foundation.layout.Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(AppSpacing.Sm),
+                    ) {
+                        AppButton(
+                            text = l.editor_matched_testers_copy_lines,
+                            onClick = { copy(testers.joinToString("\n") { it.email }, testers.size) },
+                            variant = AppButtonVariant.Secondary,
+                        )
+                        AppButton(
+                            text = l.editor_matched_testers_copy_commas,
+                            onClick = { copy(testers.joinToString(", ") { it.email }, testers.size) },
+                            variant = AppButtonVariant.Text,
+                        )
+                    }
                 }
             }
         }

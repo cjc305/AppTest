@@ -28,8 +28,6 @@ data class OwnedAppRow(
     val requiredTesters: Int,
     val requiredDays: Int,
     val daysLeft: Int,                  // 0 when not active yet
-    /** Plan C: Google Group used for Play Console auto-sync. Blank = sync disabled. */
-    val testingGroupEmail: String = "",
 )
 
 /** Editor form draft. Used by both create (id=null) and edit (id=existing). */
@@ -41,8 +39,18 @@ data class AppDraft(
     val playOptInUrl: String = "",
     val requiredTesters: Int = 12,
     val requiredDays: Int = 14,
-    /** Plan C: optional Google Group for Play Console auto-sync. Blank = disabled. */
-    val testingGroupEmail: String = "",
+)
+
+/**
+ * Plan A (2026-05-26): one matched tester surfaced to the app owner for the
+ * "copy emails into Play Console allowlist" flow in AppEditor. Sourced from
+ * the `get_matched_tester_emails` RPC, which already filters out abandoned
+ * matches and enforces caller == app.owner_id server-side.
+ */
+data class MatchedTesterEmail(
+    val email: String,
+    val status: String,
+    val assignedAt: String?,
 )
 
 /** Validation result for the [AppDraft.playOptInUrl] field. */

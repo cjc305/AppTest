@@ -3,6 +3,7 @@ package com.apptest.feature.myapps.data
 import com.apptest.core.common.AppResult
 import com.apptest.core.domain.Repository
 import com.apptest.feature.myapps.domain.model.AppDraft
+import com.apptest.feature.myapps.domain.model.MatchedTesterEmail
 import com.apptest.feature.myapps.domain.model.MyAppsLoadStatus
 import com.apptest.feature.myapps.domain.model.OwnedAppRow
 import kotlinx.coroutines.flow.Flow
@@ -40,4 +41,11 @@ interface MyAppsRepository : Repository {
     suspend fun pause(id: String): AppResult<Unit>
     suspend fun resume(id: String): AppResult<Unit>
     suspend fun delete(id: String): AppResult<Unit>
+
+    /**
+     * Plan A: list matched testers' emails for the given app so the owner can
+     * paste them into Play Console's closed-test allowlist. Backed by the
+     * `get_matched_tester_emails` RPC which enforces caller == app.owner_id.
+     */
+    suspend fun getMatchedTesterEmails(appId: String): AppResult<List<MatchedTesterEmail>>
 }

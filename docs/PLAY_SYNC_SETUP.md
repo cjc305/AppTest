@@ -1,5 +1,18 @@
 # Play Console 自動同步設定 / Play Console Auto-Sync Setup
 
+> ⚠️ **DEPRECATED 2026-05-26 (Plan C → Plan A 替換)**
+>
+> AppTest V1 改用「手動複製 email」流程 — 在 AppEditor 直接顯示「已配對測試者 emails」清單,
+> dev 一鍵複製貼進 Play Console 即可。不再需要建 Google Group / 加 service account。
+>
+> 本文件保留作歷史紀錄。Client 端 `testing_group_email` 已從 DTO/Draft/Row 移除
+> (commit history: feat(myapps) Plan A);DB column `apps.testing_group_email` 暫留,
+> 下次 cleanup migration 一併移除。
+>
+> 若未來重啟自動同步方案 (e.g. tester 數量大到手動複製不可行),從這份重啟。
+
+---
+
 > 一次設定,**所有 AppTest 配對到的測試者自動進你 Play Console 白名單**。
 > One-time setup; AppTest auto-adds matched testers to your Play Console allowlist forever.
 

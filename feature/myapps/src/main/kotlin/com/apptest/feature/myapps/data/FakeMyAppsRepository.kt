@@ -2,6 +2,7 @@ package com.apptest.feature.myapps.data
 
 import com.apptest.core.common.AppResult
 import com.apptest.feature.myapps.domain.model.AppDraft
+import com.apptest.feature.myapps.domain.model.MatchedTesterEmail
 import com.apptest.feature.myapps.domain.model.MyAppsLoadStatus
 import com.apptest.feature.myapps.domain.model.OwnedAppRow
 import com.apptest.feature.myapps.domain.model.OwnedAppStatus
@@ -64,6 +65,20 @@ class FakeMyAppsRepository @Inject constructor() : MyAppsRepository {
         delay(100)
         _items.update { list -> list.filterNot { it.id == id } }
         return AppResult.Success(Unit)
+    }
+
+    override suspend fun getMatchedTesterEmails(appId: String): AppResult<List<MatchedTesterEmail>> {
+        delay(120)
+        // Seed sample so AppEditor's "Matched testers" section is non-empty in fake mode.
+        val app = _items.value.firstOrNull { it.id == appId } ?: return AppResult.Success(emptyList())
+        val sample = (1..app.currentTesters.coerceAtLeast(0)).map { i ->
+            MatchedTesterEmail(
+                email = "tester$i+${app.id}@example.com",
+                status = if (i % 4 == 0) "completed" else if (i % 3 == 0) "installed" else "active",
+                assignedAt = null,
+            )
+        }
+        return AppResult.Success(sample)
     }
 
     private suspend fun mutateStatus(id: String, status: OwnedAppStatus): AppResult<Unit> {

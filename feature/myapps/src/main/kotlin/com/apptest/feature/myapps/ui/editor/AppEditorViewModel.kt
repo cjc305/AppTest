@@ -73,9 +73,34 @@ class AppEditorViewModel @Inject constructor(
             playOptInUrl = row.playOptInUrl,
             requiredTesters = row.requiredTesters,
             requiredDays = row.requiredDays,
-            testingGroupEmail = row.testingGroupEmail,
         )
         _state.update { it.copy(draft = draft, isLoading = false, loadError = null).recomputed() }
+        // Plan A: fetch matched testers in parallel — non-blocking, draft is already usable.
+        loadMatchedTesters(id)
+    }
+
+    /** Retry hook for the matched-testers section after a transient failure. */
+    fun retryMatchedTesters() {
+        val id = editingAppId ?: return
+        if (_state.value.matchedTestersLoading) return
+        loadMatchedTesters(id)
+    }
+
+    private fun loadMatchedTesters(id: String) {
+        _state.update { it.copy(matchedTestersLoading = true, matchedTestersError = null) }
+        viewModelScope.launch {
+            repo.getMatchedTesterEmails(id)
+                .onSuccess { list ->
+                    _state.update {
+                        it.copy(matchedTesters = list, matchedTestersLoading = false, matchedTestersError = null)
+                    }
+                }
+                .onFailure { err ->
+                    _state.update {
+                        it.copy(matchedTestersLoading = false, matchedTestersError = err)
+                    }
+                }
+        }
     }
 
     fun onField(update: (AppDraft) -> AppDraft) {

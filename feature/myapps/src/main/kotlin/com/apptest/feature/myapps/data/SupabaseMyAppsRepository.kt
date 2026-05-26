@@ -8,10 +8,12 @@ import com.apptest.core.network.apps.AppDto
 import com.apptest.core.network.apps.AppStatus
 import com.apptest.core.network.apps.AppStatusBody
 import com.apptest.core.network.apps.AppUpsertBody
+import com.apptest.core.network.apps.MatchedTesterEmailsRequest
 import com.apptest.core.network.apps.SoftDeleteBody
 import com.apptest.core.network.apps.SupabaseAppsApiService
 import java.time.Instant
 import com.apptest.feature.myapps.domain.model.AppDraft
+import com.apptest.feature.myapps.domain.model.MatchedTesterEmail
 import com.apptest.feature.myapps.domain.model.MyAppsLoadStatus
 import com.apptest.feature.myapps.domain.model.OwnedAppRow
 import com.apptest.feature.myapps.domain.model.OwnedAppStatus
@@ -189,6 +191,19 @@ class SupabaseMyAppsRepository @Inject constructor(
             }
         }
 
+    override suspend fun getMatchedTesterEmails(appId: String): AppResult<List<MatchedTesterEmail>> =
+        withContext(dispatchers.io) {
+            try {
+                val rows = appsApi.getMatchedTesterEmails(MatchedTesterEmailsRequest(appId))
+                    .map { MatchedTesterEmail(email = it.email, status = it.status, assignedAt = it.assignedAt) }
+                AppResult.Success(rows)
+            } catch (c: CancellationException) {
+                throw c
+            } catch (t: Throwable) {
+                AppResult.Failure(AppError.fromThrowable(t))
+            }
+        }
+
     private suspend fun refreshCache() {
         runCatching { appsApi.listOwned().map { it.toRow() } }
             .onSuccess { _state.value = it }
@@ -208,7 +223,6 @@ private fun AppDto.toRow() = OwnedAppRow(
     requiredTesters = requiredTesters,
     requiredDays = requiredDays,
     daysLeft = requiredDays,                // TODO: derive from created_at + requiredDays
-    testingGroupEmail = testingGroupEmail.orEmpty(),
 )
 
 /**
@@ -234,5 +248,4 @@ private fun AppDraft.toUpsertBody() = AppUpsertBody(
     playOptInUrl = playOptInUrl.trim().ifBlank { null },
     requiredTesters = requiredTesters,
     requiredDays = requiredDays,
-    testingGroupEmail = testingGroupEmail.trim().ifBlank { null },
 )

@@ -38,5 +38,6 @@ fun AppEditorRoute(
         onRequestDelete = viewModel::requestDelete,
         onCancelDelete = viewModel::cancelDelete,
         onConfirmDelete = viewModel::confirmDelete,
+        onRetryMatchedTesters = viewModel::retryMatchedTesters,
     )
 }

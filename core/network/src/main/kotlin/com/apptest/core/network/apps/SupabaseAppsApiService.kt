@@ -116,6 +116,17 @@ interface SupabaseAppsApiService {
         @Header("Prefer") prefer: String = "return=minimal",
     ): Response<Unit>
 
+    /**
+     * Plan A (2026-05-26): list matched testers' Gmail addresses for an owned app.
+     * Backed by SECURITY DEFINER RPC `get_matched_tester_emails` (migration 002):
+     * the RPC enforces caller == app.owner_id, so this safely bypasses the
+     * profiles RLS that hides emails from non-self viewers. Used by AppEditor's
+     * "Matched testers" section so dev can paste the list into Play Console's
+     * closed-test allowlist. Excludes abandoned matches.
+     */
+    @POST("rpc/get_matched_tester_emails")
+    suspend fun getMatchedTesterEmails(@Body body: MatchedTesterEmailsRequest): List<MatchedTesterEmailDto>
+
     private companion object {
         // SELECT_LIST is the source of truth for the My Apps list cache.
         // It MUST include every column that AppEditor reads back when the user taps
@@ -123,12 +134,11 @@ interface SupabaseAppsApiService {
         // blank inputs (regression noted 2026-05-24).
         const val SELECT_LIST =
             "id,name,status,category,description,play_url," +
-                "package_name,play_opt_in_url,required_testers,required_days," +
-                "testing_group_email,created_at"
+                "package_name,play_opt_in_url,required_testers,required_days,created_at"
         const val SELECT_DETAIL =
             "id,name,description,category,icon_url,owner_id,status,play_url," +
                 "package_name,play_opt_in_url,required_testers,required_days," +
-                "testing_group_email,profiles!owner_id(display_name,tier)"
+                "profiles!owner_id(display_name,tier)"
     }
 }
 
@@ -165,8 +175,6 @@ data class AppDto(
     @SerialName("play_opt_in_url") val playOptInUrl: String? = null,
     @SerialName("required_testers") val requiredTesters: Int = 12,
     @SerialName("required_days") val requiredDays: Int = 14,
-    /** Plan C: Google Group email for Play Console closed-test sync. NULL = sync disabled. */
-    @SerialName("testing_group_email") val testingGroupEmail: String? = null,
     @SerialName("created_at") val createdAt: String = "",
     val profiles: OwnerProfileDto? = null,
 )
@@ -195,8 +203,6 @@ data class AppUpsertBody(
     @SerialName("play_opt_in_url") val playOptInUrl: String? = null,
     @SerialName("required_testers") val requiredTesters: Int = 12,
     @SerialName("required_days") val requiredDays: Int = 14,
-    /** Plan C: optional. If set, AppTest auto-syncs tester emails to this Google Group. */
-    @SerialName("testing_group_email") val testingGroupEmail: String? = null,
 )
 
 @Serializable
@@ -217,4 +223,20 @@ data class ActivateAppRequest(@SerialName("p_app_id") val appId: String)
 data class SoftDeleteBody(
     @SerialName("deleted_at") val deletedAt: String,
     val status: String = AppStatus.ARCHIVED.name,
+)
+
+/** Request body for the [SupabaseAppsApiService.getMatchedTesterEmails] RPC. */
+@Serializable
+data class MatchedTesterEmailsRequest(@SerialName("p_app_id") val appId: String)
+
+/**
+ * One row returned by `get_matched_tester_emails` RPC. `status` is the match row's
+ * status (matched|installed|active|completed); abandoned matches are filtered out
+ * by the RPC itself.
+ */
+@Serializable
+data class MatchedTesterEmailDto(
+    val email: String,
+    val status: String = "matched",
+    @SerialName("assigned_at") val assignedAt: String? = null,
 )

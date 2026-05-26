@@ -123,6 +123,16 @@ data class AppStrings(
     val editor_field_required_days: String,
     val editor_cost_label: String,
     val editor_save_error_prefix: String,
+    // ── Matched testers (Plan A: copy emails to Play Console allowlist) ─────
+    val editor_matched_testers_title: String,
+    val editor_matched_testers_help: String,
+    val editor_matched_testers_empty: String,
+    val editor_matched_testers_count_fmt: String,    // %1$d
+    val editor_matched_testers_copy_lines: String,
+    val editor_matched_testers_copy_commas: String,
+    val editor_matched_testers_copied_fmt: String,   // %1$d
+    val editor_matched_testers_error_prefix: String, // %1$s reason
+    val editor_matched_testers_retry: String,
 
     // ── Testing ────────────────────────────────────────────────────────
     val testing_title: String,
@@ -297,6 +307,16 @@ object AppStringsCatalog {
         editor_field_required_days = "Required days (7–30)",
         editor_cost_label = "Cost: 1 credit (your first app is free)",
         editor_save_error_prefix = "Save failed: ",
+        editor_matched_testers_title = "Matched testers' emails",
+        editor_matched_testers_help =
+            "Copy these into Play Console → Closed testing → Testers. Without this, matched testers can't install your app.",
+        editor_matched_testers_empty = "No matches yet — emails will appear here once testers are matched.",
+        editor_matched_testers_count_fmt = "%1\$d testers",
+        editor_matched_testers_copy_lines = "Copy (one per line)",
+        editor_matched_testers_copy_commas = "Copy (comma-separated)",
+        editor_matched_testers_copied_fmt = "Copied %1\$d emails",
+        editor_matched_testers_error_prefix = "Load failed: %1\$s",
+        editor_matched_testers_retry = "Retry",
 
         testing_title = "My tests",
         testing_filter_active = "Active",
@@ -458,6 +478,16 @@ object AppStringsCatalog {
         editor_field_required_days = "需要天數（7–30）",
         editor_cost_label = "費用：1 點（首個 App 免費）",
         editor_save_error_prefix = "儲存失敗：",
+        editor_matched_testers_title = "已配對測試者 emails",
+        editor_matched_testers_help =
+            "把這些 email 貼到 Play Console → 封閉測試 → 測試者。沒貼,配對到的測試者也無法安裝。",
+        editor_matched_testers_empty = "尚無配對 — 配對成功後 email 會自動出現在這裡。",
+        editor_matched_testers_count_fmt = "%1\$d 位測試者",
+        editor_matched_testers_copy_lines = "複製（每行一個）",
+        editor_matched_testers_copy_commas = "複製（逗號分隔）",
+        editor_matched_testers_copied_fmt = "已複製 %1\$d 個 email",
+        editor_matched_testers_error_prefix = "讀取失敗：%1\$s",
+        editor_matched_testers_retry = "重試",
 
         testing_title = "我的測試",
         testing_filter_active = "進行中",

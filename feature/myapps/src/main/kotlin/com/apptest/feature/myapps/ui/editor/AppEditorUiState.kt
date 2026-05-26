@@ -3,6 +3,7 @@ package com.apptest.feature.myapps.ui.editor
 import androidx.compose.runtime.Immutable
 import com.apptest.core.common.AppError
 import com.apptest.feature.myapps.domain.model.AppDraft
+import com.apptest.feature.myapps.domain.model.MatchedTesterEmail
 import com.apptest.feature.myapps.domain.model.PlayUrlValidation
 
 /**
@@ -24,4 +25,8 @@ data class AppEditorUiState(
     val loadError: AppError? = null,
     val saveError: AppError? = null,
     val deleteError: AppError? = null,
+    // Plan A: matched testers' emails — only meaningful in edit mode.
+    val matchedTesters: List<MatchedTesterEmail> = emptyList(),
+    val matchedTestersLoading: Boolean = false,
+    val matchedTestersError: AppError? = null,
 )
