@@ -29,8 +29,8 @@ android {
         applicationId = "com.cjc305.apptest"
         minSdk = 28
         targetSdk = 36
-        versionCode = 3
-        versionName = "0.1.2"
+        versionCode = 4
+        versionName = "0.1.3"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // Supabase credentials from local.properties — never hardcoded
