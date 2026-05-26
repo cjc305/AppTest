@@ -74,11 +74,11 @@ private fun IdleBody(
         AppVSpacer(AppSpacing.Lg)
         AppText(text = l.signin_social_proof, style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
         AppVSpacer(AppSpacing.Xxl)
-        // Alpha workaround (2026-05-26): Google sign-in button hidden until the
-        // Android OAuth client (debug + Play App Signing SHA-1) is registered in
-        // Google Cloud Console — without it, Credential Manager returns "no
-        // credentials available". Email magic link works today; restore this button
-        // once the OAuth client lands (PRELAUNCH §2.3 line 67).
+        // Alpha workaround (2026-05-26): Google sign-in button hidden until OAuth
+        // flow verified end-to-end (Credential Manager returned "no credentials
+        // available" even with Android OAuth client registered + GetSignInWithGoogleOption).
+        // Email magic link is the primary path for alpha. Restore this button + spacer
+        // once a known-working Google account → onboarding flow is observed.
         // AppButton(l.signin_cta_google, onGoogleClick, variant = AppButtonVariant.Primary, modifier = Modifier.fillMaxWidth())
         // AppVSpacer(AppSpacing.Sm)
         AppButton(l.signin_cta_email, onEmailClick, variant = AppButtonVariant.Primary, modifier = Modifier.fillMaxWidth())

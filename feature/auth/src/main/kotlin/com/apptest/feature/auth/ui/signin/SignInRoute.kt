@@ -14,7 +14,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
-import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import kotlinx.coroutines.launch
 
@@ -72,11 +72,13 @@ private suspend fun triggerGoogleSignIn(
         return
     }
     val credentialManager = CredentialManager.create(context)
-    val option = GetGoogleIdOption.Builder()
-        .setFilterByAuthorizedAccounts(false)
-        .setServerClientId(serverClientId)
-        .setAutoSelectEnabled(false)
-        .build()
+    // 2026-05-26: switched from GetGoogleIdOption to GetSignInWithGoogleOption.
+    // GetGoogleIdOption is for seamless One Tap and was returning "no credentials
+    // available" on devices where the user hadn't recently signed in with Google.
+    // GetSignInWithGoogleOption is the button-click counterpart — always shows a
+    // chooser, no filter-by-authorized-accounts gate, so it matches a "Sign in
+    // with Google" CTA's UX expectation.
+    val option = GetSignInWithGoogleOption.Builder(serverClientId).build()
     val request = GetCredentialRequest.Builder()
         .addCredentialOption(option)
         .build()
