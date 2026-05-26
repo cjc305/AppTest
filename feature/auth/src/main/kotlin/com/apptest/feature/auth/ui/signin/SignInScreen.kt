@@ -60,7 +60,10 @@ fun SignInScreen(
 }
 
 @Composable
-private fun IdleBody(onGoogleClick: () -> Unit, onEmailClick: () -> Unit) {
+private fun IdleBody(
+    @Suppress("UNUSED_PARAMETER") onGoogleClick: () -> Unit,
+    onEmailClick: () -> Unit,
+) {
     val l = AppL10n.current
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -71,9 +74,14 @@ private fun IdleBody(onGoogleClick: () -> Unit, onEmailClick: () -> Unit) {
         AppVSpacer(AppSpacing.Lg)
         AppText(text = l.signin_social_proof, style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
         AppVSpacer(AppSpacing.Xxl)
-        AppButton(l.signin_cta_google, onGoogleClick, variant = AppButtonVariant.Primary, modifier = Modifier.fillMaxWidth())
-        AppVSpacer(AppSpacing.Sm)
-        AppButton(l.signin_cta_email, onEmailClick, variant = AppButtonVariant.Tonal, modifier = Modifier.fillMaxWidth())
+        // Alpha workaround (2026-05-26): Google sign-in button hidden until the
+        // Android OAuth client (debug + Play App Signing SHA-1) is registered in
+        // Google Cloud Console — without it, Credential Manager returns "no
+        // credentials available". Email magic link works today; restore this button
+        // once the OAuth client lands (PRELAUNCH §2.3 line 67).
+        // AppButton(l.signin_cta_google, onGoogleClick, variant = AppButtonVariant.Primary, modifier = Modifier.fillMaxWidth())
+        // AppVSpacer(AppSpacing.Sm)
+        AppButton(l.signin_cta_email, onEmailClick, variant = AppButtonVariant.Primary, modifier = Modifier.fillMaxWidth())
         AppVSpacer(AppSpacing.Xxl)
         AppText(
             text = l.signin_terms,
